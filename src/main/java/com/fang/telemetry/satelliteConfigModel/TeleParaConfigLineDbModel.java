@@ -21,7 +21,7 @@ public class TeleParaConfigLineDbModel {
 
     private String dimension;
 
-    private String parseType;
+    private Integer parseType;
 
     private String sourceCodeSaveType;
 

@@ -1,12 +1,17 @@
 package com.fang.service.setSatelliteConfig;
 
-import com.fang.database.mysql.repository.TeleFrameCatalogMqRepository;
+import com.fang.database.mysql.entity.TeleSatelliteNameMq;
+import com.fang.database.mysql.repository.TeleSatelliteNameMqRepository;
+import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
+import com.fang.database.postgresql.repository.SatelliteDbRepository;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModel;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModelInterface;
+import com.fang.telemetry.satelliteConfigModel.TeleSatelliteDbModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,5 +44,6 @@ public class FrameCatalogConfigService {
         this.frameCatalogDbRepository.deleteById(id);
         return getFrameCatalogInfo(satelliteId);
     }
+
 
 }

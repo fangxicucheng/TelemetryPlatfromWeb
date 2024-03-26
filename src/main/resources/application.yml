@@ -14,7 +14,7 @@ spring:
       jdbc-url: jdbc:mysql://127.0.0.1:3306/telemetry_data?useSSL=false&serverTimezone=UTC&useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8
       driver-class-name: com.mysql.cj.jdbc.Driver
       username: root
-      password:
+      password: 123456
     postgresqlsource:
       jdbc-url: jdbc:postgresql://127.0.0.1:5432/telemetry
       driver-class-name: org.postgresql.Driver

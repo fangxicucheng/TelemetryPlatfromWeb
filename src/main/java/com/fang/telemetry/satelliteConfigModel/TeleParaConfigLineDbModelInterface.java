@@ -14,7 +14,7 @@ public interface TeleParaConfigLineDbModelInterface {
 
      String getDimension();
 
-     String getParseType();
+     Integer getParseType();
 
      String getSourceCodeSaveType();
 

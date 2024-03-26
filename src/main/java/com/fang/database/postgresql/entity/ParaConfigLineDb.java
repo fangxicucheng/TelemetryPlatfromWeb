@@ -31,7 +31,7 @@ public class ParaConfigLineDb {
     @Column(name="dimension")
     private String dimension;
     @Column(name="parse_type")
-    private String parseType;
+    private Integer parseType;
     @Column(name="source_code_save_type")
     private String sourceCodeSaveType;
     @Column(name="handle_type")

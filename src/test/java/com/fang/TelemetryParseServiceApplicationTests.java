@@ -1,28 +1,27 @@
 package com.fang;
 
 import com.fang.database.mysql.entity.TeleReceiveRecordMq;
-import com.fang.database.mysql.entity.TeleSatelliteNameMq;
 import com.fang.database.mysql.repository.TeleReceiveRecordMqRepository;
 import com.fang.database.mysql.repository.TeleSatelliteNameMqRepository;
 import com.fang.database.postgresql.entity.ReceiveRecord;
-import com.fang.database.postgresql.entity.SatelliteDb;
-import com.fang.database.postgresql.entity.SatelliteNameConfig;
 import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.database.postgresql.repository.ReceiveRecordRepository;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
-import com.fang.database.postgresql.repository.SatelliteNameConfigRepository;
+import com.fang.service.setSatelliteConfig.FrameCatalogConfigService;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModel;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModelInterface;
-import com.mysql.cj.util.TimeUtil;
+import com.fang.utils.ExcelReader;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 
@@ -55,6 +54,28 @@ class TelemetryParseServiceApplicationTests {
 
 
 
+
+
+    }
+
+    @Test
+    void testReadExcel() throws FileNotFoundException {
+
+
+            File file = new File("F:\\0323\\0323\\test\\test\\5.2.34. 中心机内部参数应答帧一0_34_2_ZT-C002.xlsx");
+            InputStream inputStream = new FileInputStream(file);
+            List<Object[]> objects = ExcelReader.importExcel(inputStream);
+            assert objects != null;
+            for (Object[] object : objects) {
+               // System.out.println(object[0] + "\t" + object[1] + "\t" + object[2]);
+                String printContent="";
+                for (Object o : object) {
+                    //System.out.println(o);
+                    printContent+=o+"\t";
+
+                }
+                System.out.println(printContent);
+            }
 
 
     }
