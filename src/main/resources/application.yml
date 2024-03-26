@@ -1,0 +1,26 @@
+server:
+  port: 80
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+  datasource:
+    mysqlsource:
+      jdbc-url: jdbc:mysql://127.0.0.1:3306/telemetry_data?useSSL=false&serverTimezone=UTC&useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: root
+      password:
+    postgresqlsource:
+      jdbc-url: jdbc:postgresql://127.0.0.1:5432/telemetry
+      driver-class-name: org.postgresql.Driver
+      username: postgres
+      password: 123456
+gorit:
+  file:
+    root:
+      path: D:\卫星遥测数据监控平台\
