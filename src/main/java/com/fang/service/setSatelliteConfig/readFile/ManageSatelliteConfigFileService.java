@@ -79,17 +79,21 @@ public class ManageSatelliteConfigFileService {
                 }
                 if (catalogDb == null) {
                     catalogDb = new FrameCatalogDb();
+                    catalogDb.setCatalogCode(catalogCode);
+                    satelliteDb.getFrameCatalogDbList().add(catalogDb);
                 }
 
                 if (catalogDb.getFrameDbList() == null) {
                     catalogDb.setFrameDbList(new ArrayList<>());
                 }
+
                 FrameDb frameDb = new FrameDb();
                 frameDb.setFrameName(frameName);
                 frameDb.setReuseChannel(refuseChannel);
                 frameDb.setFrameCode(frameCode);
                 frameDb.setParaConfigLineDbList(new ArrayList<>());
                 readExcelFile(file, frameDb, paraCodeList);
+                catalogDb.getFrameDbList().add(frameDb);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +104,6 @@ public class ManageSatelliteConfigFileService {
 
         String fileContent = FileUtils.readFileToString(file, "UTF-8");
         String[] catalogContentInfoArray = fileContent.replaceAll("\n", "").split("\r");
-        // Map<Integer, String>catalogContentMap=new HashMap<>();
         if (satelliteDb.getFrameCatalogDbList() == null) {
             satelliteDb.setFrameCatalogDbList(new ArrayList<>());
         }

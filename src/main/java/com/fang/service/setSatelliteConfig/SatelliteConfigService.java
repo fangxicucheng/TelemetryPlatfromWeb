@@ -45,7 +45,7 @@ public class SatelliteConfigService {
     }
 
     public SatelliteDb uploadSatelliteConfileFiles(List<MultipartFile> files) throws IOException {
-        SatelliteDb satelliteDb = new SatelliteDb();
+        SatelliteDb satelliteDb ;
         String format = sdf.format(new Date());
         Path directoryPath = Paths.get(baseDirectoryPath + "上传文件\\" + format + "\\");
         List<File> destFiles = new ArrayList<>();
@@ -63,7 +63,7 @@ public class SatelliteConfigService {
 
 
         }
-        manageSatelliteConfigFileService.readSatelliteDbConfigFile(destFiles);
+        satelliteDb=    manageSatelliteConfigFileService.readSatelliteDbConfigFile(destFiles);
 
         System.out.println("文件保存完成");
         FileUtils.deleteDirectory(new File(baseDirectoryPath + "上传文件\\" + format + "\\"));

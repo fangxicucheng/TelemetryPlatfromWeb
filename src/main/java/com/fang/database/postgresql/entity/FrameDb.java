@@ -20,7 +20,7 @@ public class FrameDb  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id",nullable = false,unique = true)
-    private int id;
+    private Integer id;
     @Column(name="frame_name")
     private String frameName;
     @Column(name="num")
