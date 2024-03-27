@@ -141,8 +141,14 @@ public class ManageSatelliteConfigFileService {
             ParaConfigLineDb paraConfigLineDb = new ParaConfigLineDb();
             paraConfigLineDb.setRound(10);
             paraConfigLineDb.setBitStart(Integer.parseInt(((String) object[0]).replaceAll("\\D", "")));
-            paraConfigLineDb.setBitNum(Integer.parseInt(((String) object[0]).replaceAll("\\D", "")));
-            paraConfigLineDb.setDimension("1");
+            paraConfigLineDb.setBitNum(Integer.parseInt(((String) object[1]).replaceAll("\\D", "")));
+            String dimension=((String) object[10]).replaceAll("\\p{C}", "").replaceAll(" ", "");
+            if(dimension.isEmpty()){
+                dimension="1";
+            }
+
+
+            paraConfigLineDb.setDimension(dimension);
             String paraCode = ((String) object[2]).replaceAll("\\p{C}", "").replaceAll(" ", "");
             paraConfigLineDb.setSourceCodeSaveType(((String) object[4]).replaceAll("\\p{C}", "").replaceAll(" ", ""));
             if (paraCodeList.contains(paraCode)) {
@@ -164,11 +170,12 @@ public class ManageSatelliteConfigFileService {
 
                 paraConfigLineDb.setHandleType("时间");
             }
-            String handleParam = ((String) object[5]).replaceAll("\\p{C}", "").replaceAll(" ", "").replaceAll("；", ";");
+            String handleParam = ((String) object[6]).replaceAll("\\p{C}", "").replaceAll(" ", "").replaceAll("；", ";");
             if (handleParam.endsWith(";")) {
                 handleParam = handleParam.substring(0, handleParam.length() - 2);
             }
             paraConfigLineDb.setHandleParam(handleParam.replaceAll(";", "\r\n"));
+
 
             frameDb.getParaConfigLineDbList().add(paraConfigLineDb);
 

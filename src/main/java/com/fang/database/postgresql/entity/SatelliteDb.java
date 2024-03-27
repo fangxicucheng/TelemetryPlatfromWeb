@@ -24,8 +24,6 @@ public class SatelliteDb {
     private Integer id;
     @Column(name="satellite_name")
     private String satelliteName;
-    @Column(name="num")
-    private Integer num;
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name="satellite_id")
@@ -36,7 +34,7 @@ public class SatelliteDb {
 
     public SatelliteDb(TeleSatelliteNameMq satelliteNameMq) {
         this.satelliteName=satelliteNameMq.getSatelliteName();
-        this.num=satelliteNameMq.getNum();
+
         if(satelliteNameMq.getTeleFrameCatalogMqList()!=null&&satelliteNameMq.getTeleFrameCatalogMqList().size()>0)
         {
             for (TeleFrameCatalogMq teleFrameCatalogMq : satelliteNameMq.getTeleFrameCatalogMqList()) {
