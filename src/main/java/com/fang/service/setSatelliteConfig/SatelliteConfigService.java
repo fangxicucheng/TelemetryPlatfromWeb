@@ -4,7 +4,9 @@ import com.fang.database.mysql.entity.TeleSatelliteNameMq;
 import com.fang.database.mysql.repository.TeleSatelliteNameMqRepository;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
+import com.fang.service.parseTelemetry.BaseParserService;
 import com.fang.service.setSatelliteConfig.readFile.ManageSatelliteConfigFileService;
+import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
 import com.fang.telemetry.satelliteConfigModel.TeleSatelliteDbModel;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,8 @@ public class SatelliteConfigService {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     @Value("${gorit.file.root.path}")
     private String baseDirectoryPath;
+    @Autowired
+    private BaseParserService baseParserService;
 
     public void copySatelliteData() {
         List<TeleSatelliteNameMq> satelliteMqList = this.satelliteNameMqRepository.findAll();
@@ -45,7 +49,7 @@ public class SatelliteConfigService {
     }
 
     public SatelliteDb uploadSatelliteConfileFiles(List<MultipartFile> files) throws IOException {
-        SatelliteDb satelliteDb ;
+        SatelliteDb satelliteDb;
         String format = sdf.format(new Date());
         Path directoryPath = Paths.get(baseDirectoryPath + "上传文件\\" + format + "\\");
         List<File> destFiles = new ArrayList<>();
@@ -54,11 +58,11 @@ public class SatelliteConfigService {
             System.out.println(fileName);
             File dest = new File(directoryPath + "\\" + fileName);
             System.out.println(fileName);
-                dest.getParentFile().mkdirs();
+            dest.getParentFile().mkdirs();
             file.transferTo(dest);
             destFiles.add(dest);
         }
-        satelliteDb=    manageSatelliteConfigFileService.readSatelliteDbConfigFile(destFiles);
+        satelliteDb = manageSatelliteConfigFileService.readSatelliteDbConfigFile(destFiles);
 
         System.out.println("文件保存完成");
         FileUtils.deleteDirectory(new File(baseDirectoryPath + "上传文件\\" + format + "\\"));
@@ -81,16 +85,17 @@ public class SatelliteConfigService {
         return getTeleSatelliteDbModelList();
     }
 
-    public String insertSatellite(SatelliteDb satelliteDb){
-        if(satelliteDb.getSatelliteName().isEmpty()){
-            return"未设置卫星名";
+    public CheckConfigResult insertSatellite(SatelliteDb satelliteDb) {
+        CheckConfigResult result = new CheckConfigResult();
+        if (satelliteDb.getSatelliteName() == null || satelliteDb.getSatelliteName().isEmpty()) {
+            result.setErrorMsg("未设置卫星名");
         }
         List<String> satelliteNameList = satelliteDbRepository.getSatelliteNameList();
-        if(satelliteNameList.contains(satelliteDb.getSatelliteName())){
-            return"卫星名重复";
+        if (satelliteNameList.contains(satelliteDb.getSatelliteName())) {
+            result.setErrorMsg("卫星名重复");
         }
+        baseParserService.validateSatelliteDb(satelliteDb, result);
 
-
-        return "success";
+        return result;
     }
 }

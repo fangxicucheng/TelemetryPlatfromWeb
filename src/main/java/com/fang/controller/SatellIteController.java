@@ -3,6 +3,7 @@ package com.fang.controller;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.service.setSatelliteConfig.FrameCatalogConfigService;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
+import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
 import com.fang.telemetry.satelliteConfigModel.TeleSatelliteDbModel;
 import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,10 @@ public class SatellIteController {
     public SatelliteDb uploadSatelliteConfileFiles(@RequestParam("files") List<MultipartFile> files) throws IOException {
         return satelliteConfigService.uploadSatelliteConfileFiles(files);
     }
-    @PostMapping("/satellite")
-    public String insertSatelliteDb(@RequestBody SatelliteDb satellite){
+    @PostMapping("/insertSatellite")
+    public CheckConfigResult insertSatelliteDb(@RequestBody SatelliteDb satellite){
 
-        return "success";
+        return satelliteConfigService.insertSatellite(satellite);
     }
 
 
