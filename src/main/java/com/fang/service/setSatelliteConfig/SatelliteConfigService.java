@@ -54,14 +54,9 @@ public class SatelliteConfigService {
             System.out.println(fileName);
             File dest = new File(directoryPath + "\\" + fileName);
             System.out.println(fileName);
-
-            if (!Files.exists(directoryPath)) {
-                Files.createDirectories(directoryPath);
-            }
+                dest.getParentFile().mkdirs();
             file.transferTo(dest);
             destFiles.add(dest);
-
-
         }
         satelliteDb=    manageSatelliteConfigFileService.readSatelliteDbConfigFile(destFiles);
 
@@ -84,5 +79,18 @@ public class SatelliteConfigService {
     public List<TeleSatelliteDbModel> deleteTeleSatelliteDbInfoById(int id) {
         this.satelliteDbRepository.deleteById(id);
         return getTeleSatelliteDbModelList();
+    }
+
+    public String insertSatellite(SatelliteDb satelliteDb){
+        if(satelliteDb.getSatelliteName().isEmpty()){
+            return"未设置卫星名";
+        }
+        List<String> satelliteNameList = satelliteDbRepository.getSatelliteNameList();
+        if(satelliteNameList.contains(satelliteDb.getSatelliteName())){
+            return"卫星名重复";
+        }
+
+
+        return "success";
     }
 }

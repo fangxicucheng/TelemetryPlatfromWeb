@@ -22,4 +22,7 @@ public interface SatelliteDbRepository extends JpaRepository<SatelliteDb,Integer
     @Modifying
     @Transactional
     public void updateSatelliteDbInfo(int id,String satelliteName);
+
+    @Query(value="SELECT satellite_name from cg_telemetry_satellite",nativeQuery = true)
+    public List<String> getSatelliteNameList();
 }
