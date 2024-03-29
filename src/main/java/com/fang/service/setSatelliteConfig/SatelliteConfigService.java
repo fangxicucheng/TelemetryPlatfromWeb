@@ -95,6 +95,9 @@ public class SatelliteConfigService {
             result.setErrorMsg("卫星名重复");
         }
         baseParserService.validateSatelliteDb(satelliteDb, result);
+        if(!result.isHasWrong()){
+            satelliteDbRepository.save(satelliteDb);
+        }
 
         return result;
     }

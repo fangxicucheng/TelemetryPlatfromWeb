@@ -16,19 +16,13 @@ public class BaseParserService {
             for (FrameCatalogDb catalogDb : satelliteDb.getFrameCatalogDbList()) {
                 if (satelliteDb.getFrameCatalogDbList().stream().filter(t -> t.getCatalogCode().equals(catalogDb.getCatalogCode())).count() > 2) {
                     result.setErrorMsg("重复帧类型码" + catalogDb.getCatalogCode());
-
                 }
                 validateFrameCatalog(catalogDb, result);
-
             }
-
         }
-
-
     }
 
     public void validateFrameCatalog(FrameCatalogDb catalogDb, CheckConfigResult result) {
-
         if (catalogDb.getCatalogName() == null && catalogDb.getCatalogName().isEmpty()) {
             result.setErrorMsg("未设置帧类型码为:" + catalogDb.getCatalogCode() + "帧类型名");
         }
@@ -60,36 +54,23 @@ public class BaseParserService {
         }
         if (!frame.getParaConfigLineDbList().isEmpty()) {
             for (ParaConfigLineDb paraConfigLineDb : frame.getParaConfigLineDbList()) {
-
                 validateParaConfigLine(paraConfigLineDb, frame.getFrameName(), result);
-
             }
         }
-
-
     }
-
     public void validateParaConfigLine(ParaConfigLineDb paraConfigLineDb, String frameName, CheckConfigResult result) {
-
         if (paraConfigLineDb.getBitStart() < 0) {
-            result.setErrorMsg(frameName + " 中的参数" + paraConfigLineDb.getParaCode() + "起始位为负");
-
+            result.setErrorMsg(frameName + "     " + paraConfigLineDb.getParaCode() + "  的起始位为负");
         }
         if (paraConfigLineDb.getBitNum() < 0) {
-            result.setErrorMsg(frameName + " 中的参数" + paraConfigLineDb.getParaCode() + "位宽为负");
+            result.setErrorMsg(frameName + "   " + paraConfigLineDb.getParaCode() + "  的位宽为负");
         }
-
         if (paraConfigLineDb.getParseType() == 10) {
-
             switch (paraConfigLineDb.getSourceCodeSaveType()) {
-
                 case "有符号":
                 case "补码": {
-
                     if (!"十进制显示".equals(paraConfigLineDb.getHandleType())) {
-
-
-                        result.setErrorMsg(frameName + " 中的参数" + paraConfigLineDb.getParaCode() + "handleType错误");
+                        result.setErrorMsg(frameName + "    " + paraConfigLineDb.getParaCode() + "的handleType错误");
                     }
                 }
                 break;
@@ -97,19 +78,19 @@ public class BaseParserService {
                     switch (paraConfigLineDb.getHandleType()) {
                         case "状态码(二进制)": {
                             if (judgeHandleParam(2, paraConfigLineDb.getHandleParam())) {
-                                result.setErrorMsg(frameName + " 中的参数" + paraConfigLineDb.getParaCode() + "handleParam错误");
+                                result.setErrorMsg(frameName + "    " + paraConfigLineDb.getParaCode() + "的handleParam错误");
                             }
                         }
                         break;
                         case "状态码(十进制)": {
                             if (judgeHandleParam(10, paraConfigLineDb.getHandleParam())) {
-                                result.setErrorMsg(frameName + " 中的参数" + paraConfigLineDb.getParaCode() + "handleParam错误");
+                                result.setErrorMsg(frameName + "    " + paraConfigLineDb.getParaCode() + "的handleParam错误");
                             }
                         }
                         break;
                         case "状态码(十六进制)": {
                             if (judgeHandleParam(16, paraConfigLineDb.getHandleParam())) {
-                                result.setErrorMsg(frameName + " 中的参数" + paraConfigLineDb.getParaCode() + "handleParam错误");
+                                result.setErrorMsg(frameName + "    " + paraConfigLineDb.getParaCode() + "的handleParam错误");
                             }
                         }
                         break;
@@ -122,7 +103,7 @@ public class BaseParserService {
                         }
                         break;
                         default: {
-                            result.setErrorMsg(frameName + " 中的参数" + paraConfigLineDb.getParaCode() + "handleType错误");
+                            result.setErrorMsg(frameName + "    " + paraConfigLineDb.getParaCode() + "的handleType错误");
                         }
                         break;
                     }
@@ -130,17 +111,13 @@ public class BaseParserService {
                 break;
             }
         }
-
-        if(judgeDimension(paraConfigLineDb.getDimension())){
-            result.setErrorMsg(frameName + " 中的参数" + paraConfigLineDb.getParaCode() + "handleParam错误");
+        if (judgeDimension(paraConfigLineDb.getDimension())) {
+            result.setErrorMsg(frameName + "   " + paraConfigLineDb.getParaCode() + "   的量纲错误");
         }
-
     }
-
     public boolean judgeHandleParam(int number, String handleParam) {
         String[] handleParamArray = handleParam.replaceAll("\n", "").split("\r");
         if (handleParamArray != null && handleParamArray.length > 0) {
-
             for (String param : handleParamArray) {
                 if (param.contains("=")) {
                     try {
@@ -148,56 +125,46 @@ public class BaseParserService {
                     } catch (Exception e) {
                         return true;
                     }
-
                 }
-
             }
         }
         return false;
     }
-
     public boolean judgeDimension(String dimension) {
-        try{
-            getDimension(dimension);
-        }catch (Exception e){
+        try {
+           double dimensionValue= getDimension(dimension);
+            if(Double.isInfinite(dimensionValue)||Double.isNaN(dimensionValue)){
+                return true;
+            }
+        } catch (Exception e) {
             return true;
         }
         return false;
     }
 
     public double getDimension(String dimension) {
-
         double result = 1;
-
         if (dimension.contains("/")) {
             String[] divArray = dimension.split("/");
-            result=parseStrToValue(divArray[0])/parseStrToValue(divArray[1]);
-
-
+            result = parseStrToValue(divArray[0]) / parseStrToValue(divArray[1]);
         } else {
-            parseStrToValue(dimension);
-
+            result = parseStrToValue(dimension);
         }
-
         return result;
     }
 
     public double parseStrToValue(String str) {
         double result = 1;
         if (str.contains("0x")) {
-            result = Integer.parseInt(str.replaceAll("0x", ""), 16);
-        }else if(str.contains("^")){
-            String[] powArray = str.split("^");
-            result=Math.pow(Double.parseDouble(powArray[0]),Double.parseDouble(powArray[1]));
-        }
-        else{
-            result=Integer.parseInt(str);
+            result = Long.parseLong(str.replaceAll("0x", ""), 16);
+        } else if (str.contains("^")) {
+            String[] powArray = str.split("\\^");
+            result = Math.pow(Double.parseDouble(powArray[0]), Double.parseDouble(powArray[1]));
+        } else {
+            result = Double.parseDouble(str);
         }
         return result;
-
     }
-
-
 }
 
 
