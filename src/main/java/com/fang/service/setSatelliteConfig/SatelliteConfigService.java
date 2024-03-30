@@ -98,7 +98,6 @@ public class SatelliteConfigService {
         if(!result.isHasWrong()){
             satelliteDbRepository.save(satelliteDb);
         }
-
         return result;
     }
 }
