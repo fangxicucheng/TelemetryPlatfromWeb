@@ -1,6 +1,7 @@
 package com.fang.controller;
 
 import com.fang.database.postgresql.entity.FrameCatalogDb;
+import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.service.setSatelliteConfig.FrameCatalogConfigService;
 import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -21,10 +23,16 @@ public class FrameCatalogConfroller {
         return this.frameCatalogConfigService.getFrameCatalogInfo(satelliteId);
     }
     @PostMapping("/upload")
-    public FrameCatalogDb uploadSatelliteConfileFiles(@RequestParam("files") List<MultipartFile> files){
+    public FrameCatalogDb uploadSatelliteConfileFiles(@RequestParam("files") List<MultipartFile> files) throws IOException {
 
+        return this.frameCatalogConfigService.uploadFrameCatalogConfigFiles(files);
     }
-    public CheckConfigResult
+
+    @PostMapping("/insertFrameCatalog/{satelliteId}")
+    public CheckConfigResult insertFrameCatalogDb(@PathVariable int satelliteId,@RequestBody FrameCatalogDb frameCatalogDb){
+
+        return this.frameCatalogConfigService.insertFrameCatalog(satelliteId,frameCatalogDb);
+    }
 
     @PostMapping("/{satelliteId}/updateCatalog")
     public List<TeleFrameCatalogDbModel> updateFrameCatalogInfo(@PathVariable Integer satelliteId,@RequestBody TeleFrameCatalogDbModel teleFrameCatalogDbModel){
