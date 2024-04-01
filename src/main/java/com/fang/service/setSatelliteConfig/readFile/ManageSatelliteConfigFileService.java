@@ -171,6 +171,13 @@ public class ManageSatelliteConfigFileService {
 
     }
 
+    public FrameDb readFrameDbFromFile(File file) throws FileNotFoundException {
+        FrameDb frameDb = new FrameDb();
+        frameDb.setParaConfigLineDbList(readFrameExcel(file,new ArrayList<>()));
+
+        return frameDb;
+    }
+
     public FrameDb getFrameDb(ConfigFileInfoClass frameInfo, File file, List<String> paraCodeList) throws FileNotFoundException {
 
         FrameDb frameDb = new FrameDb();

@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface FrameDbRepository  extends JpaRepository<FrameDb,Integer> {
-    @Query(value="select id as id,frame_code as frameCode,frame_name as frameName,num as num,reuse_channel as reuseChannel, catalog_id as catalogId from cg_telemetry_frame_config where catalog_id=?1",nativeQuery = true)
+    @Query(value="select id as id,frame_code as frameCode,frame_name as frameName,num as num,reuse_channel as reuseChannel, catalog_id as catalogId from cg_telemetry_frame_config where catalog_id=?1 order by num",nativeQuery = true)
     public List<TeleFrameDbModelInterface> getFrameByCatalogId(Integer catalogId);
 
 

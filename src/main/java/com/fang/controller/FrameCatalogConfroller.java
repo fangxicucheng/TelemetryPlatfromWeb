@@ -23,7 +23,7 @@ public class FrameCatalogConfroller {
         return this.frameCatalogConfigService.getFrameCatalogInfo(satelliteId);
     }
     @PostMapping("/upload")
-    public FrameCatalogDb uploadSatelliteConfileFiles(@RequestParam("files") List<MultipartFile> files) throws IOException {
+    public FrameCatalogDb uploadFrameCatalogConfigFiles(@RequestParam("files") List<MultipartFile> files) throws IOException {
 
         return this.frameCatalogConfigService.uploadFrameCatalogConfigFiles(files);
     }
