@@ -7,6 +7,7 @@ import com.fang.database.postgresql.entity.ReceiveRecord;
 import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.database.postgresql.repository.ReceiveRecordRepository;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
+import com.fang.service.setExcpetionJuge.SatelliteSubsystemService;
 import com.fang.service.setSatelliteConfig.FrameCatalogConfigService;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModel;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
-
 class TelemetryParseServiceApplicationTests {
     @Autowired
     private TeleSatelliteNameMqRepository teleSatelliteNameMqRepository;
@@ -38,22 +38,18 @@ class TelemetryParseServiceApplicationTests {
     private FrameCatalogDbRepository frameCatalogDbRepository;
     @Autowired
     private SatelliteConfigService satelliteConfigService;
+    @Autowired
+    private SatelliteSubsystemService satelliteSubsystemService;
 
     @Test
-     void deleteSatellites(){
+    void deleteSatellites() {
 
-        try{
+        try {
             satelliteDbRepository.deleteAll();
             System.out.println("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        catch(Exception e){
-         e.printStackTrace();
-        }
-
-
-
-
-
 
 
     }
@@ -62,23 +58,24 @@ class TelemetryParseServiceApplicationTests {
     void testReadExcel() throws FileNotFoundException {
 
 
-            File file = new File("F:\\0323\\0323\\test\\test\\5.2.34. 中心机内部参数应答帧一0_34_2_ZT-C002.xlsx");
-            InputStream inputStream = new FileInputStream(file);
-            List<Object[]> objects = ExcelReader.importExcel(inputStream);
-            assert objects != null;
-            for (Object[] object : objects) {
-               // System.out.println(object[0] + "\t" + object[1] + "\t" + object[2]);
-                String printContent="";
-                for (Object o : object) {
-                    //System.out.println(o);
-                    printContent+=o+"\t";
+        File file = new File("F:\\0323\\0323\\test\\test\\5.2.34. 中心机内部参数应答帧一0_34_2_ZT-C002.xlsx");
+        InputStream inputStream = new FileInputStream(file);
+        List<Object[]> objects = ExcelReader.importExcel(inputStream);
+        assert objects != null;
+        for (Object[] object : objects) {
+            // System.out.println(object[0] + "\t" + object[1] + "\t" + object[2]);
+            String printContent = "";
+            for (Object o : object) {
+                //System.out.println(o);
+                printContent += o + "\t";
 
-                }
-                System.out.println(printContent);
             }
+            System.out.println(printContent);
+        }
 
 
     }
+
     @Test
     void contextLoads() {
 
@@ -86,10 +83,11 @@ class TelemetryParseServiceApplicationTests {
         // System.out.println(all);
 
     }
+
     @Test
-     void testGetQuery(){
+    void testGetQuery() {
         List<TeleFrameCatalogDbModelInterface> frameCatalogDbModelListByBId = this.frameCatalogDbRepository.getFrameCatalogDbModelListByBId(3);
-        List<TeleFrameCatalogDbModel>modelList=new ArrayList<>();
+        List<TeleFrameCatalogDbModel> modelList = new ArrayList<>();
         for (TeleFrameCatalogDbModelInterface teleFrameCatalogDbModelInterface : frameCatalogDbModelListByBId) {
 
             TeleFrameCatalogDbModel teleFrameCatalogDbModel = new TeleFrameCatalogDbModel();
@@ -104,12 +102,12 @@ class TelemetryParseServiceApplicationTests {
     }
 
     @Test
-    void testGetQuery2(){
+    void testGetQuery2() {
         List<Object[]> list = this.frameCatalogDbRepository.getFrameCatalogDbModelListByBId2(3);
-        List<TeleFrameCatalogDbModel>modelList=new ArrayList<>();
+        List<TeleFrameCatalogDbModel> modelList = new ArrayList<>();
         for (Object[] objects : list) {
             TeleFrameCatalogDbModel teleFrameCatalogDbModel = new TeleFrameCatalogDbModel();
-           teleFrameCatalogDbModel.setId((Integer) objects[0]);
+            teleFrameCatalogDbModel.setId((Integer) objects[0]);
             teleFrameCatalogDbModel.setCatalogName(((String) objects[1]));
             teleFrameCatalogDbModel.setCatalogCode(((Integer) objects[2]));
             teleFrameCatalogDbModel.setNum(((Integer) objects[3]));
@@ -129,7 +127,6 @@ class TelemetryParseServiceApplicationTests {
 
 
     }
-
 
 
     @Test
@@ -160,13 +157,20 @@ class TelemetryParseServiceApplicationTests {
 
 
     }
+
     @Test
-    public void selectSatelliteName(){
+    public void copySatelliteSubsystem() {
+        this.satelliteSubsystemService.copySatelliteSubsystemFromMysql();
+
+    }
+
+    @Test
+    public void selectSatelliteName() {
         System.out.println(this.satelliteDbRepository.querySatelliteName());
 
     }
-    @Test
 
+    @Test
     void copyRecord() {
         List<TeleReceiveRecordMq> all = this.teleReceiveRecordMqRepository.findAll();
 
