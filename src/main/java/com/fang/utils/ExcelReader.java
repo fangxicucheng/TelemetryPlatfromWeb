@@ -1,23 +1,31 @@
 package com.fang.utils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-public  class ExcelReader {
+public class ExcelReader {
     /**
      * 1、将单元格的内容转换为字符串
      *
      * @param cell 单元格
      * @return 返回转换后的字符串
      */
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private static String baseDirectoryPath = "D:\\卫星遥测数据监控平台\\";
+
     private static String convertCellValueToString(Cell cell) {
         //1.1、判断单元格的数据是否为空
         if (cell == null) {
@@ -155,29 +163,47 @@ public  class ExcelReader {
         }
     }
 
+    public static Map<Integer, List<Object[]>> readSingleExcelFile(MultipartFile file) throws IOException {
+        Map<Integer, List<Object[]>> readContentMap = new HashMap<>();
+        String format = sdf.format(new Date());
+        Path directoryPath = Paths.get(baseDirectoryPath + "上传文件\\" + format + "\\");
+        String fileName = file.getOriginalFilename();
+        System.out.println(fileName);
+        File dest = new File(directoryPath + "\\" + fileName);
+        System.out.println(fileName);
+        dest.getParentFile().mkdirs();
+        file.transferTo(dest);
+        readContentMap=importExcel(new FileInputStream(dest));
+        FileUtils.deleteDirectory(new File(baseDirectoryPath + "上传文件\\" + format + "\\"));
+        return readContentMap;
+    }
+
+
     /**
      * 5、读取excel文件内容
      *
      * @param inputStream 输入流
      * @return 返回值
      */
-    public static List<Object[]> importExcel(InputStream inputStream) {
+    public static Map<Integer, List<Object[]>> importExcel(InputStream inputStream) {
         //5.1、定义一个集合用来存储Object数据
-        List<Object[]> list = new ArrayList<>();
+        Map<Integer, List<Object[]>> listMap = new HashMap<>();
         try {
             XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
             //5.2、创建工作薄
-           // Workbook workbook = WorkbookFactory.create(inputStream);
+            // Workbook workbook = WorkbookFactory.create(inputStream);
             //5.3、获取工作薄里面sheet的个数
             int sheetNum = workbook.getNumberOfSheets();
             //5.4、遍历每一个sheet
             for (int i = 0; i < sheetNum; i++) {
                 Sheet sheet = workbook.getSheetAt(i);
+                List<Object[]> list = new ArrayList<>();
+                listMap.put(i, list);
                 //5.4.1、获取sheet中有数据的行数
                 int rows = sheet.getPhysicalNumberOfRows();
                 for (int j = 0; j < rows; j++) {
                     //5.4.1.1、过滤掉文件的表头（视文件表头情况而定）
-                    if (i == 1 || j == 0) {
+                    if (/*i == 1 ||*/ j == 0) {
                         continue;
                     }
                     //5.4.1.2、获取每一行的数据
@@ -218,8 +244,9 @@ public  class ExcelReader {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
-        };
+        }
+        ;
         //5.5、返回List集合
-        return list;
+        return listMap;
     }
 }

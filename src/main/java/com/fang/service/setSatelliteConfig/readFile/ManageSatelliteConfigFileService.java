@@ -194,7 +194,7 @@ public class ManageSatelliteConfigFileService {
 
     public List<ParaConfigLineDb> readFrameExcel(File file, List<String> paraCodeList) throws FileNotFoundException {
         List<ParaConfigLineDb> result = new ArrayList<>();
-        List<Object[]> objects = ExcelReader.importExcel(new FileInputStream(file));
+        List<Object[]> objects = ExcelReader.importExcel(new FileInputStream(file)).get(0);
         for (Object[] object : objects) {
             ParaConfigLineDb paraConfigLineDb = new ParaConfigLineDb();
             paraConfigLineDb.setRound(10);

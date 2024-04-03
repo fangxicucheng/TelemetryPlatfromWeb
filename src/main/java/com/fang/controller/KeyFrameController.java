@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -24,7 +25,7 @@ public class KeyFrameController {
         return keyFrameService.getKeyFrameParaConfigleLine(satelliteId,keyFrameId);
     }
     @PostMapping("/upload/{satelliteId}/{keyFrameId}")
-    public List<ParaConfigLineExceptionInfo> uploadKeyFrameFile(@PathVariable Integer satelliteId, @PathVariable Integer keyFrameId , @RequestBody MultipartFile file){
-        return keyFrameService.getKeyFrameParaConfigleLine(satelliteId,keyFrameId);
+    public List<ParaConfigLineExceptionInfo> uploadKeyFrameFile(@PathVariable Integer satelliteId, @PathVariable Integer keyFrameId , @RequestBody MultipartFile file) throws IOException {
+        return keyFrameService.uploadKeyFrameFile(satelliteId,keyFrameId,file);
     }
 }
