@@ -1,8 +1,10 @@
 package com.fang.controller;
 
 import com.fang.database.postgresql.entity.KeyFrame;
+import com.fang.service.setExcpetionJuge.KeyFrameExceptionInfo;
 import com.fang.service.setExcpetionJuge.KeyFrameService;
 import com.fang.service.setExcpetionJuge.ParaConfigLineExceptionInfo;
+import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,11 +23,25 @@ public class KeyFrameController {
     }
 
     @GetMapping("/{satelliteId}/{keyFrameId}")
-    public List<ParaConfigLineExceptionInfo> getKeyFrameParaConfigLine(@PathVariable Integer satelliteId,@PathVariable Integer keyFrameId){
-        return keyFrameService.getKeyFrameParaConfigleLine(satelliteId,keyFrameId);
+    public List<ParaConfigLineExceptionInfo> getKeyFrameParaConfigLine(@PathVariable Integer satelliteId, @PathVariable Integer keyFrameId) {
+        return keyFrameService.getKeyFrameParaConfigleLine(satelliteId, keyFrameId);
     }
+
     @PostMapping("/upload/{satelliteId}/{keyFrameId}")
-    public List<ParaConfigLineExceptionInfo> uploadKeyFrameFile(@PathVariable Integer satelliteId, @PathVariable Integer keyFrameId , @RequestBody MultipartFile file) throws IOException {
-        return keyFrameService.uploadKeyFrameFile(satelliteId,keyFrameId,file);
+    public List<ParaConfigLineExceptionInfo> uploadKeyFrameFile(@PathVariable Integer satelliteId, @PathVariable Integer keyFrameId, @RequestBody MultipartFile file) throws IOException {
+        return keyFrameService.uploadKeyFrameFile(satelliteId, keyFrameId, file);
+    }
+
+    @PostMapping("/update/{action}")
+    public CheckConfigResult updateKeyFrame(@PathVariable String action,@RequestBody KeyFrameExceptionInfo keyFrameExceptionInfo) {
+        return keyFrameService.updateKeyFrame(keyFrameExceptionInfo,action);
+    }
+
+
+
+    @DeleteMapping("/delete/{keyFrameId}")
+    public CheckConfigResult deleteKeyFrame(@PathVariable Integer keyFrameId){
+        this.keyFrameService.deleteKeyFrameByFrameId(keyFrameId);
+        return new CheckConfigResult();
     }
 }
