@@ -1,5 +1,6 @@
 package com.fang.utils;
 
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.*;
@@ -280,37 +281,27 @@ public class ExcelUtils {
                     } else {
                         cell.setCellStyle(contentStyle);
                     }
-
                 }
                 if (l == exportContent.size() - 1) {
-
-                    for (int i1 = 0; i1 < exportContent.size(); i1++) {
+                    for (int i1 = 0; i1 < exportContent.get(l).length; i1++) {
                         sheet.autoSizeColumn(i1);
                     }
                 }
 
             }
         }
-
         workbook.write(outputStream);
-       File file=new File("d:/test.xlsx");
-       OutputStream out2=new FileOutputStream(file);
-       workbook.write(out2);
-        outputStream.flush();
-        outputStream.close();
+
     }
     public static void exportExcelFileToWeb(List<List<String[]>> needExport, HttpServletResponse response,String fileName) throws IOException {
         fileName = URLEncoder.encode(fileName, "UTF-8");
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-        // 设置Headers
-//        response.setHeader("Content-Type", "application/octet-stream;charset=UTF-8");
         response.setCharacterEncoding("utf-8");
-        // 设置下载的文件的名称-该方式已解决中文乱码问题
-//        response.setHeader("Content-Disposition",
-//                "attachment;filename=" + java.net.URLEncoder.encode(fileName, "UTF-8"));
-
         response.setHeader("Content-disposition", "attachment;filename=" + fileName);
-        exportExcelFile(needExport,response.getOutputStream()) ;
+        ServletOutputStream outputStream = response.getOutputStream();
+        exportExcelFile(needExport,outputStream) ;
+        outputStream.flush();
+        outputStream.close();
     }
 
 }

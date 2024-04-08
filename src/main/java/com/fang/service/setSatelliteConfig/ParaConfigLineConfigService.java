@@ -63,11 +63,7 @@ public class ParaConfigLineConfigService {
             if(!StringUtil.isNullOrEmpty(teleParaConfigLineDbModel.getParaCode())&&!paraCodeDbSet.contains(teleParaConfigLineDbModel.getParaCode())){
                 frame.getParaConfigLineDbList().add(new ParaConfigLineDb(teleParaConfigLineDbModel));
             }
-
         }
-
-
-
 
         frame.getParaConfigLineDbList().sort((o1,o2)->{
             return o1.getNum()-o2.getNum();

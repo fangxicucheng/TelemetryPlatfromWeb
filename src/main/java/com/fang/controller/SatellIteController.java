@@ -5,6 +5,7 @@ import com.fang.service.setSatelliteConfig.FrameCatalogConfigService;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
 import com.fang.telemetry.satelliteConfigModel.TeleSatelliteDbModel;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,13 @@ public class SatellIteController {
     public CheckConfigResult insertSatelliteDb(@RequestBody SatelliteDb satellite){
 
         return satelliteConfigService.insertSatellite(satellite);
+    }
+
+    @PostMapping("/download")
+    public void downLoadSatelliteConfigFile(@RequestBody Integer satellteId, HttpServletResponse reponse){
+
+        this.satelliteConfigService.downloadSatelliteConfigFile(satellteId,reponse);
+
     }
 
 
