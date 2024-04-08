@@ -1,22 +1,24 @@
 package com.fang.utils;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ExcelReader {
+public class ExcelUtils {
     /**
      * 1、将单元格的内容转换为字符串
      *
@@ -173,7 +175,7 @@ public class ExcelReader {
         System.out.println(fileName);
         dest.getParentFile().mkdirs();
         file.transferTo(dest);
-        readContentMap=importExcel(new FileInputStream(dest));
+        readContentMap = importExcel(new FileInputStream(dest));
         FileUtils.deleteDirectory(new File(baseDirectoryPath + "上传文件\\" + format + "\\"));
         return readContentMap;
     }
@@ -249,4 +251,66 @@ public class ExcelReader {
         //5.5、返回List集合
         return listMap;
     }
+
+    public static void exportExcelFile(List<List<String[]>> needExport, OutputStream outputStream) throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND); // 设置背景填充模式
+        headerStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
+        headerStyle.setBorderBottom(BorderStyle.THICK);
+        headerStyle.setBorderTop(BorderStyle.THICK);
+        headerStyle.setBorderRight(BorderStyle.THICK);
+        headerStyle.setBorderLeft(BorderStyle.THICK);
+        CellStyle contentStyle = workbook.createCellStyle();
+        contentStyle.setBorderRight(BorderStyle.THIN);
+        contentStyle.setBorderBottom(BorderStyle.THIN);
+        contentStyle.setBorderLeft(BorderStyle.THIN);
+        contentStyle.setBorderTop(BorderStyle.THIN);
+        for (int i = 0; i < needExport.size(); i++) {
+            List<String[]> exportContent = needExport.get(i);
+            XSSFSheet sheet = workbook.createSheet(exportContent.get(0)[0]);
+            for (int l = 1; l < exportContent.size(); l++) {
+                XSSFRow row = sheet.createRow(l-1);
+                String[] contentArray = exportContent.get(l);
+                for (int k = 0; k < contentArray.length; k++) {
+                    XSSFCell cell = row.createCell(k);
+                    cell.setCellValue(contentArray[k]);
+                    if (l == 1) {
+                        cell.setCellStyle(headerStyle);
+                    } else {
+                        cell.setCellStyle(contentStyle);
+                    }
+
+                }
+                if (l == exportContent.size() - 1) {
+
+                    for (int i1 = 0; i1 < exportContent.size(); i1++) {
+                        sheet.autoSizeColumn(i1);
+                    }
+                }
+
+            }
+        }
+
+        workbook.write(outputStream);
+       File file=new File("d:/test.xlsx");
+       OutputStream out2=new FileOutputStream(file);
+       workbook.write(out2);
+        outputStream.flush();
+        outputStream.close();
+    }
+    public static void exportExcelFileToWeb(List<List<String[]>> needExport, HttpServletResponse response,String fileName) throws IOException {
+        fileName = URLEncoder.encode(fileName, "UTF-8");
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+        // 设置Headers
+//        response.setHeader("Content-Type", "application/octet-stream;charset=UTF-8");
+        response.setCharacterEncoding("utf-8");
+        // 设置下载的文件的名称-该方式已解决中文乱码问题
+//        response.setHeader("Content-Disposition",
+//                "attachment;filename=" + java.net.URLEncoder.encode(fileName, "UTF-8"));
+
+        response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+        exportExcelFile(needExport,response.getOutputStream()) ;
+    }
+
 }

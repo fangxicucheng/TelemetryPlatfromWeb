@@ -8,11 +8,10 @@ import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.database.postgresql.repository.ReceiveRecordRepository;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
 import com.fang.service.setExcpetionJuge.SatelliteSubsystemService;
-import com.fang.service.setSatelliteConfig.FrameCatalogConfigService;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModel;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModelInterface;
-import com.fang.utils.ExcelReader;
+import com.fang.utils.ExcelUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,7 +59,7 @@ class TelemetryParseServiceApplicationTests {
 
         File file = new File("F:\\0323\\0323\\test\\test\\5.2.34. 中心机内部参数应答帧一0_34_2_ZT-C002.xlsx");
         InputStream inputStream = new FileInputStream(file);
-        List<Object[]> objects = ExcelReader.importExcel(inputStream).get(0);
+        List<Object[]> objects = ExcelUtils.importExcel(inputStream).get(0);
         assert objects != null;
         for (Object[] object : objects) {
             // System.out.println(object[0] + "\t" + object[1] + "\t" + object[2]);

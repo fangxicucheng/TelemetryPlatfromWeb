@@ -5,6 +5,7 @@ import com.fang.service.setExcpetionJuge.KeyFrameExceptionInfo;
 import com.fang.service.setExcpetionJuge.KeyFrameService;
 import com.fang.service.setExcpetionJuge.ParaConfigLineExceptionInfo;
 import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,5 +44,10 @@ public class KeyFrameController {
     public CheckConfigResult deleteKeyFrame(@PathVariable Integer keyFrameId){
         this.keyFrameService.deleteKeyFrameByFrameId(keyFrameId);
         return new CheckConfigResult();
+    }
+
+    @PostMapping("/download")
+    public void downloadSatelliteKeyFrameInfo(@RequestBody Integer satelliteId , HttpServletResponse response) throws IOException {
+        this.keyFrameService.downloadSatelliteKeyFrameInfo(satelliteId,response);
     }
 }
