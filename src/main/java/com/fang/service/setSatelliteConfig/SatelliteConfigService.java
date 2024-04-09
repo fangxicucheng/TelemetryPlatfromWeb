@@ -9,6 +9,7 @@ import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
 import com.fang.service.parseTelemetry.BaseParserService;
 import com.fang.service.setSatelliteConfig.readFile.ManageSatelliteConfigFileService;
+import com.fang.telemetry.ExcelCellListSelectShow;
 import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
 import com.fang.telemetry.satelliteConfigModel.TeleSatelliteDbModel;
 import com.fang.utils.ExcelUtils;
@@ -22,9 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -51,7 +50,6 @@ public class SatelliteConfigService {
             satelliteDbList.add(satelliteDb);
         }
         this.satelliteDbRepository.saveAll(satelliteDbList);
-
     }
 
     public SatelliteDb uploadSatelliteConfileFiles(List<MultipartFile> files) throws IOException {
@@ -69,7 +67,6 @@ public class SatelliteConfigService {
             destFiles.add(dest);
         }
         satelliteDb = manageSatelliteConfigFileService.readSatelliteDbConfigFile(destFiles);
-
         System.out.println("文件保存完成");
         FileUtils.deleteDirectory(new File(baseDirectoryPath + "上传文件\\" + format + "\\"));
         return satelliteDb;
@@ -83,7 +80,6 @@ public class SatelliteConfigService {
     public List<TeleSatelliteDbModel> updateTeleSatelliteDbInfo(TeleSatelliteDbModel satelliteDbModel) {
         this.satelliteDbRepository.updateSatelliteDbInfo(satelliteDbModel.getId(), satelliteDbModel.getSatelliteName());
         return getTeleSatelliteDbModelList();
-
     }
 
     public List<TeleSatelliteDbModel> deleteTeleSatelliteDbInfoById(int id) {
@@ -114,20 +110,22 @@ public class SatelliteConfigService {
         //压缩文件夹
         ZipOutputStream zipStream = null;
         String directory = baseDirectoryPath + "/配置信息/" + sdf.format(new Date()) + "/";
-
-
         File directoryFile = new File(directory);
-        if ( !directoryFile.exists()) {
-
+        if (!directoryFile.exists()) {
             directoryFile.mkdirs();
         }
-
         String strZipPath = directory + satelliteDb.getSatelliteName() + ".zip";
+        List<Map<Integer, String[]>>excelCellListSelectShowMapList=new ArrayList<>();
+        Map<Integer,String[]>excelCellListSelectShowMap=new HashMap<>();
+        excelCellListSelectShowMapList.add(excelCellListSelectShowMap);
+        excelCellListSelectShowMap.put(4,new String[]{"无符号","补码","有符号","有符号位","反码"});
+        excelCellListSelectShowMap.put(5,new String[]{"原码显示","十进制显示","公式","状态码(十六进制)","状态码(十进制)","状态码(二进制)","时间","32位单精度浮点数"});
         File zipFile = new File(strZipPath);
         try {
             zipStream = new ZipOutputStream(new FileOutputStream(zipFile));
             if (frameCatalogDbList != null && frameCatalogDbList.size() > 0) {
-                for (FrameCatalogDb frameCatalogDb : frameCatalogDbList) {
+                for (int index = 0; index < frameCatalogDbList.size(); index++) {
+                    FrameCatalogDb frameCatalogDb = frameCatalogDbList.get(index);
                     catalogInfoList.add(frameCatalogDb.getCatalogCode() + ":" + frameCatalogDb.getCatalogName());
                     List<FrameDb> frameDbList = frameCatalogDb.getFrameDbList();
                     if (frameDbList != null && frameDbList.size() > 0) {
@@ -137,7 +135,7 @@ public class SatelliteConfigService {
                             frameInfoSheetList.add(frameInfoList);
                             String[] strArray = new String[1];
                             strArray[0] = "配置信息";
-                            String fileName = (frameCatalogDb.getNum() + 4) + "." +
+                            String fileName = (index + 5) + "." +
                                     frameDb.getFrameCode() + "." + frameDb.getReuseChannel() + " " + frameDb.getFrameName() + frameDb.getReuseChannel() + "_" + frameDb.getFrameCode() + "_" + frameCatalogDb.getCatalogCode() + "_ZT-C002.xlsx";
                             ZipEntry zipEntry = new ZipEntry(fileName);
                             zipStream.putNextEntry(zipEntry);
@@ -161,19 +159,60 @@ public class SatelliteConfigService {
                                     String[] lineContent = new String[11];
                                     lineContent[0] = paraConfigLineDb.getBitStart() + "";
                                     lineContent[1] = paraConfigLineDb.getBitNum() + "";
-                                    lineContent[2] = paraConfigLineDb.getParaCode();
-                                    lineContent[3] = paraConfigLineDb.getParaName();
-                                    lineContent[4] = paraConfigLineDb.getSourceCodeSaveType();
-                                    lineContent[5] = paraConfigLineDb.getHandleType();
-                                    lineContent[6] = paraConfigLineDb.getHandleParam();
+                                    lineContent[2] = paraConfigLineDb.getParaCode()+"";
+                                    lineContent[3] = paraConfigLineDb.getParaName()+"";
+                                    lineContent[4] = paraConfigLineDb.getSourceCodeSaveType()+"";
+                                    lineContent[5] = paraConfigLineDb.getHandleType()+"";
+                                    lineContent[6] = paraConfigLineDb.getHandleParam()+"";
+
+                                    switch (paraConfigLineDb.getParseType()){
+                                        case 2:{
+                                            lineContent[4]="补码";
+                                            lineContent[5]="十进制显示";
+                                        }break;
+                                        case 3:
+                                        case 4:
+                                        {
+                                            lineContent[4]="无符号";
+                                            lineContent[5]="原码显示";
+                                        }break;
+                                        case 5:{
+                                            lineContent[4]="无符号";
+                                            lineContent[5]="32位单精度浮点数";
+                                        }break;
+                                        case 0:
+                                        case 9:{
+
+                                            lineContent[4]="无符号";
+                                            lineContent[5]="十进制显示";
+                                        }break;
+                                        case 10:{
+                                            lineContent[6]=paraConfigLineDb.getHandleParam()+"";
+                                            if(paraConfigLineDb.getHandleType().contains("状态码")){
+                                                lineContent[6]=lineContent[6].replaceAll("\r\n",";\r\n");
+                                            }
+                                            lineContent[5]=lineContent[5].replaceAll(" ","");
+
+                                            switch(paraConfigLineDb.getHandleType()){
+                                                case"原码":
+                                                case"源码":
+                                                case"原码显示":
+                                                case"十六进制显示":
+                                                case"十六进制":
+                                                {
+                                                    lineContent[5]="原码显示";
+                                                }break;
+                                            }
+                                        }break;
+                                    }
                                     lineContent[7] = "";
                                     lineContent[8] = "";
                                     lineContent[9] = "";
-                                    lineContent[10] = paraConfigLineDb.getDimension();
+                                    lineContent[10] = paraConfigLineDb.getDimension()+"";
                                     frameInfoList.add(lineContent);
                                 }
                             }
-                            ExcelUtils.exportExcelFile(frameInfoSheetList, zipStream);
+                            ExcelUtils.exportExcelFile(frameInfoSheetList, zipStream,excelCellListSelectShowMapList);
                         }
                     }
                 }
@@ -185,17 +224,12 @@ public class SatelliteConfigService {
             zipStream.flush();
             zipStream.close();
             if (zipFile.exists()) {
-
                 download(response, satelliteDb.getSatelliteName() + ".zip", zipFile.getPath());
-
             }
             FileUtils.deleteDirectory(directoryFile);
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     public void download(HttpServletResponse response, String filename, String path) throws IOException {
@@ -212,7 +246,6 @@ public class SatelliteConfigService {
                     // 设置下载的文件的名称-该方式已解决中文乱码问题
                     response.setHeader("Content-Disposition",
                             "attachment;filename=" + java.net.URLEncoder.encode(filename, "UTF-8"));
-
                     is = new FileInputStream(file);
                     bs = new BufferedInputStream(is);
                     os = response.getOutputStream();
@@ -226,7 +259,6 @@ public class SatelliteConfigService {
                     response.sendRedirect("error=" + error);
                 }
             } finally {
-
                 if (is != null) {
                     is.close();
                 }
@@ -242,8 +274,12 @@ public class SatelliteConfigService {
     }
 
     private void downloadFrameCatalogConfigFile(List<String> catalogInfoList, OutputStream out) throws IOException {
-        for (String catalogInfo : catalogInfoList) {
-            out.write((catalogInfo + "\r\n".getBytes("UTF-8")).getBytes());
+        for (int i = 0; i < catalogInfoList.size(); i++) {
+            String catalogInfo = catalogInfoList.get(i);
+            if (i != catalogInfoList.size() - 1) {
+                catalogInfo += "\r\n";
+            }
+            out.write(catalogInfo.getBytes("UTF-8"));
         }
 
     }

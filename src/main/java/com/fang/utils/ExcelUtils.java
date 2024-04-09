@@ -1,10 +1,12 @@
 package com.fang.utils;
 
+import com.fang.telemetry.ExcelCellListSelectShow;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -253,7 +255,7 @@ public class ExcelUtils {
         return listMap;
     }
 
-    public static void exportExcelFile(List<List<String[]>> needExport, OutputStream outputStream) throws IOException {
+    public static void exportExcelFile(List<List<String[]>> needExport, OutputStream outputStream, List<Map<Integer, String[]>>excelListShowMapList) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook();
         CellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND); // 设置背景填充模式
@@ -264,6 +266,7 @@ public class ExcelUtils {
         headerStyle.setBorderLeft(BorderStyle.THICK);
         CellStyle contentStyle = workbook.createCellStyle();
         contentStyle.setBorderRight(BorderStyle.THIN);
+        contentStyle.setWrapText(true);
         contentStyle.setBorderBottom(BorderStyle.THIN);
         contentStyle.setBorderLeft(BorderStyle.THIN);
         contentStyle.setBorderTop(BorderStyle.THIN);
@@ -286,12 +289,39 @@ public class ExcelUtils {
                     for (int i1 = 0; i1 < exportContent.get(l).length; i1++) {
                         sheet.autoSizeColumn(i1);
                     }
-                }
+                    if(excelListShowMapList!=null&&excelListShowMapList.size()>=i){
 
+                        Map<Integer, String[]> excelCellListSelectShowMap = excelListShowMapList.get(i);
+
+
+                        for (Integer columIndex : excelCellListSelectShowMap.keySet()) {
+
+                            if(exportContent.size()<3){
+                                continue;
+                            }
+                          CellRangeAddressList rangeAddressList=new CellRangeAddressList(1,exportContent.size() - 2,columIndex,columIndex);
+
+                                DataValidationHelper dvHelper = sheet.getDataValidationHelper();
+
+                                DataValidationConstraint dvConstraint = dvHelper.createExplicitListConstraint(excelCellListSelectShowMap.get(columIndex));
+                                DataValidation validation = dvHelper.createValidation(dvConstraint, rangeAddressList);
+                                validation.setShowErrorBox(true);
+                                sheet.addValidationData(validation);
+
+
+
+
+
+                        }
+
+
+
+
+                    }
+                }
             }
         }
         workbook.write(outputStream);
-
     }
     public static void exportExcelFileToWeb(List<List<String[]>> needExport, HttpServletResponse response,String fileName) throws IOException {
         fileName = URLEncoder.encode(fileName, "UTF-8");
@@ -299,7 +329,7 @@ public class ExcelUtils {
         response.setCharacterEncoding("utf-8");
         response.setHeader("Content-disposition", "attachment;filename=" + fileName);
         ServletOutputStream outputStream = response.getOutputStream();
-        exportExcelFile(needExport,outputStream) ;
+        exportExcelFile(needExport,outputStream,null) ;
         outputStream.flush();
         outputStream.close();
     }

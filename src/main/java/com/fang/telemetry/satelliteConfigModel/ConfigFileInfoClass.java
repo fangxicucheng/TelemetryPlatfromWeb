@@ -22,13 +22,8 @@ public class ConfigFileInfoClass {
             this.refuseChannel = Integer.parseInt(fileNameInfo[0].substring(fileNameInfo[0].length() - 1, fileNameInfo[0].length()));
             this.frameCode = Integer.parseInt(fileNameInfo[1]);
             this.catalogCode = Integer.parseInt(fileNameInfo[2]);
-
-
         }
-
-
         hasInit = true;
-
     }
 
 

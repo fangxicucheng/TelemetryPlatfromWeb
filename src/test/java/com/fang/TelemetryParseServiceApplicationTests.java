@@ -8,6 +8,8 @@ import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.database.postgresql.repository.ReceiveRecordRepository;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
 import com.fang.service.setExcpetionJuge.SatelliteSubsystemService;
+import com.fang.service.setExcpetionJuge.ThresholdInfo;
+import com.fang.service.setExcpetionJuge.ThresholdService;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModel;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModelInterface;
@@ -16,10 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +38,8 @@ class TelemetryParseServiceApplicationTests {
     private SatelliteConfigService satelliteConfigService;
     @Autowired
     private SatelliteSubsystemService satelliteSubsystemService;
+    @Autowired
+    private ThresholdService thresholdService;
 
     @Test
     void deleteSatellites() {
@@ -48,6 +49,17 @@ class TelemetryParseServiceApplicationTests {
             System.out.println("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+
+    }
+    @Test
+    void readThresholdFile() throws IOException {
+
+
+        List<ThresholdInfo> thresholdInfoList = thresholdService.readThresholdFile("宽幅02A星");
+        for (ThresholdInfo thresholdInfo : thresholdInfoList) {
+            System.out.println(thresholdInfo);
         }
 
 
