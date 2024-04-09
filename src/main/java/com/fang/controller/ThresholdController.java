@@ -30,9 +30,9 @@ public class ThresholdController {
         this.thresholdService.rebuildThresholdFile(satelliteName,thresholdInfoList);
     }
 
-    @PostMapping("/download/{satelliteName}")
-    public void downLoadThresholdFile(@PathVariable String satelliteName, HttpServletResponse response){
-
+    @PostMapping("/download")
+    public void downLoadThresholdFile(@RequestBody String satelliteName, HttpServletResponse response) throws IOException {
+        this.thresholdService.downLoadThresholdFile(satelliteName.replaceAll("\"",""),response);
     }
 
 }

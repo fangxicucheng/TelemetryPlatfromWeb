@@ -5,14 +5,14 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.TypeReference;
 import com.fang.database.postgresql.entity.*;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
+import com.fang.utils.DownLoadUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 @Service
@@ -78,12 +78,10 @@ public class ThresholdService {
         return thresholdInfoList;
     }
 
-    public void downLoadThresholdFile(String satelliteName, HttpServletResponse response){
-
+    public void downLoadThresholdFile(String satelliteName, HttpServletResponse response) throws IOException {
         String fileName=satelliteName + ".json";
-        String filePath = baseDirectoryPath + "/" +fileName;
-        File file = new File(filePath);
-        response.setHeader();
+        String filePath = baseDirectoryPath  +fileName;
+        DownLoadUtils.download(response,fileName,filePath);
 
     }
     public List<ThresholdInfo> readThresholdFile(String satelliteName) throws IOException {
