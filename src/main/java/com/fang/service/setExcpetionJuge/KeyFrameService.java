@@ -30,13 +30,10 @@ public class KeyFrameService {
         SatelliteDb satelliteDb = satelliteDbRepository.findById(keyFrameExceptionInfo.getSatelliteId()).get();
         Map<String, ParaConfigLineExceptionInfo> paraConfigLineExceptionInfoMap = new HashMap<>();
         for (int i = 0; i < keyFrameExceptionInfo.getParaConfigLineExceptionInfoList().size(); i++) {
-
             ParaConfigLineExceptionInfo paraConfigLineExceptionInfo = keyFrameExceptionInfo.getParaConfigLineExceptionInfoList().get(i);
-
             paraConfigLineExceptionInfoMap.put(paraConfigLineExceptionInfo.getParaCode(), paraConfigLineExceptionInfo);
             if (paraConfigLineExceptionInfo.getParaName().equals("未知")) {
                 checkConfigResult.setErrorMsg("第" + (i + 1) + "行 " + paraConfigLineExceptionInfo.getParaCode() + "为未知参数名");
-
             }
             if (paraConfigLineExceptionInfo.getParaCode().isEmpty()) {
                 checkConfigResult.setErrorMsg("第" + (i + 1) + "行 未设置参数代号");
@@ -55,7 +52,6 @@ public class KeyFrameService {
                             }
                         }
                     }
-
                 }
             }
         }

@@ -88,16 +88,32 @@ public class ThresholdService {
         List<ThresholdInfo> thresholdInfoList = new ArrayList<>();
         String filePath = baseDirectoryPath + "/" + satelliteName + ".json";
         File file = new File(filePath);
+        if(!file.exists()){
+            file.createNewFile();
+
+        }
         String jsonString = FileUtils.readFileToString(file);
-        thresholdInfoList.addAll(JSON.parseObject(jsonString, new TypeReference<List<ThresholdInfo>>() {
-        }));
+        if(jsonString==null){
+            jsonString="";
+        }
+        List<ThresholdInfo> list = JSON.parseObject(jsonString, new TypeReference<List<ThresholdInfo>>() {
+        });
+        if(list!=null){
+            thresholdInfoList.addAll(list);
+        }
+
         return thresholdInfoList;
     }
     //重新生成
     public void rebuildThresholdFile(String satelliteName, List<ThresholdInfo> thresholdInfoList) throws IOException {
         String filePath = baseDirectoryPath + "/" + satelliteName + ".json";
+
         String jsonStr = (new JSONArray(thresholdInfoList)).toJSONString();
         File file = new File(filePath);
+        if(!file.exists()){
+            file.createNewFile();
+
+        }
         FileUtils.writeStringToFile(file, jsonStr);
     }
 }

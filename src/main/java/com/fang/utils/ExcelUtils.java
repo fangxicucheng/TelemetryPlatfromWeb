@@ -249,6 +249,14 @@ public class ExcelUtils {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }finally {
+            if(inputStream!=null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         ;
         //5.5、返回List集合

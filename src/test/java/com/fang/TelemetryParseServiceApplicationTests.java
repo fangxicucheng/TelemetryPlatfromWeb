@@ -7,7 +7,7 @@ import com.fang.database.postgresql.entity.ReceiveRecord;
 import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.database.postgresql.repository.ReceiveRecordRepository;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
-import com.fang.service.setExcpetionJuge.SatelliteSubsystemService;
+import com.fang.service.setExcpetionJuge.SubSystemService;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.setExcpetionJuge.ThresholdService;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
@@ -37,7 +37,7 @@ class TelemetryParseServiceApplicationTests {
     @Autowired
     private SatelliteConfigService satelliteConfigService;
     @Autowired
-    private SatelliteSubsystemService satelliteSubsystemService;
+    private SubSystemService subSystemService;
     @Autowired
     private ThresholdService thresholdService;
 
@@ -171,7 +171,7 @@ class TelemetryParseServiceApplicationTests {
 
     @Test
     public void copySatelliteSubsystem() {
-        this.satelliteSubsystemService.copySatelliteSubsystemFromMysql();
+        this.subSystemService.copySatelliteSubsystemFromMysql();
 
     }
 
