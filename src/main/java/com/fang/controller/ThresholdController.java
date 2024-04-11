@@ -32,7 +32,9 @@ public class ThresholdController {
 
     @PostMapping("/download")
     public void downLoadThresholdFile(@RequestBody String satelliteName, HttpServletResponse response) throws IOException {
-        this.thresholdService.downLoadThresholdFile(satelliteName.replaceAll("\"",""),response);
+
+            this.thresholdService.downLoadThresholdFile(satelliteName.replaceAll("\"",""),response);
+
     }
 
 }

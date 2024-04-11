@@ -84,6 +84,7 @@ public class ThresholdService {
         DownLoadUtils.download(response,fileName,filePath);
 
     }
+
     public List<ThresholdInfo> readThresholdFile(String satelliteName) throws IOException {
         List<ThresholdInfo> thresholdInfoList = new ArrayList<>();
         String filePath = baseDirectoryPath + "/" + satelliteName + ".json";

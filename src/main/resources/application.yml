@@ -8,7 +8,7 @@ spring:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true
+    show-sql: false
   datasource:
     mysqlsource:
       jdbc-url: jdbc:mysql://127.0.0.1:3306/telemetry_data?useSSL=false&serverTimezone=UTC&useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8
