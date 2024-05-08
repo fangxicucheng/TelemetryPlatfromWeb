@@ -7,20 +7,26 @@ import com.fang.database.postgresql.entity.ReceiveRecord;
 import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.database.postgresql.repository.ReceiveRecordRepository;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
+import com.fang.service.resourceReader.ResourceReaderService;
 import com.fang.service.setExcpetionJuge.SubSystemService;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.setExcpetionJuge.ThresholdService;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModel;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModelInterface;
+import com.fang.telemetry.satelliteConfigModel.TeleSatelliteDbModel;
 import com.fang.utils.ExcelUtils;
+import org.apache.commons.io.FileUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootTest
 class TelemetryParseServiceApplicationTests {
@@ -40,6 +46,80 @@ class TelemetryParseServiceApplicationTests {
     private SubSystemService subSystemService;
     @Autowired
     private ThresholdService thresholdService;
+    @Autowired
+    private ResourceReaderService resourceReaderService;
+
+    @Test
+    void updateSatelliteInfo() throws IOException {
+        List<TeleSatelliteDbModel> teleSatelliteDbModels = this.satelliteDbRepository.querySatelliteName();
+        Map<String, TeleSatelliteDbModel> satelliteDbModelMap = new HashMap<>();
+        for (TeleSatelliteDbModel teleSatelliteDbModel : teleSatelliteDbModels) {
+            satelliteDbModelMap.put(teleSatelliteDbModel.getSatelliteName(), teleSatelliteDbModel);
+        }
+        List<String> satelliteNameInfoList = this.resourceReaderService.readResourceFile("satelliteName.txt");
+        for (String satelliteNameInfo : satelliteNameInfoList) {
+            String[] nameInfoArray = satelliteNameInfo.split(",");
+
+            if (satelliteDbModelMap.containsKey(nameInfoArray[1])) {
+                satelliteDbModelMap.get(nameInfoArray[1]).setSatelliteId(nameInfoArray[0]);
+            }
+
+        }
+
+        List<String> satelliteNmaeByteInfoList = this.resourceReaderService.readResourceFile("satelliteNameByte.txt");
+        //System.out.println(satelliteNmaeByteInfoList);
+        for (String nameByteInfo : satelliteNmaeByteInfoList) {
+            String[] nameByteInfoArray = nameByteInfo.split(",");
+            if (nameByteInfoArray.length == 3) {
+                if (satelliteDbModelMap.containsKey(nameByteInfoArray[0])) {
+                    satelliteDbModelMap.get(nameByteInfoArray[0]).setSatelliteBytesStr(nameByteInfoArray[1] + "," + nameByteInfoArray[2]);
+                }
+            }
+        }
+        //  satelliteNmaeByteInfoList.forEach(t->System.out.println(t));
+        List<String> satellliteICardInfoList = this.resourceReaderService.readResourceFile("BDSatelliteICard.txt");
+        //   satellliteICardInfoList.forEach(t->System.out.println(t));
+        //System.out.println(satellliteICardInfoList);
+
+        for (String iCardInfo : satellliteICardInfoList) {
+
+            String[] iCardInfoArray = iCardInfo.split(":");
+
+            if (satelliteDbModelMap.containsKey(iCardInfoArray[0])) {
+                satelliteDbModelMap.get(iCardInfoArray[0]).setBdICCardsStr(iCardInfoArray[1]);
+            }
+
+
+        }
+
+
+        for (String satelliteName : satelliteDbModelMap.keySet()) {
+
+            System.out.println(satelliteDbModelMap.get(satelliteName));
+        }
+
+
+        for (TeleSatelliteDbModel satelliteDbModel : satelliteDbModelMap.values()) {
+
+            //
+            if (satelliteDbModel.getBdICCardsStr() == null) {
+                satelliteDbModel.setBdICCardsStr("");
+            }
+            if(satelliteDbModel.getSatelliteBytesStr()==null){
+                satelliteDbModel.setSatelliteBytesStr("");
+            }
+            if(satelliteDbModel.getSatelliteId()==null){
+                satelliteDbModel.setSatelliteId("");
+            }
+
+            System.out.println(satelliteDbModel.getSatelliteName() + " id:" + satelliteDbModel.getSatelliteId().length() + ";bytes:" + satelliteDbModel.getSatelliteBytesStr().length() + ";iCards:" + satelliteDbModel.getBdICCardsStr().length());
+     this.satelliteConfigService.updateTeleSatelliteDbInfo(satelliteDbModel);
+
+        }
+
+
+    }
+
 
     @Test
     void deleteSatellites() {
@@ -53,10 +133,9 @@ class TelemetryParseServiceApplicationTests {
 
 
     }
+
     @Test
     void readThresholdFile() throws IOException {
-
-
         List<ThresholdInfo> thresholdInfoList = thresholdService.readThresholdFile("宽幅02A星");
         for (ThresholdInfo thresholdInfo : thresholdInfoList) {
             System.out.println(thresholdInfo);

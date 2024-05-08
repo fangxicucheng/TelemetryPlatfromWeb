@@ -79,7 +79,7 @@ public class SatelliteConfigService {
     }
 
     public List<TeleSatelliteDbModel> updateTeleSatelliteDbInfo(TeleSatelliteDbModel satelliteDbModel) {
-        this.satelliteDbRepository.updateSatelliteDbInfo(satelliteDbModel.getId(), satelliteDbModel.getSatelliteName());
+        this.satelliteDbRepository.updateSatelliteDbInfo(satelliteDbModel.getId(), satelliteDbModel.getSatelliteName(),satelliteDbModel.getSatelliteId(),satelliteDbModel.getSatelliteBytesStr(),satelliteDbModel.getBdICCardsStr());
         return getTeleSatelliteDbModelList();
     }
 

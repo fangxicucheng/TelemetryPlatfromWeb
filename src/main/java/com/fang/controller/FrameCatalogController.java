@@ -1,8 +1,6 @@
 package com.fang.controller;
 
 import com.fang.database.postgresql.entity.FrameCatalogDb;
-import com.fang.database.postgresql.entity.SatelliteDb;
-import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.service.setSatelliteConfig.FrameCatalogConfigService;
 import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModel;
@@ -15,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/frameCatalog")
-public class FrameCatalogConfroller {
+public class FrameCatalogController {
     @Autowired
     private FrameCatalogConfigService frameCatalogConfigService;
     @GetMapping("/{satelliteId}")

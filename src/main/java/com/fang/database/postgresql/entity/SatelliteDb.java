@@ -24,14 +24,18 @@ public class SatelliteDb {
     private Integer id;
     @Column(name="satellite_name")
     private String satelliteName;
-
+    @Column(name="satellite_id_code")
+    private String satelliteId;
+    @Column(name="satellite_bytes")
+    private String satelliteBytesStr;
+    @Column(name="bd_ic_cards")
+    private String bdICCardsStr;
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name="satellite_id")
     private List<FrameCatalogDb> frameCatalogDbList;
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name="satellite_id")
     private List<KeyFrame> keyFrameList;
-
     public SatelliteDb(TeleSatelliteNameMq satelliteNameMq) {
         this.satelliteName=satelliteNameMq.getSatelliteName();
 

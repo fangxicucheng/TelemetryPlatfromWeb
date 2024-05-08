@@ -12,4 +12,7 @@ import java.io.Serializable;
 public class TeleSatelliteDbModel  {
     private Integer id;
     private String satelliteName;
+    private String satelliteId;
+    private String satelliteBytesStr;
+    private String bdICCardsStr;
 }

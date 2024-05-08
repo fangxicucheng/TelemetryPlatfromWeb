@@ -3,6 +3,27 @@ server:
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  data:
+#   redis:
+#    cluster:
+#      nodes:
+#        - 192.168.179.132:6379
+#        - 192.168.179.132:6380
+#        - 192.168.179.132:6381
+#        - 192.168.179.132:6382
+#        - 192.168.179.132:6383
+#        - 192.168.179.132:6384
+#      max-redirects: 3
+#    lettuce:
+#      pool:
+#        min-idle: 1
+#        max-idle: 2
+#        max-wait: 10ms
+#        max-active: 32
+#      cluster:
+#        refresh:
+#          adaptive: true
+#          period: 2000
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,6 +41,15 @@ spring:
       driver-class-name: org.postgresql.Driver
       username: postgres
       password: 123456
+#  kafka:
+#    bootstrap-servers: hadoop1:9092,hadoop2:9092,hadoop3:9092
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      acks: 0
+#    consumer:
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 gorit:
   file:
     root:
