@@ -28,7 +28,7 @@ public class SatelliteDb {
     private String satelliteId;
     @Column(name="satellite_bytes")
     private String satelliteBytesStr;
-    @Column(name="bd_ic_cards")
+    @Column(name="bd_ic_cards",length = 512)
     private String bdICCardsStr;
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name="satellite_id")

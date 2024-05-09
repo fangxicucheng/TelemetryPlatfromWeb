@@ -83,6 +83,11 @@ public class SatelliteConfigService {
         return getTeleSatelliteDbModelList();
     }
 
+    public void updateSatelliteInfo(TeleSatelliteDbModel satelliteDbModel)
+    {
+        this.satelliteDbRepository.updateSatelliteDbInfo(satelliteDbModel.getId(), satelliteDbModel.getSatelliteName(),satelliteDbModel.getSatelliteId());
+    }
+
     public List<TeleSatelliteDbModel> deleteTeleSatelliteDbInfoById(int id) {
         this.satelliteDbRepository.deleteById(id);
         return getTeleSatelliteDbModelList();

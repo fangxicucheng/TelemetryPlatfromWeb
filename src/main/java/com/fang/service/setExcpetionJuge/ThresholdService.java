@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ThresholdService {
@@ -25,6 +27,26 @@ public class ThresholdService {
         SatelliteDb satelliteDb = satelliteDbRepository.findById(satelliteId).get();
         List<ThresholdInfo> thresholdInfoList = getThresholdInfoList(satelliteDb);
         rebuildThresholdFile(satelliteDb.getSatelliteName(),thresholdInfoList);
+    }
+
+
+    public Map<String,List<ThresholdInfo>>getThreadholdInfoMap() throws IOException {
+        Map<String,List<ThresholdInfo>>threadholdInfoMap=new HashMap<>();
+
+        File dirFile=new File(baseDirectoryPath);
+        List<File> fileList = Arrays.stream(dirFile.listFiles()).filter(t -> t.getName().contains("json")).collect(Collectors.toList());
+        for (File file : fileList) {
+
+            String satelliteName = file.getName().replaceAll(".json", "");
+
+            List<ThresholdInfo> thresholdInfoList = readThresholdFile(satelliteName);
+            threadholdInfoMap.put(satelliteName,thresholdInfoList);
+
+        }
+
+        System.out.println("异常初始化");
+        return threadholdInfoMap;
+
     }
     public List<ThresholdInfo> getThresholdInfoListBySatelliteId(Integer satelliteId) throws IOException {
         SatelliteDb satelliteDb = satelliteDbRepository.findById(satelliteId).get();
@@ -105,6 +127,10 @@ public class ThresholdService {
 
         return thresholdInfoList;
     }
+
+
+
+
     //重新生成
     public void rebuildThresholdFile(String satelliteName, List<ThresholdInfo> thresholdInfoList) throws IOException {
         String filePath = baseDirectoryPath + "/" + satelliteName + ".json";

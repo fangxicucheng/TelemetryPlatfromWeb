@@ -19,4 +19,7 @@ public class StationInfo {
     private String stationId;
     @Column(name="wave_info")
     private String waveInfo;
+    @Column(name="server_ip")
+    private String serverIp;
+
 }

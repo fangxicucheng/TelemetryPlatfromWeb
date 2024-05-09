@@ -4,9 +4,11 @@ import com.fang.database.mysql.entity.TeleReceiveRecordMq;
 import com.fang.database.mysql.repository.TeleReceiveRecordMqRepository;
 import com.fang.database.mysql.repository.TeleSatelliteNameMqRepository;
 import com.fang.database.postgresql.entity.ReceiveRecord;
+import com.fang.database.postgresql.entity.StationInfo;
 import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.database.postgresql.repository.ReceiveRecordRepository;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
+import com.fang.database.postgresql.repository.StationInfoRepository;
 import com.fang.service.resourceReader.ResourceReaderService;
 import com.fang.service.setExcpetionJuge.SubSystemService;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
@@ -16,6 +18,7 @@ import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModel;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameCatalogDbModelInterface;
 import com.fang.telemetry.satelliteConfigModel.TeleSatelliteDbModel;
 import com.fang.utils.ExcelUtils;
+import com.fang.utils.NetWorkInfoUtils;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +52,79 @@ class TelemetryParseServiceApplicationTests {
     private ThresholdService thresholdService;
     @Autowired
     private ResourceReaderService resourceReaderService;
+    @Autowired
+    private StationInfoRepository stationInfoRepository;
+
+    @Test
+    void testGetIpAddress() {
+        List<InetAddress> machineIpAddress = NetWorkInfoUtils.getMachineIpAddress();
+        for (InetAddress ipAddress : machineIpAddress) {
+            System.out.println(ipAddress.getHostAddress());
+        }
+    }
+    @Test
+    void updateStationInfo() throws IOException {
+        List<StationInfo> stationInfoDbList = this.stationInfoRepository.findAll();
+        Map<String, StationInfo> stationInfoMap = new HashMap<>();
+        List<StationInfo> stationInfoList = new ArrayList<>();
+        if (stationInfoDbList != null && stationInfoDbList.size() > 0) {
+            for (StationInfo stationInfo : stationInfoDbList) {
+                if (!stationInfoMap.containsKey(stationInfo.getStationName())) {
+                    stationInfoMap.put(stationInfo.getStationName(), stationInfo);
+                    stationInfoList.add(stationInfo);
+                }
+            }
+        }
+        List<String> stationNameInfoList = this.resourceReaderService.readResourceFile("stationName.txt");
+        for (String stationNameInfo : stationNameInfoList) {
+            String[] stationNameInfoArray = stationNameInfo.split(",");
+            if (!stationInfoMap.containsKey(stationNameInfoArray[1])) {
+                StationInfo stationInfo = new StationInfo();
+                stationInfo.setStationName(stationNameInfoArray[1]);
+                stationInfoMap.put(stationInfo.getStationName(), stationInfo);
+                stationInfoList.add(stationInfo);
+            }
+            stationInfoMap.get(stationNameInfoArray[1]).setStationId(stationNameInfoArray[0]);
+        }
+        List<String> stationConfigList = this.resourceReaderService.readResourceFile("StationConfig.txt");
+        StationInfo stationInfo = null;
+        for (String stationConfigInfo : stationConfigList) {
+            if (stationConfigInfo.contains("$")) {
+                String stationName = stationConfigInfo.replaceAll("\\$", "");
+                if (stationInfoMap.containsKey(stationName)) {
+                    stationInfo = stationInfoMap.get(stationName);
+                }
+            } else if (stationConfigInfo.contains("#")) {
+                String[] waveNameInfoArray = stationConfigInfo.replaceAll("#", "").split(":");
+                String wavename = waveNameInfoArray[0];
+                String[] ipAddressInfo = waveNameInfoArray[1].split(";");
+                if (ipAddressInfo.length == 3) {
+                    String ip = ipAddressInfo[1].split(",")[1];
+                    String port = ipAddressInfo[2].split(",")[1];
+                    String waveInfo=wavename+":"+ip+","+port;
+                    if(stationInfo!=null){
+                        if(stationInfo.getWaveInfo()!=null&&!stationInfo.getWaveInfo().equals("")){
+                            stationInfo.setWaveInfo(stationInfo.getWaveInfo()+";"+waveInfo);
+                        }else{
+                            stationInfo.setWaveInfo(waveInfo);
+                        }
+                    }
+                }
+            }
+        }
+        List<String> stationAndServerInfoList = this.resourceReaderService.readResourceFile("stationAndServer.txt");
+        for (String stationAndServerInfo : stationAndServerInfoList) {
+            String[] stationAndServerInfoArray = stationAndServerInfo.split(":");
+            String ip = stationAndServerInfoArray[0];
+            String[] stationNameList = stationAndServerInfoArray[1].split(",");
+            for (String stationName : stationNameList) {
+                if (stationInfoMap.containsKey(stationName)) {
+                    stationInfoMap.get(stationName).setServerIp(ip);
+                }
+            }
+        }
+        this.stationInfoRepository.saveAll(stationInfoList);
+    }
 
     @Test
     void updateSatelliteInfo() throws IOException {
@@ -101,19 +178,23 @@ class TelemetryParseServiceApplicationTests {
 
         for (TeleSatelliteDbModel satelliteDbModel : satelliteDbModelMap.values()) {
 
+            try {
+//                if (satelliteDbModel.getBdICCardsStr() == null) {
+//                    satelliteDbModel.setBdICCardsStr("");
+//                }
+//                if (satelliteDbModel.getSatelliteBytesStr() == null) {
+//                    satelliteDbModel.setSatelliteBytesStr("");
+//                }
+//                if (satelliteDbModel.getSatelliteId() == null) {
+//                    satelliteDbModel.setSatelliteId("");
+//                }
+                //  System.out.println(satelliteDbModel.getSatelliteName() + " id:" + satelliteDbModel.getSatelliteId().length() + ";bytes:" + satelliteDbModel.getSatelliteBytesStr().length() + ";iCards:" + satelliteDbModel.getBdICCardsStr().length());
+                this.satelliteConfigService.updateTeleSatelliteDbInfo(satelliteDbModel);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             //
-            if (satelliteDbModel.getBdICCardsStr() == null) {
-                satelliteDbModel.setBdICCardsStr("");
-            }
-            if(satelliteDbModel.getSatelliteBytesStr()==null){
-                satelliteDbModel.setSatelliteBytesStr("");
-            }
-            if(satelliteDbModel.getSatelliteId()==null){
-                satelliteDbModel.setSatelliteId("");
-            }
 
-            System.out.println(satelliteDbModel.getSatelliteName() + " id:" + satelliteDbModel.getSatelliteId().length() + ";bytes:" + satelliteDbModel.getSatelliteBytesStr().length() + ";iCards:" + satelliteDbModel.getBdICCardsStr().length());
-     this.satelliteConfigService.updateTeleSatelliteDbInfo(satelliteDbModel);
 
         }
 
