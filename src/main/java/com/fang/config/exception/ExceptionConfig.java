@@ -14,16 +14,10 @@ import java.util.Map;
 
 @Configuration
 public class ExceptionConfig {
-
-
-
     @Bean(name="threadInfoListMap")
     @Qualifier("threadInfoListMap")
     public Map<String, List<ThresholdInfo>> getSatelliteThreaInfoListMap(ThresholdService thresholdService) throws IOException {
-
-
         return thresholdService.getThreadholdInfoMap();
-
     }
 
 

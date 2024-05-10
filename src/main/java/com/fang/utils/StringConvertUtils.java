@@ -1,6 +1,9 @@
 package com.fang.utils;
 
-public class NumberConvertUtils {
+import javax.sound.sampled.AudioFormat;
+import java.nio.charset.StandardCharsets;
+
+public class StringConvertUtils {
     public static byte[] hexStringToByteArray(String hexString) {
         // 去除空格和无效字符
         hexString = hexString.replaceAll("\\s", "").replaceAll("0X","").replaceAll("0x","").replaceAll(",","");
@@ -26,4 +29,9 @@ public class NumberConvertUtils {
 
         return byteArray;
     }
+    public static String bytesConvertToASCIIStr(byte[] bytes){
+        return new String(bytes, StandardCharsets.US_ASCII);
+    }
+
+
 }
