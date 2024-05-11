@@ -2,8 +2,19 @@ package com.fang.utils;
 
 import javax.sound.sampled.AudioFormat;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class StringConvertUtils {
+
+
+    public static String removeInvisibleCharacters(String input){
+        String cleaned = input.replaceAll("\\p{C}", "");
+        return cleaned;
+    }
+    public static String removeUnableNumberCharacters(String input){
+        String cleaned=input.replaceAll("[^0-9A-Fa-f]+","");
+        return cleaned;
+    }
     public static byte[] hexStringToByteArray(String hexString) {
         // 去除空格和无效字符
         hexString = hexString.replaceAll("\\s", "").replaceAll("0X","").replaceAll("0x","").replaceAll(",","");

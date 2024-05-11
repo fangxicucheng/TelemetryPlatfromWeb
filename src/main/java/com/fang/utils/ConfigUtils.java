@@ -1,5 +1,6 @@
 package com.fang.utils;
 
+import com.fang.config.satellite.configStruct.SatelliteConfigClass;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ public class ConfigUtils {
     private static Map<String, String> satelliteIdMap = new HashMap<>();
     private static Map<String, byte[]> midMap = new HashMap<>();
     private static Map<String, String> icCardMap = new HashMap<>();
+
     public static void setSatelliteName(String satelliteName, String satelliteId) {
         if (!satelliteNameMap.containsKey(satelliteName)) {
             satelliteNameMap.put(satelliteName, satelliteId);

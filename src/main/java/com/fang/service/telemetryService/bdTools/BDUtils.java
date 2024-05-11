@@ -1,4 +1,4 @@
-package com.fang.service.parseTelemetry.bdTools;
+package com.fang.service.telemetryService.bdTools;
 
 import com.fang.utils.CrcUtils;
 import com.fang.utils.StringConvertUtils;

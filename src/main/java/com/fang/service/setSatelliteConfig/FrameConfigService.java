@@ -2,10 +2,9 @@ package com.fang.service.setSatelliteConfig;
 
 import com.fang.database.postgresql.entity.FrameCatalogDb;
 import com.fang.database.postgresql.entity.FrameDb;
-import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
 import com.fang.database.postgresql.repository.FrameDbRepository;
-import com.fang.service.parseTelemetry.BaseParserService;
+import com.fang.service.telemetryService.BaseParserService;
 import com.fang.service.setSatelliteConfig.readFile.ManageSatelliteConfigFileService;
 import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
 import com.fang.telemetry.satelliteConfigModel.TeleFrameDbModel;

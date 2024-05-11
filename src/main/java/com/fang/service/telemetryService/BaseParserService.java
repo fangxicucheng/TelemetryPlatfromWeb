@@ -1,10 +1,11 @@
-package com.fang.service.parseTelemetry;
+package com.fang.service.telemetryService;
 
 import com.fang.database.postgresql.entity.FrameCatalogDb;
 import com.fang.database.postgresql.entity.FrameDb;
 import com.fang.database.postgresql.entity.ParaConfigLineDb;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.telemetry.satelliteConfigModel.CheckConfigResult;
+import com.fang.utils.ParseUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -132,7 +133,7 @@ public class BaseParserService {
     }
     public boolean judgeDimension(String dimension) {
         try {
-           double dimensionValue= getDimension(dimension);
+           double dimensionValue= ParseUtils.getDimension(dimension);
             if(Double.isInfinite(dimensionValue)||Double.isNaN(dimensionValue)){
                 return true;
             }
@@ -142,29 +143,29 @@ public class BaseParserService {
         return false;
     }
 
-    public double getDimension(String dimension) {
-        double result = 1;
-        if (dimension.contains("/")) {
-            String[] divArray = dimension.split("/");
-            result = parseStrToValue(divArray[0]) / parseStrToValue(divArray[1]);
-        } else {
-            result = parseStrToValue(dimension);
-        }
-        return result;
-    }
-
-    public double parseStrToValue(String str) {
-        double result = 1;
-        if (str.contains("0x")) {
-            result = Long.parseLong(str.replaceAll("0x", ""), 16);
-        } else if (str.contains("^")) {
-            String[] powArray = str.split("\\^");
-            result = Math.pow(Double.parseDouble(powArray[0]), Double.parseDouble(powArray[1]));
-        } else {
-            result = Double.parseDouble(str);
-        }
-        return result;
-    }
+//    public double getDimension(String dimension) {
+//        double result = 1;
+//        if (dimension.contains("/")) {
+//            String[] divArray = dimension.split("/");
+//            result = parseStrToValue(divArray[0]) / parseStrToValue(divArray[1]);
+//        } else {
+//            result = parseStrToValue(dimension);
+//        }
+//        return result;
+//    }
+//
+//    public double parseStrToValue(String str) {
+//        double result = 1;
+//        if (str.contains("0x")) {
+//            result = Long.parseLong(str.replaceAll("0x", ""), 16);
+//        } else if (str.contains("^")) {
+//            String[] powArray = str.split("\\^");
+//            result = Math.pow(Double.parseDouble(powArray[0]), Double.parseDouble(powArray[1]));
+//        } else {
+//            result = Double.parseDouble(str);
+//        }
+//        return result;
+//    }
 }
 
 

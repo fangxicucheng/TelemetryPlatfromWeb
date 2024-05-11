@@ -1,10 +1,8 @@
-package com.fang.service.parseTelemetry;
+package com.fang.service.telemetryService;
 
-import com.fang.service.parseTelemetry.blockIngQueue.TelemetryBlockingQueue;
+
 import com.fang.utils.ConfigUtils;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.concurrent.LinkedBlockingDeque;
 @Data
@@ -26,15 +24,18 @@ public class ParseTelemetry {
        this.queue=new LinkedBlockingDeque<>();
     }
 
-    private void initQueue(){
 
-
-
-    }
 
     public void enQueue(byte[] bytes){
 
         queue.push(bytes);
+    }
+    //处理业务
+    public void parseService(){
+
+
+
+
     }
 
 }
