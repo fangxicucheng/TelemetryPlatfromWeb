@@ -3,10 +3,12 @@ package com.fang.config.satellite.paraParser;
 import com.fang.config.exception.ExceptionManager;
 import com.fang.config.satellite.configStruct.FrameConfigClass;
 import com.fang.config.satellite.configStruct.SatelliteConfigClass;
+import com.fang.database.postgresql.entity.SatelliteDb;
+import lombok.NoArgsConstructor;
 import org.apache.poi.ss.formula.functions.T;
 
 import java.util.Calendar;
-
+@NoArgsConstructor
 public class BaseParaParser implements ParaParser {
 
     private String satelliteTime;
@@ -16,20 +18,25 @@ public class BaseParaParser implements ParaParser {
     private String satelliteName;
     private SatelliteConfigClass satelliteConfigClass;
     private ExceptionManager exceptionManager;
+
     private boolean isBd;
 
-    public BaseParaParser(String satelliteName) {
-        this.satelliteName = satelliteName;
-        this.isBd=false;
-        if(this.satelliteName.contains("北斗")){
-            this.isBd=true;
-        }
-    }
+
+
 
     @Override
     public String getDisplayValue(String paraCode, Double paraValue) {
         return paraValue.toString();
     }
+
+    @Override
+    public void init(String satelliteName, SatelliteDb satelliteDb) {
+        this.satelliteName=satelliteName;
+        this.isBd=false;
+        this.satelliteConfigClass=new SatelliteConfigClass(satelliteDb);
+    }
+
+
 
 
     @Override
@@ -48,11 +55,7 @@ public class BaseParaParser implements ParaParser {
         return this.satelliteConfigClass.getFrameConfigClassByFrameCode(catalogCode,frameCode,reuseChannel);
     }
 
-    @Override
-    public void setExceptionManager(ExceptionManager exceptionManager) {
 
-        this.exceptionManager=exceptionManager;
-    }
 
     @Override
     public void threadInit() {

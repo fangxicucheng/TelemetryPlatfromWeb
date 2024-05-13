@@ -6,6 +6,7 @@ import com.fang.config.satellite.configStruct.FrameCatalogConfigClass;
 import com.fang.config.satellite.configStruct.FrameConfigClass;
 import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
 import com.fang.config.satellite.configStruct.SatelliteConfigClass;
+import com.fang.config.satellite.paraParser.ParaParser;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.entity.StationInfo;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
@@ -24,6 +25,7 @@ public class ConfigUtils {
     private static Map<String, String> icCardMap = new HashMap<>();
     private static Map<String, ExceptionManager> exceptionManagerMap=new HashMap<>();
     private static Map<String,SatelliteConfigClass> satelliteConfigClassMap=new HashMap<>();
+    private static Map<String, ParaParser> satelliteParaParserMap=new HashMap<>();
 
 
 

@@ -19,7 +19,6 @@ public class FrameCatalogConfigClass {
     private Integer catalogCode;
 
     public FrameCatalogConfigClass(FrameCatalogDb catalogDb) {
-
     this.catalogName=catalogDb.getCatalogName();
     this.catalogCode=catalogDb.getCatalogCode();
         for (FrameDb frameDb : catalogDb.getFrameDbList()) {
