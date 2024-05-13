@@ -1,5 +1,7 @@
 package com.fang.config.satellite;
 
+import com.fang.config.exception.ExceptionManager;
+import com.fang.config.exception.satelliteExcetionManager.BaseExceptionManager;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
 import com.fang.utils.ConfigUtils;
@@ -63,20 +65,22 @@ public class SatelliteConfig {
 //    }
 
 
-    @Bean(name="satelliteDbMap")
+    @Bean(name = "satelliteDbMap")
     @Qualifier("satelliteDbMap")
     Map<String, SatelliteDb> getSatelliteDbMap() {
         System.out.println("开始初始化");
         Map<String, SatelliteDb> satelliteDbMap = new HashMap<>();
         for (SatelliteDb satelliteDb : satelliteDbRepository.findAll()) {
-            try{
+            try {
                 if (satelliteDb.getSatelliteId() == null) {
                     continue;
                 }
                 satelliteDbMap.put(satelliteDb.getSatelliteName(), satelliteDb);
                 initSatelliteInfo(satelliteDb);
                 System.out.println(satelliteDb.getSatelliteName() + "初始化结束");
-            }catch (Exception e){
+
+
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -85,15 +89,18 @@ public class SatelliteConfig {
     }
 
 
-
     private void initSatelliteInfo(SatelliteDb satelliteDb) {
         setSatelliteName(satelliteDb);
         setSatelliteNameBytes(satelliteDb);
         setBdICard(satelliteDb);
     }
+
+
+
     private void setSatelliteName(SatelliteDb satelliteDb) {
-        ConfigUtils.setSatelliteName(satelliteDb.getSatelliteName(),satelliteDb.getSatelliteId());
+        ConfigUtils.setSatelliteName(satelliteDb.getSatelliteName(), satelliteDb.getSatelliteId());
     }
+
     private void setSatelliteNameBytes(SatelliteDb satelliteDb) {
 
 
@@ -102,15 +109,14 @@ public class SatelliteConfig {
         }
         ConfigUtils.setMid(satelliteDb.getSatelliteName(), StringConvertUtils.hexStringToByteArray(satelliteDb.getSatelliteBytesStr()));
     }
+
     private void setBdICard(SatelliteDb satelliteDb) {
-        if(satelliteDb.getBdICCardsStr()==null||satelliteDb.getBdICCardsStr().isEmpty()){
+        if (satelliteDb.getBdICCardsStr() == null || satelliteDb.getBdICCardsStr().isEmpty()) {
             return;
         }
-
-
         for (String bdICard : satelliteDb.getBdICCardsStr().split(",")) {
-           //bdICardMap.put(bdICard,satelliteDb.getSatelliteName());
-            ConfigUtils.setIcCard(satelliteDb.getSatelliteName(),bdICard);
+            //bdICardMap.put(bdICard,satelliteDb.getSatelliteName());
+            ConfigUtils.setIcCard(satelliteDb.getSatelliteName(), bdICard);
         }
     }
 //    private void initSatelliteInfo(SatelliteDb satelliteDb,Map<String,byte[]>satelliteNameBytesMap,Map<String,String> satelliteNameMap,Map<String,String>bdICardMap) {

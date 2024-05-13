@@ -1,5 +1,6 @@
 package com.fang;
 
+import com.fang.config.exception.ExceptionManager;
 import com.fang.database.mysql.entity.TeleReceiveRecordMq;
 import com.fang.database.mysql.repository.TeleReceiveRecordMqRepository;
 import com.fang.database.mysql.repository.TeleSatelliteNameMqRepository;
@@ -62,6 +63,7 @@ class TelemetryParseServiceApplicationTests {
             System.out.println(ipAddress.getHostAddress());
         }
     }
+
     @Test
     void updateStationInfo() throws IOException {
         List<StationInfo> stationInfoDbList = this.stationInfoRepository.findAll();

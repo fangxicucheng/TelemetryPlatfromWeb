@@ -1,6 +1,10 @@
 package com.fang.config.satellite.configStruct;
 
+import com.fang.config.exception.ExceptionManager;
+import com.fang.config.exception.ParaJudge;
+import com.fang.config.exception.SingleExceptionManager;
 import com.fang.database.postgresql.entity.ParaConfigLineDb;
+import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.utils.ParseUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +26,8 @@ public class ParaConfigLineConfigClass {
     private boolean needJudgeException;
     private Map<Double,String> stateParseMap;
 
+    private ParaJudge paraJudge;
+
     public ParaConfigLineConfigClass(ParaConfigLineDb paraConfigLineDb) {
         this.bitStart=paraConfigLineDb.getBitStart();
         this.bitNum=paraConfigLineDb.getBitNum();
@@ -29,6 +35,13 @@ public class ParaConfigLineConfigClass {
         this.paraName=paraConfigLineDb.getParaName();
         this.dimension= ParseUtils.getDimension(paraConfigLineDb.getDimension());
         ParseUtils.initParaConfigClass(paraConfigLineDb,this);
+        this.needJudgeException=false;
+
+    }
+
+    public void initExceptionManager(ThresholdInfo thresholdInfo, ExceptionManager exceptionManager){
+        this.needJudgeException=true;
+        this.paraJudge=new ParaJudge(thresholdInfo,exceptionManager);
 
     }
 }

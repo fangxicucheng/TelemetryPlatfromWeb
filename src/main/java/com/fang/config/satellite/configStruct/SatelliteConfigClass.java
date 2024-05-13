@@ -40,6 +40,11 @@ public class SatelliteConfigClass {
 
 
 
+
+
+
+
+
     public FrameConfigClass getFrameConfigClassByFrameCode(Integer catalogCode,Integer frameCode,Integer refuseChannel ){
         FrameConfigClass frameConfigClass=null;
         if(this.catalogCodeConfigClassMap.containsKey(catalogCode)){

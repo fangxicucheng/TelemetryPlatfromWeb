@@ -15,6 +15,33 @@ public class StringConvertUtils {
         String cleaned=input.replaceAll("[^0-9A-Fa-f]+","");
         return cleaned;
     }
+
+    public static boolean testStringEmpty(String str){
+        boolean result=false;
+
+        if (str==null) {
+
+            result=true;
+        }
+        if(str.isEmpty()){
+            result=true;
+        }
+
+        return false;
+    }
+
+    public static Double strConvertToDouble(String str){
+        Double result=null;
+        String input = removeUnableNumberCharacters(str);
+        if(input.contains("0x")||input.contains("0X")){
+            result = ((double) Long.parseLong(input.replaceAll("0x", "").replaceAll("0X", ""), 16));
+
+        }else{
+
+            result= (double) Integer.parseInt(str);
+        }
+        return result;
+    }
     public static byte[] hexStringToByteArray(String hexString) {
         // 去除空格和无效字符
         hexString = hexString.replaceAll("\\s", "").replaceAll("0X","").replaceAll("0x","").replaceAll(",","");
