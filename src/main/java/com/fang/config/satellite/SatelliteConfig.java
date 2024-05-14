@@ -4,10 +4,12 @@ import com.fang.config.exception.ExceptionManager;
 import com.fang.config.exception.satelliteExcetionManager.BaseExceptionManager;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
+import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.utils.ConfigUtils;
 import com.fang.utils.StringConvertUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +20,9 @@ public class SatelliteConfig {
 
     @Autowired
     private SatelliteDbRepository satelliteDbRepository;
+    @Autowired
+    @Qualifier("threadInfoListMap")
+    private Map<String, List<ThresholdInfo>> thresholdInfoMap;
     //key:satelliteName,value satelliteNameBytes
 //    @Bean(name="satelliteNameBytesMap")
 //    @Qualifier("satelliteNameBytesMap")
@@ -67,6 +72,7 @@ public class SatelliteConfig {
 
     @Bean(name = "satelliteDbMap")
     @Qualifier("satelliteDbMap")
+//    @ConditionalOnBean(name="threadInfoListMap")
     Map<String, SatelliteDb> getSatelliteDbMap() {
         System.out.println("开始初始化");
         Map<String, SatelliteDb> satelliteDbMap = new HashMap<>();
@@ -93,13 +99,23 @@ public class SatelliteConfig {
         setSatelliteName(satelliteDb);
         setSatelliteNameBytes(satelliteDb);
         setBdICard(satelliteDb);
+        setSatelliteParaParser(satelliteDb);
     }
-
 
 
     private void setSatelliteName(SatelliteDb satelliteDb) {
         ConfigUtils.setSatelliteName(satelliteDb.getSatelliteName(), satelliteDb.getSatelliteId());
     }
+
+    private void setSatelliteParaParser( SatelliteDb satelliteDb) {
+        String satelliteName = satelliteDb.getSatelliteName();
+        List<ThresholdInfo> thresholdInfoList = null;
+        if (this.thresholdInfoMap.containsKey(satelliteName)) {
+            thresholdInfoList = this.thresholdInfoMap.get(satelliteName);
+        }
+        ConfigUtils.setSatelliteParaParser(satelliteDb, thresholdInfoList);
+    }
+
 
     private void setSatelliteNameBytes(SatelliteDb satelliteDb) {
 

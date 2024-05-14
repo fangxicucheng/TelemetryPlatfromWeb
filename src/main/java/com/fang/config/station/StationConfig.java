@@ -24,7 +24,7 @@ public class StationConfig {
 
     @Bean(name="stationInfoList")
     @Qualifier("stationInfoList")
-    @ConditionalOnBean(name = {"satelliteDbMap","threadInfoListMap"})
+    @ConditionalOnBean(name = {"satelliteDbMap"})
     public List<StationInfo> getStationInfoList() {
         List<StationInfo> stationInfoList = findStationInfoList();
         List<InetAddress> machineIpAddressList = NetWorkInfoUtils.getMachineIpAddress();

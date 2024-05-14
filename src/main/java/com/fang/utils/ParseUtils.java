@@ -3,8 +3,10 @@ package com.fang.utils;
 import com.fang.config.satellite.configStruct.HandleType;
 import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
 import com.fang.config.satellite.configStruct.SourceCodeSaveType;
+import com.fang.config.satellite.paraParser.FrameInfo;
 import com.fang.database.postgresql.entity.ParaConfigLineDb;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ public class ParseUtils {
 
     public static Double getDimension(String dimension) {
         double result = 1;
-        if(dimension==null){
+        if (dimension == null) {
             return result;
         }
         if (dimension.contains("/")) {
@@ -24,8 +26,31 @@ public class ParseUtils {
         return result;
     }
 
+    //宽带节点的校验
+    public static void validateKDJDBytes(FrameInfo frameInfo) {
+        boolean result = false;
+        byte[] dataBytes = frameInfo.getDataBytes();
+        if (dataBytes != null&&dataBytes.length==224) {
+            if (dataBytes[0] != 0xFA || dataBytes[1] != 0xF2 || dataBytes[2] != 0x20) {
+                result = false;
+            } else {
+                int crcSum = dataBytes[dataBytes.length - 2] * 256 + dataBytes[dataBytes.length - 1];
+
+                byte[] needCheckBytes = Arrays.copyOfRange(dataBytes, 8, 221);
+                result= CrcUtils.calculateCrcSum(needCheckBytes)==crcSum;
+            }
+
+        }
+        frameInfo.setValid(result);
+
+    }
+
+
     public static Double parseStrToValue(String str) {
         double result = 1;
+        if (StringConvertUtils.testStringEmpty(str)) {
+            return 1.0;
+        }
         if (str.contains("0x")) {
             result = Long.parseLong(str.replaceAll("0x", ""), 16);
         } else if (str.contains("^")) {
@@ -36,8 +61,6 @@ public class ParseUtils {
         }
         return result;
     }
-
-
 
 
     public static void initParaConfigClass(ParaConfigLineDb paraConfigLineDb, ParaConfigLineConfigClass paraConfigLineConfigClass) {
@@ -97,17 +120,18 @@ public class ParseUtils {
                             break;
                             case "时间": {
                                 setTimeShow(paraConfigLineConfigClass);
-                            }break;
-                            case"原码":
-                            case"原码显示":
-                            case"源码":
-                            case"源码显示":
+                            }
+                            break;
+                            case "原码":
+                            case "原码显示":
+                            case "源码":
+                            case "源码显示":
                             case "十六进制显示":
-                            case"十六进制":
-                            {
+                            case "十六进制": {
                                 setSourceCodeShow(paraConfigLineConfigClass);
-                            }break;
-                            case"32位单精度浮点数":{
+                            }
+                            break;
+                            case "32位单精度浮点数": {
                                 setIEE754Float(paraConfigLineConfigClass);
                             }
                             break;
@@ -172,8 +196,8 @@ public class ParseUtils {
                 if (paramInfo.contains("=")) {
                     String[] paramInfoArray = paramInfo.split("=");
                     if (paramInfoArray.length == 2) {
-                        Double parseValue =Double.valueOf(Long.parseLong(StringConvertUtils.removeUnableNumberCharacters(paramInfoArray[0]), index));
-                        result.put(parseValue,paramInfoArray[1]);
+                        Double parseValue = Double.valueOf(Long.parseLong(StringConvertUtils.removeUnableNumberCharacters(paramInfoArray[0], index), index));
+                        result.put(parseValue, paramInfoArray[1]);
                     }
                 }
             }

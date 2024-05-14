@@ -1,7 +1,7 @@
 package com.fang.service.stationService;
 
 import com.fang.service.telemetryService.ParseTelemetry;
-import com.fang.service.telemetryService.bdTools.BDUtils;
+import com.fang.utils.BDUtils;
 import com.fang.utils.ConfigUtils;
 import com.fang.utils.StringConvertUtils;
 import lombok.AllArgsConstructor;

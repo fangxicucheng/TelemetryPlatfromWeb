@@ -11,11 +11,39 @@ public class StringConvertUtils {
         String cleaned = input.replaceAll("\\p{C}", "");
         return cleaned;
     }
-    public static String removeUnableNumberCharacters(String input){
+
+
+
+    public static String removeUnableNumberCharacters(String input,int index){
+        String result=input;
+      switch (index){
+          case 10:{
+              result=rebuildDecimalStr(input);
+          }break;
+          case 2:{
+              result=rebuildBinaryStr(input);
+
+
+          }break;
+          case 16:{
+              result=rebuildHexStr(input);
+          }break;
+      }
+      return result;
+
+    }
+    public static String rebuildDecimalStr(String input){
+        String cleaned=input.replaceAll("[^0-9]+","");
+        return cleaned;
+    }
+    public static String rebuildBinaryStr(String input){
+        String cleaned=input.replaceAll("[^0-1]+","");
+        return cleaned;
+    }
+    public static String rebuildHexStr(String input){
         String cleaned=input.replaceAll("[^0-9A-Fa-f]+","");
         return cleaned;
     }
-
     public static boolean testStringEmpty(String str){
         boolean result=false;
 
@@ -23,22 +51,22 @@ public class StringConvertUtils {
 
             result=true;
         }
-        if(str.isEmpty()){
+        else if(str.isEmpty()){
             result=true;
         }
 
-        return false;
+        return result;
     }
 
     public static Double strConvertToDouble(String str){
         Double result=null;
-        String input = removeUnableNumberCharacters(str);
+        String input = removeInvisibleCharacters(str);
         if(input.contains("0x")||input.contains("0X")){
             result = ((double) Long.parseLong(input.replaceAll("0x", "").replaceAll("0X", ""), 16));
 
         }else{
 
-            result= (double) Integer.parseInt(str);
+            result= Double.parseDouble(str);
         }
         return result;
     }
