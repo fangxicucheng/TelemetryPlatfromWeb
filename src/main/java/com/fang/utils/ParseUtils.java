@@ -1,8 +1,6 @@
 package com.fang.utils;
 
-import com.fang.config.satellite.configStruct.HandleType;
-import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
-import com.fang.config.satellite.configStruct.SourceCodeSaveType;
+import com.fang.config.satellite.configStruct.*;
 import com.fang.config.satellite.paraParser.FrameInfo;
 import com.fang.database.postgresql.entity.ParaConfigLineDb;
 
@@ -30,14 +28,14 @@ public class ParseUtils {
     public static void validateKDJDBytes(FrameInfo frameInfo) {
         boolean result = false;
         byte[] dataBytes = frameInfo.getDataBytes();
-        if (dataBytes != null&&dataBytes.length==224) {
+        if (dataBytes != null && dataBytes.length == 224) {
             if (dataBytes[0] != 0xFA || dataBytes[1] != 0xF2 || dataBytes[2] != 0x20) {
                 result = false;
             } else {
                 int crcSum = dataBytes[dataBytes.length - 2] * 256 + dataBytes[dataBytes.length - 1];
 
                 byte[] needCheckBytes = Arrays.copyOfRange(dataBytes, 8, 221);
-                result= CrcUtils.calculateCrcSum(needCheckBytes)==crcSum;
+                result = CrcUtils.calculateCrcSum(needCheckBytes) == crcSum;
             }
 
         }
@@ -61,7 +59,34 @@ public class ParseUtils {
         }
         return result;
     }
+    public static boolean validateNormalFrameBytes(byte[] dataBytes)
+    {
+        byte checksum = 0;
+        byte checksum1 = 0; //
+        if (!(dataBytes[0] == 0xEB && dataBytes[1] == 0x90))
+        {
+            return false;
+        }
 
+        byte byte_Last = dataBytes[dataBytes.length - 1];
+        for (int i = 0; i < dataBytes.length - 1; i++)
+        {
+            checksum += dataBytes[i];
+        }
+
+        checksum1 = (byte) (~(char) checksum + 1);
+        if (checksum==byte_Last)
+        {
+            return true;
+        }
+
+        if (checksum1==byte_Last)
+        {
+            return true;
+        }
+
+        return false; //误码
+    }
 
     public static void initParaConfigClass(ParaConfigLineDb paraConfigLineDb, ParaConfigLineConfigClass paraConfigLineConfigClass) {
 
@@ -136,10 +161,8 @@ public class ParseUtils {
                             }
                             break;
                         }
-
                     }
                     break;
-
                 }
             }
             break;
@@ -148,8 +171,42 @@ public class ParseUtils {
             }
             break;
         }
+    }
 
-
+    public static void setFrameInfo(byte[] dataBytes, FrameInfo frameInfo, SatelliteConfigClass satelliteConfigClass) {
+        byte byte_61 = dataBytes[61];
+        byte byte_62 = dataBytes[62];
+        frameInfo.setSerialNum(byte_62 & 0x07);
+        frameInfo.setCatalogCode(byte_62 & 0xf0 >> 4);
+        frameInfo.setFrameFlag(byte_62 & 0x08);
+        frameInfo.setDataBytes(dataBytes);
+        if (satelliteConfigClass.isHasSixBitWidthFrameCode())
+        {
+            frameInfo.setReuseChannel(byte_61 & 0xC0 >> 6);
+            frameInfo.setFrameCode(byte_61 & 0x3f);
+        }
+        else
+        {
+            frameInfo.setReuseChannel(byte_61 & 0xe0 >> 5);
+            frameInfo.setFrameCode(byte_61 & 0x1f);
+        }
+        if(satelliteConfigClass.isGPSatellite()){
+            if(frameInfo.getFrameCode()==4&& frameInfo.getCatalogCode()==3)
+            {
+                if(!(dataBytes[2]==0x41||dataBytes[2]==0x42)){
+                    frameInfo.setCatalogCode(4);
+                }
+            }
+        }
+        FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());
+        if(frame==null){
+            frameInfo.setValid(false);
+        }
+        else
+        {
+            frameInfo.setFrameConfigClass(frame);
+            frameInfo.setValid(validateNormalFrameBytes(dataBytes));
+        }
     }
 
 

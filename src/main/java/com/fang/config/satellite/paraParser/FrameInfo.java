@@ -1,5 +1,6 @@
 package com.fang.config.satellite.paraParser;
 
+import com.fang.config.satellite.configStruct.FrameConfigClass;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,11 +13,11 @@ public class FrameInfo {
     private Integer frameCode;
     private Integer catalogCode;
     private  Integer reuseChannel;
-    private String frameName;
+    private FrameConfigClass frameConfigClass;
     private Integer frameFlag;
     private byte[] dataBytes;
     private boolean isValid;
     private Integer serialNum;//序列号
-    private boolean is03BCBD;
+
 
 }
