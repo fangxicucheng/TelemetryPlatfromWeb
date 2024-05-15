@@ -36,11 +36,15 @@ public class BaseParserService {
                     result.setErrorMsg(frameDb.getFrameName() + "帧名称重复");
                 }
                 validateFrame(frameDb, result);
-
             }
         }
-
     }
+
+
+
+
+
+
 
     public void validateFrame(FrameDb frame, CheckConfigResult result) {
 

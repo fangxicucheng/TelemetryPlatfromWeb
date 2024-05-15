@@ -26,6 +26,5 @@ public class ReceiveManager {
         this.receiveBlockQueue=new LinkedBlockingQueue<>();
         this.dataReceive=new DataReceive(stationInfo,receiveBlockQueue);
         this.dataTransfer=new DataTransfer(stationInfo.getStationName(),stationInfo.getStationId(),receiveBlockQueue);
-
     }
 }

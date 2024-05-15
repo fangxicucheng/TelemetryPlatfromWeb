@@ -1,7 +1,7 @@
 package com.fang.service.stationService;
 
 import com.fang.service.telemetryService.ParseTelemetry;
-import com.fang.utils.BDUtils;
+import com.fang.utils.ParseBDUtils;
 import com.fang.utils.ConfigUtils;
 import com.fang.utils.StringConvertUtils;
 import lombok.AllArgsConstructor;
@@ -113,7 +113,7 @@ public class DataTransfer {
                 System.out.println(stationName + "启动了transfer线程");
                 byte[] bytes = this.queue.take();
                 String receiveStr = StringConvertUtils.bytesConvertToASCIIStr(bytes);
-                if (!BDUtils.bdMsgValidate(receiveStr)) {
+                if (!ParseBDUtils.bdMsgValidate(receiveStr)) {
                     continue;
                 }
                 String[] receiveStrArray = receiveStr.split(",");
@@ -124,7 +124,7 @@ public class DataTransfer {
                 }
                 String dataContent = receiveStrArray[5].split("\\*")[0];
 
-                if (!BDUtils.validateBDMsgHeader(dataContent)) {
+                if (!ParseBDUtils.validateBDMsgHeader(dataContent)) {
                     continue;
                 }
                 if (!parseTelemetryMap.containsKey(satelliteName)) {

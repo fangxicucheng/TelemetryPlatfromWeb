@@ -18,6 +18,8 @@ public class SatelliteConfigClass {
     private boolean isBCBDSatellite;
     private boolean hasSixBitWidthFrameCode;
     private boolean isGPSatellite;
+    private boolean isKDJD;
+    private boolean isBD;
 
     private Map<Integer, FrameCatalogConfigClass> catalogCodeConfigClassMap;
     private Map<String, FrameCatalogConfigClass> catalogNameConfigClassMap;
@@ -25,8 +27,11 @@ public class SatelliteConfigClass {
     public SatelliteConfigClass(SatelliteDb satelliteDb) {
         this.satelliteName = satelliteDb.getSatelliteName();
         this.satelliteId = satelliteDb.getSatelliteId();
-        checkGF03BCBDSatellite();
+
         checkSixBitWidthFrameCode();
+        checkKDJD();
+        checkBDSatellite();
+        checkGF03BCBDSatellite();
         checkGPSatellite();
         for (FrameCatalogDb frameCatalogDb : satelliteDb.getFrameCatalogDbList()) {
             FrameCatalogConfigClass frameCatalogConfigClass = new FrameCatalogConfigClass(frameCatalogDb);
@@ -41,25 +46,41 @@ public class SatelliteConfigClass {
         }
     }
 
+    private void checkBDSatellite() {
+        if (this.satelliteName.contains("北斗")) {
+            this.isBD = true;
+        } else {
+            this.isBD = false;
+        }
+    }
+
     private void checkGF03BCBDSatellite() {
-        if (this.satelliteName.contains("北斗") && this.satelliteName.contains("高分03B") && this.satelliteName.contains("高分03C")) {
+        if (this.isBD && this.satelliteName.contains("高分03B") && this.satelliteName.contains("高分03C")) {
 
             this.isBCBDSatellite = true;
         } else {
             this.isBCBDSatellite = false;
         }
     }
-    private void checkGPSatellite(){
-        if(this.satelliteName.contains("光谱")){
-            this.isGPSatellite=true;
+
+    private void checkGPSatellite() {
+        if (this.satelliteName.contains("光谱")) {
+            this.isGPSatellite = true;
+        } else {
+            this.isGPSatellite = false;
         }
-        else{
-            this.isGPSatellite=false;
+    }
+
+    private void checkKDJD() {
+        if (this.satelliteName.contains("宽带节点")) {
+            this.isKDJD = true;
+        } else {
+            this.isKDJD = false;
         }
     }
 
     private void checkSixBitWidthFrameCode() {
-        if (    satelliteName.contains("宽幅") ||
+        if (satelliteName.contains("宽幅") ||
                 satelliteName.contains("吉星") ||
                 satelliteName.contains("平台") ||
                 satelliteName.contains("魔方") ||

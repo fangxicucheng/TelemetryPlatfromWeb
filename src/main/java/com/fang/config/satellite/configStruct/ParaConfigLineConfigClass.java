@@ -2,7 +2,6 @@ package com.fang.config.satellite.configStruct;
 
 import com.fang.config.exception.ExceptionManager;
 import com.fang.config.exception.ParaJudge;
-import com.fang.config.exception.SingleExceptionManager;
 import com.fang.database.postgresql.entity.ParaConfigLineDb;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.utils.ParseUtils;
@@ -25,8 +24,8 @@ public class ParaConfigLineConfigClass {
     private SourceCodeSaveType sourceCodeSaveType;
     private boolean needJudgeException;
     private Map<Double,String> stateParseMap;
-
     private ParaJudge paraJudge;
+    private ThreadLocal<Integer>count;
 
     public ParaConfigLineConfigClass(ParaConfigLineDb paraConfigLineDb) {
         this.bitStart=paraConfigLineDb.getBitStart();
@@ -36,12 +35,24 @@ public class ParaConfigLineConfigClass {
         this.dimension= ParseUtils.getDimension(paraConfigLineDb.getDimension());
         ParseUtils.initParaConfigClass(paraConfigLineDb,this);
         this.needJudgeException=false;
-
     }
 
     public void initExceptionManager(ThresholdInfo thresholdInfo, ExceptionManager exceptionManager){
         this.needJudgeException=true;
         this.paraJudge=new ParaJudge(thresholdInfo,exceptionManager);
 
+    }
+    public void removeThreadLocal(){
+        if(this.count!=null){
+            this.count.remove();
+        }
+    }
+    public Integer getParaCodeCount(){
+        this.count.set(this.count.get()+1);
+        return this.count.get();
+    }
+
+    public void refresh(){
+        this.count.set(0);
     }
 }

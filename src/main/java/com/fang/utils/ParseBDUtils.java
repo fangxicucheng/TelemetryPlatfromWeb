@@ -3,13 +3,10 @@ package com.fang.utils;
 import com.fang.config.satellite.configStruct.FrameConfigClass;
 import com.fang.config.satellite.configStruct.SatelliteConfigClass;
 import com.fang.config.satellite.paraParser.FrameInfo;
-import com.fang.config.satellite.paraParser.ParaParser;
-import com.fang.utils.CrcUtils;
-import com.fang.utils.StringConvertUtils;
 
 import java.util.Arrays;
 
-public class BDUtils {
+public class ParseBDUtils {
 
 
     public static void parseBdFrameInfo(FrameInfo frameInfo, byte[] receiveBytes, SatelliteConfigClass satelliteConfigClass) {
@@ -17,12 +14,13 @@ public class BDUtils {
         String[] receiveStrArray = receiveStr.split(",");
         String[] dataStrArray = receiveStrArray[5].split("\\*");
         byte[] frameBytes = getDataBytes(dataStrArray[0]);
+        frameInfo.setDataBytes(frameBytes);
         frameInfo.setFrameFlag(0);
         if (matchBDSelfFrame(frameBytes)) {
-            setBDSelfFrameInfo(frameBytes, frameInfo,satelliteConfigClass);
+            setBDSelfFrameInfo(frameBytes, frameInfo, satelliteConfigClass);
         } else if (matchBDMsgFrame(frameBytes)) {
-
-        }else{
+            setBDMsgFrameInfo(frameInfo, frameBytes, satelliteConfigClass);
+        } else {
             frameInfo.setValid(false);
             frameInfo.setDataBytes(receiveBytes);
         }
@@ -44,41 +42,42 @@ public class BDUtils {
         frameInfo.setCatalogCode(255);
         frameInfo.setSerialNum(8);
         frameInfo.setReuseChannel(0);
-        frameInfo.setDataBytes(Arrays.copyOfRange(frameBytes, 0, 27));
+        //frameInfo.setDataBytes(Arrays.copyOfRange(frameBytes, 0, 27));
         FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());
-        if (frame != null) {
-            if(frame.getFrameName().contains("X测控遥测应答帧")&&isValid)
-            {
+        frameInfo.setFrameConfigClass(frame);
+        frameInfo.setValid(isValid);
 
-
-                ParseUtils.setFrameInfo(Arrays.copyOfRange(frameBytes,frameBytes.length-64,frameBytes.length-1),frameInfo,satelliteConfigClass);
-
-            }
-            else
-            {
-                frameInfo.setFrameConfigClass(frame);
-                frameInfo.setValid(isValid);
-                frameInfo.setDataBytes(frameBytes);
-            }
-
-        } else {
-            frameInfo.setValid(false);
-            frameInfo.setDataBytes(frameBytes);
-        }
+//        if (frame != null) {
+//            if(frame.getFrameName().contains("X测控遥测应答帧")&&isValid)
+//            {
+//
+//
+//                ParseNormalUtils.setNormalFrameInfo(Arrays.copyOfRange(frameBytes,frameBytes.length-64,frameBytes.length-1),frameInfo,satelliteConfigClass);
+//                frameInfo.setDataBytes(frameBytes);
+//
+//            }
+//            else
+//            {
+//                frameInfo.setFrameConfigClass(frame);
+//                frameInfo.setValid(isValid);
+//                frameInfo.setDataBytes(frameBytes);
+//            }
+//
+//        } else {
+//            frameInfo.setValid(false);
+//            frameInfo.setDataBytes(frameBytes);
+//        }
     }
 
 
-    public static boolean bdValidateFrameBytes(byte[] frameBytes)
-    {
+    public static boolean bdValidateFrameBytes(byte[] frameBytes) {
         byte checkValue = frameBytes[5];
         byte checkSum = 0;
-        for (int i = 6; i < frameBytes.length; i++)
-        {
+        for (int i = 6; i < frameBytes.length; i++) {
             checkSum += frameBytes[i];
         }
 
-        if (checkSum == checkValue)
-        {
+        if (checkSum == checkValue) {
             return true;
         }
 
@@ -86,34 +85,28 @@ public class BDUtils {
         return false;
     }
 
-    public static void setBDMsgFrameInfo(FrameInfo frameInfo, byte[] frameBytes,SatelliteConfigClass satelliteConfigClass) {
+    public static void setBDMsgFrameInfo(FrameInfo frameInfo, byte[] frameBytes, SatelliteConfigClass satelliteConfigClass) {
 
-        if(satelliteConfigClass.isBCBDSatellite()){
-
+        if (satelliteConfigClass.isBCBDSatellite()) {
             frameInfo.setCatalogCode((frameBytes[5] & 0xf0) >> 4);
             frameInfo.setFrameCode(frameBytes[5] & 0x0f);
             frameInfo.setReuseChannel(0);
-            frameInfo.setSerialNum(frameBytes[6]&0x70>>4);
-
-            FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());
-            if(frame!=null){
-                frameInfo.setValid(bcBDValidateFrameBytes(frameBytes));
-                frameInfo.setDataBytes(Arrays.copyOfRange(frameBytes,8,frameBytes[3]+7));
-            }else{
-                frameInfo.setValid(false);
-                frameInfo.setDataBytes(frameBytes);
-            }
-
-        }else{
-
+            frameInfo.setSerialNum(frameBytes[6] & 0x70 >> 4);
+            frameInfo.setValid(bcBDValidateFrameBytes(frameBytes));
+            frameInfo.setDataBytes(Arrays.copyOfRange(frameBytes, 8, frameBytes[3] + 7));
+        } else {
             frameInfo.setCatalogCode((frameBytes[8] & 0xf0) >> 4);
             frameInfo.setFrameCode(frameBytes[8] & 0x0f);
             frameInfo.setReuseChannel(0);
-            frameInfo.setSerialNum(frameBytes[9]&0x70>>4);
+            frameInfo.setSerialNum(frameBytes[9] & 0x70 >> 4);
             frameInfo.setValid(bdValidateFrameBytes(frameBytes));
         }
-
-
+        FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());
+        if (frame != null && frame.getFrameName().contains("X测控遥测应答帧")) {
+            byte[] dataBytes = Arrays.copyOfRange(frameBytes, frameBytes.length - 64, frameBytes.length - 1);
+            ParseMCUtils.setNormalFrameInfo(dataBytes, frameInfo, satelliteConfigClass);
+            frameInfo.setDataBytes(dataBytes);
+        }
     }
 
     public static boolean bdSelfValidate(byte[] buf_receive) {
@@ -134,9 +127,9 @@ public class BDUtils {
     }
 
     public static boolean bcBDValidateFrameBytes(byte[] receiveBytes) {
-        byte checkValue = receiveBytes[2 ];
+        byte checkValue = receiveBytes[2];
         byte checkSum = 0;
-        for (int i = 3 ; i < receiveBytes.length; i++) {
+        for (int i = 3; i < receiveBytes.length; i++) {
             checkSum += receiveBytes[i];
         }
         if (checkSum == checkValue) {

@@ -1,19 +1,14 @@
 package com.fang.utils;
 
-import javax.sound.sampled.AudioFormat;
+
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
+
 
 public class StringConvertUtils {
-
-
     public static String removeInvisibleCharacters(String input){
         String cleaned = input.replaceAll("\\p{C}", "");
         return cleaned;
     }
-
-
-
     public static String removeUnableNumberCharacters(String input,int index){
         String result=input;
       switch (index){
@@ -22,15 +17,12 @@ public class StringConvertUtils {
           }break;
           case 2:{
               result=rebuildBinaryStr(input);
-
-
           }break;
           case 16:{
               result=rebuildHexStr(input);
           }break;
       }
       return result;
-
     }
     public static String rebuildDecimalStr(String input){
         String cleaned=input.replaceAll("[^0-9]+","");
@@ -54,7 +46,6 @@ public class StringConvertUtils {
         else if(str.isEmpty()){
             result=true;
         }
-
         return result;
     }
 
@@ -65,10 +56,18 @@ public class StringConvertUtils {
             result = ((double) Long.parseLong(input.replaceAll("0x", "").replaceAll("0X", ""), 16));
 
         }else{
-
             result= Double.parseDouble(str);
         }
         return result;
+    }
+    public static String getHexString(Long sourceCode){
+        String hexString = Long.toHexString(sourceCode);
+        if(hexString.length()%2==0){
+            hexString="0x"+hexString;
+        }else{
+            hexString="0x0"+hexString;
+        }
+        return hexString;
     }
     public static byte[] hexStringToByteArray(String hexString) {
         // 去除空格和无效字符

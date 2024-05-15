@@ -18,6 +18,4 @@ public class FrameInfo {
     private byte[] dataBytes;
     private boolean isValid;
     private Integer serialNum;//序列号
-
-
 }
