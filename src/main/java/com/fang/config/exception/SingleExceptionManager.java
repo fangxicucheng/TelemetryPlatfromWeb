@@ -4,6 +4,7 @@ import com.fang.config.exception.judgeStruct.ProgramJudge;
 import com.fang.config.exception.judgeStruct.StateJudge;
 import com.fang.config.exception.judgeStruct.ThresholdJudge;
 import com.fang.config.exception.judgeStruct.UnchangedJudge;
+import com.fang.database.postgresql.entity.CountPara;
 import com.fang.utils.StringConvertUtils;
 
 import java.util.Map;
@@ -60,9 +61,9 @@ public class SingleExceptionManager {
             this.conditionJudge.init(conditionInfoArray[1], conditionInfoArray[1]);
         }
     }
-    public void refresh(Double paraValue) {
+    public void refreshUnchanged(Map<String, CountPara>countParaMap) {
         if (this.judgeExpression != null) {
-            this.judgeExpression.refresh(paraValue);
+            this.judgeExpression.refreshUnchanged(countParaMap);
         }
     }
     public boolean matchCondition(Map<String, Double> realMap) {

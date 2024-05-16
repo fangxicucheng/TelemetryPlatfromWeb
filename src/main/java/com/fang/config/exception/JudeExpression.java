@@ -1,10 +1,12 @@
 package com.fang.config.exception;
 
+import com.fang.database.postgresql.entity.CountPara;
+
 import java.util.Map;
 
 public interface JudeExpression {
     default void init(String minStr ,String maxStr){}
-    default  void refresh(Double paraValue){}
+    default  void refreshUnchanged(Map<String, CountPara> countParaMap){}
 
     default void destroyThread(){}
     default void initFormula(ExceptionManager exceptionManager){}

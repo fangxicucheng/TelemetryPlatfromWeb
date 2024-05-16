@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GpsParaConfigRepository extends JpaRepository<GpsParaConfig,Integer> {
+    GpsParaConfig getGpsParaConfigBySatelliteName(String satelliteName);
+
 }

@@ -1,11 +1,12 @@
 package com.fang.config.exception.judgeStruct;
 
 import com.fang.config.exception.JudeExpression;
+import com.fang.database.postgresql.entity.CountPara;
 
 import java.util.Map;
 
 public class UnchangedJudge implements JudeExpression {
-    private ThreadLocal<Double> oldValue;
+    private ThreadLocal<CountPara> oldValue;
     private ThreadLocal<Integer> changedTimes;
 
     @Override
@@ -15,7 +16,8 @@ public class UnchangedJudge implements JudeExpression {
     }
 
     @Override
-    public void refresh(Double oldValue) {
+    public void refreshUnchanged(Map<String,CountPara>countParaMap) {
+
         this.oldValue.set(oldValue);
         this.changedTimes.set(0);
     }

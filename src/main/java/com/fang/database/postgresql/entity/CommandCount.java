@@ -1,5 +1,6 @@
 package com.fang.database.postgresql.entity;
 
+import com.fang.database.mysql.entity.TeleCommandCountMq;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,6 +34,15 @@ public class CommandCount  {
     private String errorCommandParaName;
     @Column(name="error_command_count")
     private Integer errorCommandCount;
+
+    public CommandCount(TeleCommandCountMq teleCommandCountMq){
+        this.satelliteName=teleCommandCountMq.getSatelliteName();
+        this.frameName=teleCommandCountMq.getFrameName();
+        this.totalCommandParaCode= teleCommandCountMq.getErrorCommandParaCode();
+        this.totalCommandParaName=teleCommandCountMq.getTotalCommandParaName();
+        this.errorCommandParaCode=teleCommandCountMq.getErrorCommandParaCode();
+        this.errorCommandParaName= teleCommandCountMq.getTotalCommandParaName();
+    }
 
 
 }
