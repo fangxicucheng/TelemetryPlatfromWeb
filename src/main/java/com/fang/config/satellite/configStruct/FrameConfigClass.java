@@ -35,7 +35,22 @@ public class FrameConfigClass {
             this.configLineList.add(paraConfigLineConfigClass);
             this.configlineMap.put(paraConfigLineDb.getParaCode(),paraConfigLineConfigClass);
         }
+    }
+    public void initThread(){
 
+        if(this.configLineList!=null){
+            for (ParaConfigLineConfigClass configLine : this.configLineList) {
 
+                configLine.initThread();
+            }
+        }
+    }
+    public void destroyThread(){
+        if(this.configLineList!=null){
+            for (ParaConfigLineConfigClass configLine : this.configLineList) {
+
+                configLine.destroyThread();
+            }
+        }
     }
 }

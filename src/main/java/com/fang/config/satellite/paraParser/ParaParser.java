@@ -5,13 +5,16 @@ import com.fang.config.satellite.configStruct.FrameConfigClass;
 import com.fang.config.satellite.configStruct.SatelliteConfigClass;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
+import com.fang.service.telemetryService.SatelliteTimeManager;
 import com.fang.telemetry.TelemetryFrame;
 import jakarta.persistence.criteria.CriteriaBuilder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface ParaParser {
-   String getDisplayValue(String paraCode,Double paraValue);
+   String getDisplayValue(String paraCode, Double paraValue, SatelliteTimeManager satelliteTimeManager);
 
    void init(String satelliteName, SatelliteDb satelliteDb, List<ThresholdInfo> thresholdInfoList);
 
@@ -30,7 +33,12 @@ public interface ParaParser {
 
 
 
-   void threadInit();
-   void threadFinsh();
+   default Map<String,Double> getInitRealMap(){
+       return new HashMap<>();
+   }
+
+
+   void initThread();
+   void destroyThread();
 
 }

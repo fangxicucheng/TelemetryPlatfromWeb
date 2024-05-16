@@ -26,7 +26,6 @@ public class ParaConfigLineConfigClass {
     private Map<Double,String> stateParseMap;
     private ParaJudge paraJudge;
     private ThreadLocal<Integer>count;
-
     public ParaConfigLineConfigClass(ParaConfigLineDb paraConfigLineDb) {
         this.bitStart=paraConfigLineDb.getBitStart();
         this.bitNum=paraConfigLineDb.getBitNum();
@@ -34,25 +33,43 @@ public class ParaConfigLineConfigClass {
         this.paraName=paraConfigLineDb.getParaName();
         this.dimension= ParseUtils.getDimension(paraConfigLineDb.getDimension());
         ParseUtils.initParaConfigClass(paraConfigLineDb,this);
+        this.count=new ThreadLocal<>();
         this.needJudgeException=false;
     }
+
+
 
     public void initExceptionManager(ThresholdInfo thresholdInfo, ExceptionManager exceptionManager){
         this.needJudgeException=true;
         this.paraJudge=new ParaJudge(thresholdInfo,exceptionManager);
 
     }
-    public void removeThreadLocal(){
-        if(this.count!=null){
-            this.count.remove();
+
+    public String getParseState(double paraValue){
+        if(this.stateParseMap==null||!this.stateParseMap.containsKey(paraValue))
+        {
+            return Double.toString(paraValue);
         }
+        return this.stateParseMap.get(paraValue);
+    }
+    public void initThread(){
+        this.count.set(0);
+    }
+    public void destroyThread(){
+        this.count.remove();
+        if(this.paraJudge!=null){
+            this.paraJudge.destroyThread();
+        }
+    }
+    public boolean judgeException(double paraValue,Map<String,Double>localMap){
+        if(this.needJudgeException){
+            return this.paraJudge.judgeException(paraValue,localMap,this.paraCode);
+        }
+        return true;
     }
     public Integer getParaCodeCount(){
         this.count.set(this.count.get()+1);
         return this.count.get();
     }
 
-    public void refresh(){
-        this.count.set(0);
-    }
 }

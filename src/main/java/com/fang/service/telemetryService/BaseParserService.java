@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BaseParserService {
-
     public void validateSatelliteDb(SatelliteDb satelliteDb, CheckConfigResult result) {
 
         if (!satelliteDb.getFrameCatalogDbList().isEmpty()) {

@@ -11,9 +11,10 @@ import java.util.Map;
 public class ParaJudge {
 
     List<SingleExceptionManager> exceptionManagerList;
-
+    private ThreadLocal<Integer>errorCount;
     public ParaJudge(ThresholdInfo thresholdInfo, ExceptionManager exceptionManager) {
         this.exceptionManagerList = new ArrayList<>();
+        this.errorCount=new ThreadLocal<>();
         String condition = thresholdInfo.getCondition();
         String minThresholdStr = thresholdInfo.getThresholdMin();
         String maxThresholdStr = thresholdInfo.getThresholdMax();
@@ -42,23 +43,52 @@ public class ParaJudge {
         }
     }
 
+    public void initThread(){
+        this.errorCount.set(0);
+    }
+    public void destroyThread(){
+        this.errorCount.remove();
+    }
+
     public boolean judgeException(Double paraValue, Map<String,Double>realMap,String paraCode){
 
+        boolean judgeResult=false;
         for (SingleExceptionManager singleExceptionManager : this.exceptionManagerList) {
 
             if (singleExceptionManager.matchCondition(realMap)) {
 
-                singleExceptionManager.judgeParaValue(paraValue,realMap,paraCode);
+
+                judgeResult=   singleExceptionManager.judgeParaValue(paraValue,realMap,paraCode);
+                break;
             }
         }
-        return true;
+        boolean hasError=false;
+        Integer errorTimes = this.errorCount.get();
+        if(judgeResult){
 
+            errorTimes++;
+        }
+        else
+        {
+            errorTimes=0;
+        }
+        this.errorCount.set(errorTimes);
+        if(errorTimes>3){
+            hasError=true;
+        }
+
+
+        return hasError;
     }
     public void refresh(Double paraValue){
-
         for (SingleExceptionManager singleExceptionManager : this.exceptionManagerList) {
             singleExceptionManager.refresh(paraValue);
         }
+        this.errorCount.set(0);
     }
+
+
+
+
 
 }

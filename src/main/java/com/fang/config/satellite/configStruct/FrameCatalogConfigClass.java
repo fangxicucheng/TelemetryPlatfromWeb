@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,26 @@ public class FrameCatalogConfigClass {
                 frameCodeMap.put(frameConfigClass.getFrameCode(),new HashMap<>());
             }
             frameCodeMap.get(frameConfigClass.getFrameCode()).put(frameConfigClass.getReuseChannel(),frameConfigClass);
+        }
+
+    }
+    public void initTread(){
+        Collection<FrameConfigClass> frameList = frameNameMap.values();
+        if(frameList!=null){
+            for (FrameConfigClass frame : frameList) {
+
+                frame.initThread();
+            }
+        }
+
+    }
+    public void destroyThread(){
+        Collection<FrameConfigClass> frameList = frameNameMap.values();
+        if(frameList!=null){
+            for (FrameConfigClass frame : frameList) {
+
+                frame.destroyThread();
+            }
         }
 
     }

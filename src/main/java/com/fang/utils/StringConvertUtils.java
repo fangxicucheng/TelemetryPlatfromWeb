@@ -24,6 +24,23 @@ public class StringConvertUtils {
       }
       return result;
     }
+    public static String bytesToHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+       /* for (byte b : bytes)*/
+        for(int i=0;i<bytes.length;i++)
+        {
+            byte b=bytes[i];
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+            if(i!= bytes.length-1){
+                hexString.append(" ");
+            }
+        }
+        return hexString.toString();
+    }
     public static String rebuildDecimalStr(String input){
         String cleaned=input.replaceAll("[^0-9]+","");
         return cleaned;

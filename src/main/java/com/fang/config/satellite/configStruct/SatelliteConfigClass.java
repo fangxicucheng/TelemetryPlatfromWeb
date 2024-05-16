@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,14 +21,11 @@ public class SatelliteConfigClass {
     private boolean isGPSatellite;
     private boolean isKDJD;
     private boolean isBD;
-
     private Map<Integer, FrameCatalogConfigClass> catalogCodeConfigClassMap;
     private Map<String, FrameCatalogConfigClass> catalogNameConfigClassMap;
-
     public SatelliteConfigClass(SatelliteDb satelliteDb) {
         this.satelliteName = satelliteDb.getSatelliteName();
         this.satelliteId = satelliteDb.getSatelliteId();
-
         checkSixBitWidthFrameCode();
         checkKDJD();
         checkBDSatellite();
@@ -45,6 +43,23 @@ public class SatelliteConfigClass {
             this.catalogCodeConfigClassMap.put(frameCatalogDb.getCatalogCode(), frameCatalogConfigClass);
         }
     }
+    public void initThread() {
+        Collection<FrameCatalogConfigClass> catalogList = this.getCatalogNameConfigClassMap().values();
+        if (catalogList != null) {
+            for (FrameCatalogConfigClass catalog : catalogList) {
+                catalog.initTread();
+            }
+        }
+    }
+
+    public void destroyTread() {
+        Collection<FrameCatalogConfigClass> catalogList = this.getCatalogNameConfigClassMap().values();
+        if (catalogList != null) {
+            for (FrameCatalogConfigClass catalog : catalogList) {
+                catalog.destroyThread();
+            }
+        }
+    }
 
     private void checkBDSatellite() {
         if (this.satelliteName.contains("北斗")) {
@@ -56,7 +71,6 @@ public class SatelliteConfigClass {
 
     private void checkGF03BCBDSatellite() {
         if (this.isBD && this.satelliteName.contains("高分03B") && this.satelliteName.contains("高分03C")) {
-
             this.isBCBDSatellite = true;
         } else {
             this.isBCBDSatellite = false;

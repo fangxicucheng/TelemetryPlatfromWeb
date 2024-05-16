@@ -5,8 +5,10 @@ import com.fang.config.exception.satelliteExcetionManager.BaseExceptionManager;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
+import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.utils.ConfigUtils;
 import com.fang.utils.StringConvertUtils;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -23,6 +25,23 @@ public class SatelliteConfig {
     @Autowired
     @Qualifier("threadInfoListMap")
     private Map<String, List<ThresholdInfo>> thresholdInfoMap;
+
+
+    @Autowired
+    private SatelliteConfigService satelliteConfigService;
+   // private static SatelliteConfigService configService;
+
+
+//    @PostConstruct
+//    public void initConfigService(){
+//        configService=this.satelliteConfigService;
+//    }
+//
+//
+//    public static SatelliteConfigService getConfigService(){
+//        return configService;
+//    }
+
     //key:satelliteName,value satelliteNameBytes
 //    @Bean(name="satelliteNameBytesMap")
 //    @Qualifier("satelliteNameBytesMap")

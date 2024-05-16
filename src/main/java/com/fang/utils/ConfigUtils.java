@@ -24,8 +24,6 @@ public class ConfigUtils {
     private static Map<String, String> satelliteIdMap = new HashMap<>();
     private static Map<String, byte[]> midMap = new HashMap<>();
     private static Map<String, String> icCardMap = new HashMap<>();
-  // private static Map<String, ExceptionManager> exceptionManagerMap=new HashMap<>();
-  //  private static Map<String,SatelliteConfigClass> satelliteConfigClassMap=new HashMap<>();
     private static Map<String, ParaParser> satelliteParaParserMap=new HashMap<>();
 
 

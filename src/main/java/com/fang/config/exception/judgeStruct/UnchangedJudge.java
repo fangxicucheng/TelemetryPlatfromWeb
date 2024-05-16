@@ -21,6 +21,13 @@ public class UnchangedJudge implements JudeExpression {
     }
 
     @Override
+    public void destroyThread() {
+        this.oldValue.remove();
+        this.changedTimes.remove();
+    }
+
+
+    @Override
     public boolean judgeMatch(Double paraValue, Map<String,Double>realMap,String paraCode) {
         boolean result = false;
         Double buffer = oldValue.get();

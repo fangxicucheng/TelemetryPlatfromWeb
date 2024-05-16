@@ -7,6 +7,7 @@ import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
 import com.fang.config.satellite.configStruct.SatelliteConfigClass;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
+import com.fang.service.telemetryService.SatelliteTimeManager;
 import com.fang.telemetry.TelemetryFrame;
 import com.fang.telemetry.TelemetryParameterModel;
 import com.fang.utils.*;
@@ -18,17 +19,16 @@ import java.util.*;
 @NoArgsConstructor
 @Data
 public class BaseParaParser implements ParaParser {
-    private ThreadLocal<String> satelliteTime;
-    private ThreadLocal<String> satelliteTime_延时;
-    private ThreadLocal<String> restartTime;
-    private ThreadLocal<String> restartTime_延时;
+
     private String satelliteName;
+    private ThreadLocal<Map<String, Double>> threadLocalMap;
     private SatelliteConfigClass satelliteConfigClass;
     private ExceptionManager exceptionManager;
     private boolean isBd;
+    private ThreadLocal<SatelliteTimeManager> satelliteTimeManagerThreadLocal;
 
     @Override
-    public String getDisplayValue(String paraCode, Double paraValue) {
+    public String getDisplayValue(String paraCode, Double paraValue, SatelliteTimeManager satelliteTimeManager) {
         return paraValue.toString();
     }
 
@@ -40,21 +40,12 @@ public class BaseParaParser implements ParaParser {
         if (this.satelliteName.contains("北斗")) {
             isBd = true;
         }
+        this.threadLocalMap = new ThreadLocal<>();
         this.satelliteConfigClass = new SatelliteConfigClass(satelliteDb);
         this.exceptionManager = ConfigUtils.createExceptionManager(satelliteName);
         setExceptionManager(this.exceptionManager, thresholdInfoList);
-        if(this.restartTime_延时==null){
-            this.restartTime_延时=new ThreadLocal<>();
-        }
-        if(this.satelliteTime_延时==null){
-            this.satelliteTime_延时=new ThreadLocal<>();
-        }
-        if(this.restartTime==null){
-            this.restartTime=new ThreadLocal<>();
-        }
-        if(this.satelliteTime==null){
-            this.satelliteTime=new ThreadLocal<>();
-        }
+        this.satelliteTimeManagerThreadLocal = new ThreadLocal<>();
+
     }
 
     @Override
@@ -69,10 +60,12 @@ public class BaseParaParser implements ParaParser {
     }
 
     @Override
-    public void parseTelemetryFrame(byte[] dataBytes, FrameInfo frameInfo,TelemetryFrame frame) {
-
+    public void parseTelemetryFrame(byte[] dataBytes, FrameInfo frameInfo, TelemetryFrame frame) {
         frame.setDelayFlag(frameInfo.getFrameFlag());
         frame.setCorrSate(frameInfo.isValid());
+        if (!frame.isCorrSate()) {
+            return;
+        }
         FrameConfigClass config = frameInfo.getFrameConfigClass();
         if (config != null) {
             boolean[] bitArray = getBitArray(dataBytes);
@@ -80,26 +73,41 @@ public class BaseParaParser implements ParaParser {
                 if (configLine.getBitStart() + configLine.getBitNum() > bitArray.length) {
                     continue;
                 }
+                Map<String, Double> realMap = this.threadLocalMap.get();
                 Long sourceCode = getSourceSourceCode(configLine, bitArray);
                 String hexCodeStr = StringConvertUtils.getHexString(sourceCode);
                 double paraValue = getParaValue(sourceCode, bitArray, configLine);
-                String paraValueStr=getDisplay(configLine,hexCodeStr,paraValue);
-                TelemetryParameterModel parameterModel=new TelemetryParameterModel();
+                String paraValueStr = getDisplay(configLine, hexCodeStr, paraValue);
+                boolean isException = configLine.judgeException(paraValue, realMap);
+                updateRealMap(configLine.getParaCode(), paraValue, realMap);
+                TelemetryParameterModel parameterModel = new TelemetryParameterModel();
                 parameterModel.setParaCode(configLine.getParaCode());
                 parameterModel.setParaDouble(paraValue);
+                parameterModel.setException(isException);
                 parameterModel.setParaHex(hexCodeStr);
                 parameterModel.setParaValue(paraValueStr);
                 parameterModel.setReceiveCount(configLine.getParaCodeCount());
                 frame.addParameter(parameterModel);
             }
+            frame.setFrameFlag(frameInfo.getFrameFlag() + "");
+            SatelliteTimeManager satelliteTimeManager = this.satelliteTimeManagerThreadLocal.get();
+            if (frameInfo.getFrameFlag() == 0) {
+                frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeStr());
+                frame.setRestartTime(satelliteTimeManager.getRestartTimeStr());
+            }
+            else
+            {
+                frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeDelayStr());
+                frame.setRestartTime(satelliteTimeManager.getRestartTimeDelayStr());
+            }
         }
     }
-
     private String getDisplay(ParaConfigLineConfigClass configLine, String hexCodeStr, double paraValue) {
         String paraValueStr = switch (configLine.getHandleType()) {
-            case 时间 -> UTCUtils.getUTC8PLUSTimeStr(paraValue);
+            case 时间 -> UTCUtils.getUTCTimeStr(paraValue);
             case 源码 -> hexCodeStr;
-            default -> getDisplayValue(configLine.getParaCode(), paraValue);
+            case 状态码 -> configLine.getParseState(paraValue);
+            default -> getDisplayValue(configLine.getParaCode(), paraValue, this.satelliteTimeManagerThreadLocal.get());
         };
         return paraValueStr;
     }
@@ -183,15 +191,26 @@ public class BaseParaParser implements ParaParser {
         return this.satelliteConfigClass.getFrameConfigClassByFrameCode(catalogCode, frameCode, reuseChannel);
     }
 
+    private void updateRealMap(String paraCode, Double paraValue, Map<String, Double> realMap) {
+
+        if (realMap.containsKey(paraCode)) {
+            realMap.put(paraCode, paraValue);
+        }
+    }
+
 
     @Override
-    public void threadInit() {
-
+    public void initThread() {
+        this.threadLocalMap.set(getInitRealMap());
+        this.satelliteTimeManagerThreadLocal.set(new SatelliteTimeManager());
+        this.satelliteConfigClass.initThread();
 
     }
 
     @Override
-    public void threadFinsh() {
-
+    public void destroyThread() {
+        this.threadLocalMap.remove();
+        this.satelliteConfigClass.destroyTread();
+        this.satelliteTimeManagerThreadLocal.remove();
     }
 }

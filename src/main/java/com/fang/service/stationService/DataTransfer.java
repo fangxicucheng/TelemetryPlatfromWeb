@@ -151,36 +151,4 @@ public class DataTransfer {
         this.transferThread=null;
 
     }
-
-//    public String getSatelliteName(byte midByte1, byte midByte2) {
-//        String satelliteNameResult = null;
-//        for (String satelliteName : satelliteNameBytesMap.keySet()) {
-//            byte[] bytes = satelliteNameBytesMap.get(satelliteName);
-//            if (bytes[0] == midByte1 && bytes[1] == midByte2) {
-//                satelliteNameResult = satelliteName;
-//                break;
-//            }
-//        }
-//        return satelliteNameResult;
-//    }
-//
-//
-//    public String getSatelliteId(String satelliteName) {
-//
-//        String satelliteId = null;
-//        if (this.satelliteNameMap.containsKey(satelliteName)) {
-//            satelliteId = this.satelliteNameMap.get(satelliteName);
-//        }
-//        return satelliteId;
-//    }
-//
-//
-//    public String parseBdICard(String icCard) {
-//
-//        String satelliteName = null;
-//        if (this.bdICardMap.containsKey(icCard)) {
-//            satelliteName = this.bdICardMap.get(icCard);
-//        }
-//        return satelliteName;
-//    }
 }

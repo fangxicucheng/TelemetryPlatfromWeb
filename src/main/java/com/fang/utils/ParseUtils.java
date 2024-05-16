@@ -1,14 +1,9 @@
 package com.fang.utils;
-
 import com.fang.config.satellite.configStruct.*;
 import com.fang.database.postgresql.entity.ParaConfigLineDb;
-
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 public class ParseUtils {
-
     public static Double getDimension(String dimension) {
         double result = 1;
         if (dimension == null) {
@@ -22,10 +17,7 @@ public class ParseUtils {
         }
         return result;
     }
-
     //宽带节点的校验
-
-
     public static Double parseStrToValue(String str) {
         double result = 1;
         if (StringConvertUtils.testStringEmpty(str)) {
@@ -41,8 +33,6 @@ public class ParseUtils {
         }
         return result;
     }
-
-
     public static boolean[] getBitArray(byte[] dataBytes) {
         boolean[] bitArray = null;
         if (dataBytes != null) {
