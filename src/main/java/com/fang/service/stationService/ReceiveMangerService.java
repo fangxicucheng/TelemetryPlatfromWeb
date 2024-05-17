@@ -1,6 +1,7 @@
 package com.fang.service.stationService;
 
 import com.fang.database.postgresql.entity.StationInfo;
+import com.fang.service.stationService.ReceiveManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

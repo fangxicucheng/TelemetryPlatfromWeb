@@ -9,8 +9,10 @@ import com.fang.config.satellite.configStruct.SatelliteConfigClass;
 import com.fang.config.satellite.paraParser.BaseParaParser;
 import com.fang.config.satellite.paraParser.ParaParser;
 import com.fang.database.postgresql.entity.CommandCount;
+import com.fang.database.postgresql.entity.GpsParaConfig;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.entity.StationInfo;
+import com.fang.service.gpsService.gpsManager.GpsConfigInfo;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import lombok.Data;
 
@@ -25,41 +27,54 @@ public class ConfigUtils {
     private static Map<String, String> satelliteIdMap = new HashMap<>();
     private static Map<String, byte[]> midMap = new HashMap<>();
     private static Map<String, String> icCardMap = new HashMap<>();
-    private static Map<String, ParaParser> satelliteParaParserMap=new HashMap<>();
-    private static Map<String, List<CommandCount>>commandCountMap=new HashMap<>();
+    private static Map<String, ParaParser> satelliteParaParserMap = new HashMap<>();
+    private static Map<String, List<CommandCount>> commandCountMap = new HashMap<>();
+    private static Map<String, GpsConfigInfo> gpsParaConfigMap = new HashMap<>();
+
+    public static void setGpsParaConfigInfo(GpsParaConfig gpsParaConfig) {
+        gpsParaConfigMap.put(gpsParaConfig.getSatelliteName(), new GpsConfigInfo(gpsParaConfig));
 
 
-
-
-    public static void setSatelliteParaParser(SatelliteDb satelliteDb,List<ThresholdInfo> thresholdInfoList){
-        ParaParser paraParser = createParaParser(satelliteDb, thresholdInfoList);
-        satelliteParaParserMap.put(satelliteDb.getSatelliteName(),paraParser);
     }
 
-    public static ParaParser getParaParser(String satelliteName){
-        ParaParser paraParser=null;
-        if(satelliteParaParserMap.containsKey(satelliteName)){
-            paraParser=satelliteParaParserMap.get(satelliteName);
+    public static GpsConfigInfo getGpsConfigInfo(String satelliteName) {
+
+        if (gpsParaConfigMap.containsKey(satelliteName)) {
+            return gpsParaConfigMap.get(satelliteName);
+        }
+        return null;
+    }
+
+    public static void setSatelliteParaParser(SatelliteDb satelliteDb, List<ThresholdInfo> thresholdInfoList) {
+        ParaParser paraParser = createParaParser(satelliteDb, thresholdInfoList);
+        satelliteParaParserMap.put(satelliteDb.getSatelliteName(), paraParser);
+    }
+
+    public static ParaParser getParaParser(String satelliteName) {
+        ParaParser paraParser = null;
+        if (satelliteParaParserMap.containsKey(satelliteName)) {
+            paraParser = satelliteParaParserMap.get(satelliteName);
         }
         return paraParser;
 
     }
-    public static ParaParser createParaParser(SatelliteDb satelliteDb,List<ThresholdInfo> thresholdInfoList){
-        ParaParser paraParser=null;
+
+    public static ParaParser createParaParser(SatelliteDb satelliteDb, List<ThresholdInfo> thresholdInfoList) {
+        ParaParser paraParser = null;
         String satelliteName = satelliteDb.getSatelliteName();
         if (satelliteName.contains("-")) {
             satelliteName = satelliteName.replaceAll("-", "_");
         }
         String className = "com.fang.config.satellite.paraParser.ParaParser_" + satelliteName;
         try {
-            paraParser= (ParaParser) Class.forName(className).newInstance();
+            paraParser = (ParaParser) Class.forName(className).newInstance();
             // ConfigUtils.setSatelliteExceptionManager(satelliteName, exceptionManager);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             System.out.println(satelliteName + "ParaParser未找到类");
-            paraParser= new BaseParaParser();
+            paraParser = new BaseParaParser();
             //  ConfigUtils.setSatelliteExceptionManager(satelliteName, exceptionManager);
         }
-        paraParser.init(satelliteName,satelliteDb,thresholdInfoList);
+        paraParser.init(satelliteName, satelliteDb, thresholdInfoList);
         return paraParser;
     }
 
@@ -99,7 +114,7 @@ public class ConfigUtils {
 //        satelliteConfigClassMap.put(satelliteDb.getSatelliteName(),satelliteConfigClass);
 //    }
 
-//    public static SatelliteConfigClass getSatelliteConfigClass(String satelliteName){
+    //    public static SatelliteConfigClass getSatelliteConfigClass(String satelliteName){
 //        SatelliteConfigClass satelliteConfigClass=null;
 //        if(satelliteConfigClassMap.containsKey(satelliteName)){
 //            satelliteConfigClass=satelliteConfigClassMap.get(satelliteName);
@@ -113,14 +128,15 @@ public class ConfigUtils {
         String className = "com.fang.config.satelliteExceptionManager.ExceptionManager_" + satelliteName;
         try {
             return (ExceptionManager) Class.forName(className).newInstance();
-           // ConfigUtils.setSatelliteExceptionManager(satelliteName, exceptionManager);
+            // ConfigUtils.setSatelliteExceptionManager(satelliteName, exceptionManager);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             System.out.println(satelliteName + "Exception未找到类");
             return new BaseExceptionManager();
-          //  ConfigUtils.setSatelliteExceptionManager(satelliteName, exceptionManager);
+            //  ConfigUtils.setSatelliteExceptionManager(satelliteName, exceptionManager);
         }
     }
-//    public static void setExceptionManager(String satelliteName) {
+
+    //    public static void setExceptionManager(String satelliteName) {
 //        if (satelliteName.contains("-")) {
 //            satelliteName = satelliteName.replaceAll("-", "_");
 //        }
@@ -172,10 +188,11 @@ public class ConfigUtils {
         }
         return satelliteId;
     }
-    public static String getSatelliteNameByIcCard(String icCard){
-        String satelliteName=null;
-        if(icCardMap.containsKey(icCard)){
-            satelliteName=icCardMap.get(icCard);
+
+    public static String getSatelliteNameByIcCard(String icCard) {
+        String satelliteName = null;
+        if (icCardMap.containsKey(icCard)) {
+            satelliteName = icCardMap.get(icCard);
         }
         return satelliteName;
     }

@@ -1,4 +1,4 @@
-package com.fang.service.gpsConfigService;
+package com.fang.service.gpsService;
 
 import com.fang.database.postgresql.entity.GpsParaConfig;
 import com.fang.database.postgresql.repository.GpsParaConfigRepository;
@@ -12,7 +12,7 @@ public class GPSConfigService {
     @Autowired
     private GpsParaConfigRepository gpsParaConfigDao;
 
-    public List<GpsParaConfig> getGpsParaConfig() {
+    public List<GpsParaConfig> getGpsParaConfigList() {
         return this.gpsParaConfigDao.findAll();
     }
 

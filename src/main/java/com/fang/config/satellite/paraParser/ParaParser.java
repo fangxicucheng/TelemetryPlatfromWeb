@@ -3,6 +3,7 @@ package com.fang.config.satellite.paraParser;
 import com.fang.config.exception.ExceptionManager;
 import com.fang.config.satellite.configStruct.FrameConfigClass;
 import com.fang.config.satellite.configStruct.SatelliteConfigClass;
+import com.fang.database.postgresql.entity.CountPara;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.telemetryService.SatelliteTimeManager;
@@ -20,6 +21,10 @@ public interface ParaParser {
 
    FrameInfo parseFrameInfoFromBytes(byte[]receiveBytes);
    void parseTelemetryFrame(byte[]dataBytes,FrameInfo frameInfo,TelemetryFrame telemetryFrame);
+
+   void setUnchangedParaValue(List<CountPara>countPara);
+
+   Map<String,Double>getUnchangedParaValue();
 
 
   default void setSatelliteConfigClass(SatelliteConfigClass satelliteConfigClass){}

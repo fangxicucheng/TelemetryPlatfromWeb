@@ -5,6 +5,7 @@ import com.fang.config.satellite.configStruct.FrameCatalogConfigClass;
 import com.fang.config.satellite.configStruct.FrameConfigClass;
 import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
 import com.fang.config.satellite.configStruct.SatelliteConfigClass;
+import com.fang.database.postgresql.entity.CountPara;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.telemetryService.SatelliteTimeManager;
@@ -94,14 +95,54 @@ public class BaseParaParser implements ParaParser {
             if (frameInfo.getFrameFlag() == 0) {
                 frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeStr());
                 frame.setRestartTime(satelliteTimeManager.getRestartTimeStr());
-            }
-            else
-            {
+            } else {
                 frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeDelayStr());
                 frame.setRestartTime(satelliteTimeManager.getRestartTimeDelayStr());
             }
         }
     }
+
+    @Override
+    public void setUnchangedParaValue(List<CountPara> countParaList) {
+        if (countParaList != null && countParaList.size() > 0) {
+            Map<String, ParaConfigLineConfigClass> unchangedJudgeParaMap = this.satelliteConfigClass.getUnchangedJudgeParaMap();
+            if (unchangedJudgeParaMap == null || unchangedJudgeParaMap.size() == 0) {
+                return;
+            }
+            for (CountPara countPara : countParaList) {
+                if (unchangedJudgeParaMap.containsKey(countPara.getParaCode())) {
+                    unchangedJudgeParaMap.get(countPara).getParaJudge().refresh(countPara.getParaValue());
+                }
+                else
+                {
+              unchangedJudgeParaMap.get(countPara).getParaJudge().refresh(-10000.0);
+
+
+                }
+
+
+            }
+
+
+        }
+
+    }
+
+    @Override
+    public Map<String, Double> getUnchangedParaValue() {
+        Map<String, Double> unChangedParaValueMap = new HashMap<>();
+        Map<String, ParaConfigLineConfigClass> unchangedJudgeParaMap = this.satelliteConfigClass.getUnchangedJudgeParaMap();
+
+        for (String paraCode : unchangedJudgeParaMap.keySet()) {
+
+            unChangedParaValueMap.put(paraCode, unchangedJudgeParaMap.get(paraCode).getParaJudgeBufferValue());
+
+
+        }
+
+        return unChangedParaValueMap;
+    }
+
     private String getDisplay(ParaConfigLineConfigClass configLine, String hexCodeStr, double paraValue) {
         String paraValueStr = switch (configLine.getHandleType()) {
             case 时间 -> UTCUtils.getUTCTimeStr(paraValue);
@@ -145,6 +186,7 @@ public class BaseParaParser implements ParaParser {
     private void setExceptionManager(ExceptionManager exceptionManager, List<ThresholdInfo> thresholdInfoList) {
         Map<String, ParaConfigLineConfigClass> configLineMap = new HashMap<>();
         Map<String, FrameCatalogConfigClass> catalogMap = this.satelliteConfigClass.getCatalogNameConfigClassMap();
+
         if (catalogMap == null || catalogMap.size() == 0) {
             return;
         }
@@ -166,11 +208,13 @@ public class BaseParaParser implements ParaParser {
         }
 
         for (ThresholdInfo thresholdInfo : thresholdInfoList) {
-
             if (configLineMap.containsKey(thresholdInfo.getParaCode())) {
-                configLineMap.get(thresholdInfo.getParaCode()).initExceptionManager(thresholdInfo, exceptionManager);
-            }
+                ParaConfigLineConfigClass configLine = configLineMap.get(thresholdInfo.getParaCode());
+                configLine.initExceptionManager(thresholdInfo, exceptionManager);
+                if (configLine.checkUnchanged()) {
 
+                }
+            }
         }
     }
 

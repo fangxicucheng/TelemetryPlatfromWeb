@@ -2,8 +2,10 @@ package com.fang.config.satellite;
 
 import com.fang.config.exception.ExceptionManager;
 import com.fang.config.exception.satelliteExcetionManager.BaseExceptionManager;
+import com.fang.database.postgresql.entity.GpsParaConfig;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
+import com.fang.service.gpsService.GPSConfigService;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.utils.ConfigUtils;
@@ -26,6 +28,9 @@ public class SatelliteConfig {
     @Qualifier("threadInfoListMap")
     private Map<String, List<ThresholdInfo>> thresholdInfoMap;
 
+
+    @Autowired
+    private GPSConfigService gpsConfigService;
 
     @Autowired
     private SatelliteConfigService satelliteConfigService;
@@ -104,15 +109,21 @@ public class SatelliteConfig {
                 initSatelliteInfo(satelliteDb);
                 System.out.println(satelliteDb.getSatelliteName() + "初始化结束");
 
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        initGPSConfigMap();
         System.out.println("结束了");
         return satelliteDbMap;
     }
 
+    private void initGPSConfigMap(){
+        List<GpsParaConfig> gpsParaConfigList = this.gpsConfigService.getGpsParaConfigList();
+        for (GpsParaConfig gpsParaConfig : gpsParaConfigList) {
+            ConfigUtils.setGpsParaConfigInfo(gpsParaConfig);
+        }
+    }
 
     private void initSatelliteInfo(SatelliteDb satelliteDb) {
         setSatelliteName(satelliteDb);

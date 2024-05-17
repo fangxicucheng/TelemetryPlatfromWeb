@@ -1,11 +1,11 @@
 package com.fang.config.exception.judgeStruct;
 
 import com.fang.config.exception.ExceptionManager;
-import com.fang.config.exception.JudeExpression;
+import com.fang.config.exception.JudgeExpression;
 
 import java.util.Map;
 
-public class ProgramJudge implements JudeExpression {
+public class ProgramJudge implements JudgeExpression {
     ExceptionManager exceptionManager;
     @Override
     public void initFormula(ExceptionManager exceptionManager) {

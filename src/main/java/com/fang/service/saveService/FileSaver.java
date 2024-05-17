@@ -1,6 +1,6 @@
 package com.fang.service.saveService;
 
-import com.fang.service.telemetryService.DataBaseManagerService;
+import com.fang.service.dataBaseManager.DataBaseManagerService;
 import lombok.Data;
 
 import java.util.ArrayList;

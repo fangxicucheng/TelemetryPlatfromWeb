@@ -1,11 +1,11 @@
 package com.fang.config.exception.judgeStruct;
 
-import com.fang.config.exception.JudeExpression;
+import com.fang.config.exception.JudgeExpression;
 import com.fang.utils.StringConvertUtils;
 
 import java.util.Map;
 
-public class ThresholdJudge implements JudeExpression {
+public class ThresholdJudge implements JudgeExpression {
     private Double min;
     private Double max;
     private boolean hasMin=false;

@@ -2,19 +2,24 @@ package com.fang.config.exception;
 
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.utils.StringConvertUtils;
+import lombok.Data;
 
 import javax.print.DocFlavor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Data
 public class ParaJudge {
 
     List<SingleExceptionManager> exceptionManagerList;
-    private ThreadLocal<Integer>errorCount;
+
+    private ThreadLocal<Integer> errorCount;
+
     public ParaJudge(ThresholdInfo thresholdInfo, ExceptionManager exceptionManager) {
         this.exceptionManagerList = new ArrayList<>();
-        this.errorCount=new ThreadLocal<>();
+
+        this.errorCount = new ThreadLocal<>();
         String condition = thresholdInfo.getCondition();
         String minThresholdStr = thresholdInfo.getThresholdMin();
         String maxThresholdStr = thresholdInfo.getThresholdMax();
@@ -29,6 +34,7 @@ public class ParaJudge {
         if (number == 0) {
             SingleExceptionManager singleExceptionManager = new SingleExceptionManager();
             singleExceptionManager.init(minThresholdStr, maxThresholdStr, condition, exceptionManager);
+
         } else {
             for (int i = 0; i < number; i++) {
 
@@ -36,59 +42,87 @@ public class ParaJudge {
                 String max = maxStrArray != null && maxStrArray.length > i ? maxStrArray[i] : null;
                 String con = conditionArray != null && conditionArray.length > i ? conditionArray[i] : null;
                 SingleExceptionManager singleExceptionManager = new SingleExceptionManager();
-                singleExceptionManager.init(min,max,con,exceptionManager);
+                singleExceptionManager.init(min, max, con, exceptionManager);
+
                 this.exceptionManagerList.add(singleExceptionManager);
             }
 
         }
     }
 
-    public void initThread(){
+    public boolean checkUnchanged() {
+        if (this.exceptionManagerList == null || this.exceptionManagerList.size() == 0) {
+            return false;
+        }
+
+        for (SingleExceptionManager singleExceptionManager : this.exceptionManagerList) {
+
+            if(singleExceptionManager.isUnChanged()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Double getParaValue(){
+
+        if (this.exceptionManagerList!=null&&this.exceptionManagerList.size()>0) {
+
+            for (SingleExceptionManager singleExceptionManager : this.exceptionManagerList) {
+
+                if (singleExceptionManager.getParaValue()!=null) {
+
+                    return singleExceptionManager.getParaValue();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public void initThread() {
         this.errorCount.set(0);
     }
-    public void destroyThread(){
+
+    public void destroyThread() {
         this.errorCount.remove();
     }
 
-    public boolean judgeException(Double paraValue, Map<String,Double>realMap,String paraCode){
+    public boolean judgeException(Double paraValue, Map<String, Double> realMap, String paraCode) {
 
-        boolean judgeResult=false;
+        boolean judgeResult = false;
         for (SingleExceptionManager singleExceptionManager : this.exceptionManagerList) {
 
             if (singleExceptionManager.matchCondition(realMap)) {
 
 
-                judgeResult=   singleExceptionManager.judgeParaValue(paraValue,realMap,paraCode);
+                judgeResult = singleExceptionManager.judgeParaValue(paraValue, realMap, paraCode);
                 break;
             }
         }
-        boolean hasError=false;
+        boolean hasError = false;
         Integer errorTimes = this.errorCount.get();
-        if(judgeResult){
+        if (judgeResult) {
 
             errorTimes++;
-        }
-        else
-        {
-            errorTimes=0;
+        } else {
+            errorTimes = 0;
         }
         this.errorCount.set(errorTimes);
-        if(errorTimes>3){
-            hasError=true;
+        if (errorTimes > 3) {
+            hasError = true;
         }
 
 
         return hasError;
     }
-    public void refresh(Double paraValue){
+
+    public void refresh(Double paraValue) {
         for (SingleExceptionManager singleExceptionManager : this.exceptionManagerList) {
-            singleExceptionManager.refresh(paraValue);
+            singleExceptionManager.refreshUnchanged(paraValue);
         }
         this.errorCount.set(0);
     }
-
-
-
 
 
 }

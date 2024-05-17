@@ -25,7 +25,19 @@ public class UTCUtils {
         return localDateTime;
     }
 
+    public static String getUTCDirectory(){
+
+        LocalDateTime now = LocalDateTime.now();
+        return now.format(dateFormatter);
+    }
+    public static String getUTCStr(){
+        LocalDateTime now=LocalDateTime.now();
+        return now.format(dateTimeStrFormatter);
+    }
+
+    public static DateTimeFormatter dateFormatter=DateTimeFormatter.ofPattern("yyyy/MM/dd");
     public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+    public static DateTimeFormatter dateTimeStrFormatter=DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     public static String getUTCTimeStr(double seconds) {
 

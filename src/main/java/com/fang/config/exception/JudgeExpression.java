@@ -4,9 +4,10 @@ import com.fang.database.postgresql.entity.CountPara;
 
 import java.util.Map;
 
-public interface JudeExpression {
+public interface JudgeExpression {
     default void init(String minStr ,String maxStr){}
-    default  void refreshUnchanged(Map<String, CountPara> countParaMap){}
+    default  void refreshUnchanged(Double paraValue){}
+    default Double getParaValue(){return null;}
 
     default void destroyThread(){}
     default void initFormula(ExceptionManager exceptionManager){}

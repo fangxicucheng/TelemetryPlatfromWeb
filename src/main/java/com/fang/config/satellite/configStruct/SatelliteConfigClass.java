@@ -23,8 +23,11 @@ public class SatelliteConfigClass {
     private boolean isBD;
     private Map<Integer, FrameCatalogConfigClass> catalogCodeConfigClassMap;
     private Map<String, FrameCatalogConfigClass> catalogNameConfigClassMap;
+    //恒不变参数
+    private Map<String,ParaConfigLineConfigClass>unchangedJudgeParaMap;
     public SatelliteConfigClass(SatelliteDb satelliteDb) {
         this.satelliteName = satelliteDb.getSatelliteName();
+        this.unchangedJudgeParaMap=new HashMap<>();
         this.satelliteId = satelliteDb.getSatelliteId();
         checkSixBitWidthFrameCode();
         checkKDJD();
@@ -109,6 +112,12 @@ public class SatelliteConfigClass {
         }
 
     }
+
+    public void setUnchangedPara(ParaConfigLineConfigClass configLine){
+        this.unchangedJudgeParaMap.put(configLine.getParaCode(),configLine);
+
+    }
+
 
 
     public FrameConfigClass getFrameConfigClassByFrameCode(Integer catalogCode, Integer frameCode, Integer refuseChannel) {

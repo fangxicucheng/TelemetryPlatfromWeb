@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TelemetryFrame {
     private String telemetryPlanId;
+    private String frameName;
     private int serialNum;
     private int frameNum;
     private int delayFlag;
