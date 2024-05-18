@@ -1,13 +1,11 @@
 package com.fang.utils;
 
 import com.obs.services.ObsClient;
-import com.obs.services.exception.ObsException;
-import com.obs.services.model.DeleteObjectRequest;
-import com.obs.services.model.ListObjectsRequest;
-import com.obs.services.model.ObjectListing;
-import com.obs.services.model.PutObjectRequest;
+import com.obs.services.model.*;
 
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class OBSUtils {
@@ -20,78 +18,38 @@ public class OBSUtils {
         return new ObsClient(AK, SK, endPoint);
     }
 
-    public void SaveFile(List<byte[]> bytesList, String fileName) {
-
-        if (bytesList.size() == 0) {
-            return;
-        }
+    public static void saveFile(byte[] bytes, String fileName) {
+//        if (bytesList.size() == 0) {
+//            return;
+//        }
+//        int length = 0;
+//        for (byte[] bytes : bytesList) {
+//            length += bytes.length;
+//        }
+//        if (length == 0) {
+//            return;
+//        }
+//        byte[] bytes = new byte[length];
+//        for (var i = 0; i < bytesList.size(); i++) {
+//            System.arraycopy(bytesList.get(i), 0, bytes, i * 8, 8);
+//        }
         String objcetPath = getObjectName(fileName);
-        int length = 0;
-        bytesList.ForEach(t = > {length += t.Length; });
+        ObsClient obsClient = getObsClient();
+        for (int i = 0; i < 3; i++) {
 
-        if (length == 0) {
-            return;
-        }
+            try {
+                obsClient.putObject(bucketName, objcetPath, new ByteArrayInputStream(bytes));
 
-        byte[] bytes = new byte[length];
-        int index = 0;
-        for (var i = 0; i < bytesList.Count; i++) {
-            for (var i1 = 0; i1 < bytesList[i].Length; i1++) {
-                bytes[index] = bytesList[i][i1];
-                index++;
+                break;
+            } catch (Exception e) {
             }
         }
-
-        ObsClient obsClient = ;
         try {
+            obsClient.close();
+        } catch (IOException e) {
 
-
-            Stream steam = new MemoryStream(bytes);
-            PutObjectRequest putRequest = new PutObjectRequest
-            {
-                BucketName = bucketName,
-                        ObjectKey = objcetPath,
-                        InputStream = steam
-            } ;
-
-
-            obsClient.BeginPutObject(putRequest, delegate(IAsyncResult ar)
-            {
-
-                try {
-                    PutObjectResponse response = obsClient.EndPutObject(ar);
-                    Console.WriteLine("put object response:{0}", response.StatusCode);
-                } catch (ObsException ex) {
-                    Console.WriteLine("ErrorCode{0}", ex.ErrorCode);
-                    Console.WriteLine("ErrorMessage{0}", ex.Message);
-                }
-            },null);
-            /*Console.WriteLine("put object response:{0}", putObjectResponse.StatusCode);*/
-        } catch (ObsException ex) {
-            Console.WriteLine("ErrorCode{0}", ex.ErrorCode);
-            Console.WriteLine("ErrorMessage{0}", ex.Message);
         }
 
-    }
-
-    public List<String> ListFiles() {
-        List<String> fileList = new ArrayList<>();
-        ObsClient client = getObsClient();
-
-        try {
-            ListObjectsRequest request = new ListObjectsRequest();
-            request.setBucketName(this.bucketName);
-            ObjectListing objectListing = client.listObjects(request);
-
-            foreach(ObsObject entry in response.ObsObjects)
-            {
-                fileList.Add(entry.ObjectKey);
-            }
-
-        } catch (ObsException ex) {
-            ex.printStackTrace();
-        }
-        return fileList;
     }
 
     /// <summary>
@@ -99,7 +57,7 @@ public class OBSUtils {
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    private String getObjectName(String path) {
+    private static String getObjectName(String path) {
         String objectPath = "";
         try {
             objectPath = getRealPath(path);
@@ -111,12 +69,34 @@ public class OBSUtils {
         return objectPath;
     }
 
+    public static byte[] readFileFromObs(String filePath){
+        byte[] result=null;
+        if(fileExist(filePath)){
+            ObsClient obsClient = getObsClient();
+            try {
+                String objectName = getRealPath(filePath);
+                GetObjectRequest request=new GetObjectRequest(bucketName,objectName);
+                ObsObject object = obsClient.getObject(request);
+                InputStream inputStream = object.getObjectContent();
+                result = inputStream.readAllBytes();
+            } catch (Exception e) {
+            }finally {
+                try {
+                    obsClient.close();
+                } catch (IOException e) {
+
+                }
+            }
+        }
+        return result;
+    }
+
     /// <summary>
     /// 获取文件名+不带文件夹路径
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    private String getRealPath(String path) {
+    private static String getRealPath(String path) {
         return path.replaceAll("D:/卫星遥测数据监控平台", "");
     }
 
@@ -126,43 +106,46 @@ public class OBSUtils {
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    public bool FileExist(string path) {
-        bool fileExists = false;
+    public static boolean fileExist(String filePath) {
+        boolean fileExists = false;
 
 
-        ObsClient client = new ObsClient(AK, SK, endpoint);
+        ObsClient client = getObsClient();
         try {
-            string objectPath = getObjectName(path);
-            HeadObjectRequest request = new HeadObjectRequest() {
-                BucketName =bucketName,
-                ObjectKey =objectPath
-            };
-            fileExists = client.HeadObject(request);
+            String objectName = getObjectName(filePath);
+            GetObjectMetadataRequest request = new GetObjectMetadataRequest(bucketName, objectName);
+            fileExists = client.doesObjectExist(request);
+        } catch (Exception e) {
 
-        } catch (Exception) {
+        } finally {
+            try {
+                client.close();
+            } catch (IOException e) {
 
+            }
         }
-
         return fileExists;
-
     }
 
     /// <summary>
     /// 删除文件
     /// </summary>
     /// <param name="fileName"></param>
-    public void DeleteFile(String fileName) {
-        ObsClient client = new ObsClient(AK, SK, endpoint);
+    public static void deleteFile(String filePath) {
+        ObsClient client = getObsClient();
+        String objectName = getObjectName(filePath);
         try {
-            DeleteObjectRequest request = new DeleteObjectRequest() {
-                BucketName =bucketName,
-                ObjectKey =fileName
-            };
-            DeleteObjectResponse response = client.DeleteObject(request);
-            Console.WriteLine("Delete object response:{0}", response.StatusCode);
-        } catch (ObsException ex) {
-            Console.WriteLine("ErrorCode:{0}", ex.ErrorCode);
-            Console.WriteLine("Error Message:{0}", ex.ErrorMessage);
+            DeleteObjectRequest request = new DeleteObjectRequest(bucketName, objectName);
+            DeleteObjectResult deleteObjectResult = client.deleteObject(request);
+            //client.close();
+        } catch (Exception ex) {
+
+        } finally {
+            try {
+                client.close();
+            } catch (IOException e) {
+                //
+            }
         }
     }
 }

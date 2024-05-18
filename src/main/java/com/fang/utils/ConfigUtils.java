@@ -30,11 +30,20 @@ public class ConfigUtils {
     private static Map<String, ParaParser> satelliteParaParserMap = new HashMap<>();
     private static Map<String, List<CommandCount>> commandCountMap = new HashMap<>();
     private static Map<String, GpsConfigInfo> gpsParaConfigMap = new HashMap<>();
+    private static String rootPath="D:\\卫星遥测数据监控平台";
+    private static String gpsPath="GPS参数";
+    private static String dataPath="遥测\\源码";
 
     public static void setGpsParaConfigInfo(GpsParaConfig gpsParaConfig) {
         gpsParaConfigMap.put(gpsParaConfig.getSatelliteName(), new GpsConfigInfo(gpsParaConfig));
 
 
+    }
+    public static String getGPSRootPath(){
+        return rootPath+"\\"+gpsPath;
+    }
+    public static String getDataRootPath(){
+        return rootPath+"\\"+dataPath;
     }
 
     public static GpsConfigInfo getGpsConfigInfo(String satelliteName) {
