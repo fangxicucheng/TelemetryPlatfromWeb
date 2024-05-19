@@ -34,7 +34,10 @@ public class CommandCount  {
     private String errorCommandParaName;
     @Column(name="error_command_count")
     private Integer errorCommandCount;
-
+    @Column(name="total_command_count_max")
+    private Integer totalCommandCountMax;
+    @Column(name="error_command_count_max")
+    private Integer errorCommandCountMax;
     public CommandCount(TeleCommandCountMq teleCommandCountMq){
         this.satelliteName=teleCommandCountMq.getSatelliteName();
         this.frameName=teleCommandCountMq.getFrameName();

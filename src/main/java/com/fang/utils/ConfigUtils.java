@@ -36,6 +36,19 @@ public class ConfigUtils {
 
     public static void setGpsParaConfigInfo(GpsParaConfig gpsParaConfig) {
         gpsParaConfigMap.put(gpsParaConfig.getSatelliteName(), new GpsConfigInfo(gpsParaConfig));
+    }
+
+    public static List<CommandCount>getCommandCountList(String satelliteName){
+        if(commandCountMap.containsKey(satelliteName)){
+            return commandCountMap.get(satelliteName);
+        }
+        return null;
+    }
+
+    public static void setCommandList(String satelliteName,List<CommandCount>commandCountList){
+        if(!commandCountMap.containsKey(satelliteName)){
+            commandCountMap.put(satelliteName,commandCountList);
+        }
 
 
     }

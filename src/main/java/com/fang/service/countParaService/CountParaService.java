@@ -19,7 +19,7 @@ public class CountParaService {
         return this.countParaDao.findBySatelliteName(satelliteName);
     }
     @Transactional
-    public void saveParaCount(String satelliteName,List<CountPara> paraCountList){
+    public void saveParaCount(String satelliteName,List<CountPara>paraCountList){
         if(paraCountList==null||paraCountList.size()==0){
          return;
         }
