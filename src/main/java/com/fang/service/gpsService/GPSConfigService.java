@@ -26,5 +26,8 @@ public class GPSConfigService {
     public void saveOrUpdateGpsParaConfigList(List<GpsParaConfig>gpsParaConfigList){
         this.gpsParaConfigDao.saveAll(gpsParaConfigList);
     }
+    public void deleteGpsParaConfig(Integer id){
+        this.gpsParaConfigDao.deleteById(id);
+    }
 
 }

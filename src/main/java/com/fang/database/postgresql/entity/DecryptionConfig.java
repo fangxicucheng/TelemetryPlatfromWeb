@@ -6,14 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name="cg_telemetry_decryption_cofnig")
-public class DecryptionCofnig {
+public class DecryptionConfig {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
@@ -33,7 +31,7 @@ public class DecryptionCofnig {
     @Column(name="non_encrypted_status_value")
     private Integer noneEncryptedStatusValue;
 
-    public DecryptionCofnig(TeleDecryptionCofnigMq decryptionConfigMq) {
+    public DecryptionConfig(TeleDecryptionCofnigMq decryptionConfigMq) {
         this.satelliteName=decryptionConfigMq.getSatelliteName();
         this.decryptionStatusParaCode=decryptionConfigMq.getDecryptionStatusParaCode();
         this.secretKeyParaCode=decryptionConfigMq.getSecretKeyParaCode();

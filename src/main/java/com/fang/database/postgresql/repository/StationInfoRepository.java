@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StationInfoRepository extends JpaRepository<StationInfo, Integer> {
+
+    //public void deleteStationInfoByStationName(String stationName);
 }

@@ -1,15 +1,11 @@
 package com.fang;
 
 import com.fang.config.exception.ExceptionManager;
-import com.fang.database.mysql.entity.TeleReceiveRecordMq;
-import com.fang.database.mysql.repository.TeleReceiveRecordMqRepository;
-import com.fang.database.mysql.repository.TeleSatelliteNameMqRepository;
-import com.fang.database.postgresql.entity.ReceiveRecord;
-import com.fang.database.postgresql.entity.StationInfo;
-import com.fang.database.postgresql.repository.FrameCatalogDbRepository;
-import com.fang.database.postgresql.repository.ReceiveRecordRepository;
-import com.fang.database.postgresql.repository.SatelliteDbRepository;
-import com.fang.database.postgresql.repository.StationInfoRepository;
+import com.fang.database.mysql.entity.*;
+import com.fang.database.mysql.repository.*;
+import com.fang.database.postgresql.entity.*;
+import com.fang.database.postgresql.repository.*;
+import com.fang.service.commandCountService.CommandCountService;
 import com.fang.service.resourceReader.ResourceReaderService;
 import com.fang.service.setExcpetionJuge.SubSystemService;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
@@ -55,6 +51,77 @@ class TelemetryParseServiceApplicationTests {
     private ResourceReaderService resourceReaderService;
     @Autowired
     private StationInfoRepository stationInfoRepository;
+
+    @Autowired
+    private CommandCountService commandCountService;
+    @Autowired
+    private TeleCommandCountMqRepository commandCountMqRepository;
+    @Autowired
+    private TeleCountparaMqRepository teleCountparaMqRepository;
+    @Autowired
+    private DecryptionConfigRepository decryptionConfigRepository;
+    @Autowired
+    private TeleDecryptionCofnigMqRepository teleDecryptionCofnigMqRepository;
+
+    @Autowired
+    private GpsParaConfigRepository gpsParaConfigRepository;
+    @Autowired
+    private TeleGpsParaConfigMqRepository gpsParaConfigMqRepository;
+    @Autowired
+    private TeleSatelliteNameConfigMqRepository satelliteNameConfigMqRepository;
+    @Autowired
+    private SatelliteNameConfigRepository satelliteNameConfigRepository;
+
+
+    @Test
+    void testUpdateDataBase() {
+        updateGpsList();
+        updateCommandCountList();
+        updateSatelliteNameConfig();
+        updateDecryptionConfig();
+
+    }
+
+    void updateGpsList() {
+        this.gpsParaConfigRepository.deleteAll();
+        List<TeleGpsParaConfigMq> gpsParaConfigMqList = this.gpsParaConfigMqRepository.findAll();
+        List<GpsParaConfig> gpsParaConfigList = new ArrayList<>();
+        for (TeleGpsParaConfigMq teleGpsParaConfigMq : gpsParaConfigMqList) {
+            gpsParaConfigList.add(new GpsParaConfig(teleGpsParaConfigMq));
+        }
+        this.gpsParaConfigRepository.saveAll(gpsParaConfigList);
+    }
+
+    void updateCommandCountList() {
+        this.commandCountMqRepository.deleteAll();
+        List<TeleCommandCountMq> commandCountMqList = this.commandCountMqRepository.findAll();
+        List<CommandCount> commandCountList = new ArrayList<>();
+        for (TeleCommandCountMq teleCommandCountMq : commandCountMqList) {
+            commandCountList.add(new CommandCount(teleCommandCountMq));
+        }
+        this.commandCountService.saveOrUpdateCommandCountList(commandCountList);
+    }
+
+    void updateSatelliteNameConfig() {
+        this.satelliteNameConfigRepository.deleteAll();
+        List<TeleSatelliteNameConfigMq> satelliteNameConfigMqList = this.satelliteNameConfigMqRepository.findAll();
+        List<SatelliteNameConfig> satelliteNameConfigList = new ArrayList<>();
+        for (TeleSatelliteNameConfigMq teleSatelliteNameConfigMq : satelliteNameConfigMqList) {
+            satelliteNameConfigList.add(new SatelliteNameConfig(teleSatelliteNameConfigMq));
+        }
+        this.satelliteNameConfigRepository.saveAll(satelliteNameConfigList);
+    }
+
+    void updateDecryptionConfig() {
+        this.decryptionConfigRepository.deleteAll();
+        List<TeleDecryptionCofnigMq> teleDecryptionCofnigMqList = this.teleDecryptionCofnigMqRepository.findAll();
+        List<DecryptionConfig> decryptionConfigList = new ArrayList<>();
+        for (TeleDecryptionCofnigMq teleDecryptionCofnigMq : teleDecryptionCofnigMqList) {
+            decryptionConfigList.add(new DecryptionConfig(teleDecryptionCofnigMq));
+        }
+        this.decryptionConfigRepository.saveAll(decryptionConfigList);
+    }
+
 
     @Test
     void testGetIpAddress() {
@@ -103,11 +170,11 @@ class TelemetryParseServiceApplicationTests {
                 if (ipAddressInfo.length == 3) {
                     String ip = ipAddressInfo[1].split(",")[1];
                     String port = ipAddressInfo[2].split(",")[1];
-                    String waveInfo=wavename+":"+ip+","+port;
-                    if(stationInfo!=null){
-                        if(stationInfo.getWaveInfo()!=null&&!stationInfo.getWaveInfo().equals("")){
-                            stationInfo.setWaveInfo(stationInfo.getWaveInfo()+";"+waveInfo);
-                        }else{
+                    String waveInfo = wavename + ":" + ip + "," + port;
+                    if (stationInfo != null) {
+                        if (stationInfo.getWaveInfo() != null && !stationInfo.getWaveInfo().equals("")) {
+                            stationInfo.setWaveInfo(stationInfo.getWaveInfo() + ";" + waveInfo);
+                        } else {
                             stationInfo.setWaveInfo(waveInfo);
                         }
                     }
