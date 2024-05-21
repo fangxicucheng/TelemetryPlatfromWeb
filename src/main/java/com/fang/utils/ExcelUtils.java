@@ -7,10 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -31,7 +28,7 @@ public class ExcelUtils {
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private static String baseDirectoryPath = "D:\\卫星遥测数据监控平台\\";
 
-    private static String convertCellValueToString(Cell cell) {
+    private static String convertCellValueToString(Cell cell,FormulaEvaluator formulaEvaluator) {
         //1.1、判断单元格的数据是否为空
         if (cell == null) {
             return null;
@@ -80,7 +77,7 @@ public class ExcelUtils {
                 break;
             case FORMULA:
                 //处理函数类型
-                cellValue = cell.getCellFormula();
+                cellValue = String.valueOf((int)(formulaEvaluator.evaluate(cell).getNumberValue()));
                 break;
             case ERROR:
                 byte errorCellValue = cell.getErrorCellValue();
@@ -118,7 +115,7 @@ public class ExcelUtils {
      * @param cell            需要判断的单元格
      * @param sheet           sheet
      */
-    public static String isCombineCell(List<CellRangeAddress> listCombineCell, Cell cell, Sheet sheet) {
+    public static String isCombineCell(List<CellRangeAddress> listCombineCell, Cell cell, Sheet sheet,FormulaEvaluator formulaEvaluator) {
         //3.1、设置第一个单元格和最后一个单元格的值
         int firstColumn = 0;
         int lastColumn = 0;
@@ -141,12 +138,12 @@ public class ExcelUtils {
                     //3.3.2.2、获取单元格数据
                     Cell fCell = fRow.getCell(firstColumn);
                     //3.3.2.3、对有合并单元格的数据进行格式处理
-                    cellValue = convertCellValueToString(fCell);
+                    cellValue = convertCellValueToString(fCell,formulaEvaluator);
                     break;
                 }
             } else {
                 //3.3.3、对没有合并单元格的数据进行格式处理
-                cellValue = convertCellValueToString(cell);
+                cellValue = convertCellValueToString(cell,formulaEvaluator);
             }
         }
         //3.4、返回处理后的单元格数据
@@ -195,6 +192,7 @@ public class ExcelUtils {
         Map<Integer, List<Object[]>> listMap = new HashMap<>();
         try {
             XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+            XSSFFormulaEvaluator formulaEvaluator=workbook.getCreationHelper().createFormulaEvaluator();
             //5.2、创建工作薄
             // Workbook workbook = WorkbookFactory.create(inputStream);
             //5.3、获取工作薄里面sheet的个数
@@ -231,11 +229,11 @@ public class ExcelUtils {
                             if (b) {
                                 //5.4.1.6.2.1、判断当前单元格是不是合并单元格，如果是则输出合并单元格的数据，不是则直接输出
                                 List<CellRangeAddress> listCombineCell = getCombineCell(sheet);
-                                String combineCell = isCombineCell(listCombineCell, cell, sheet);
+                                String combineCell = isCombineCell(listCombineCell, cell, sheet,formulaEvaluator);
                                 //5.4.1.6.2.1.2、对单元格的数据进行处理
                                 objects[index] = combineCell;
                             } else {
-                                String cellValueToString = convertCellValueToString(cell);
+                                String cellValueToString = convertCellValueToString(cell,formulaEvaluator);
                                 objects[index] = cellValueToString;
                             }
                             //5.4.1.6.3、下标累加

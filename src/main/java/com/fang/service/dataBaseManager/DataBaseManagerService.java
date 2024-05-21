@@ -10,6 +10,8 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 @Service
 public class DataBaseManagerService {
 
@@ -44,6 +46,60 @@ public class DataBaseManagerService {
     }
     public static RestartTimeService getRestartTimeService(){
         return restartTimeService;
+    }
+
+    public static void saveOrUpdateRestartTime(String satelliteName, Date restartTime){
+
+        if(restartTime==null){
+            return;
+        }
+        restartTimeService.saveOrUpdateRestartTime(satelliteName,restartTime);
+    }
+    public static Date getRestartTime(String satelliteName){
+        return restartTimeService.getRestartTimeBySatelliteName(satelliteName);
+    }
+
+    public static void saveReceiveRecord(Date startTime,Date endTime,String satelliteName,String filePath){
+        ReceiveRecord receiveRecord=new ReceiveRecord();
+        receiveRecord.setStartTime(startTime);
+        receiveRecord.setEndTime(endTime);
+        receiveRecord.setSatelliteName(satelliteName);
+        receiveRecord.setFilePath(filePath);
+
+        receiveRecordService.save(receiveRecord);
+
+    }
+
+    public static void updateParaCountMap(String satelliteName,Map<String,Double>paraCountMap){
+
+        if(paraCountMap==null||paraCountMap.size()==0){
+            return;
+        }
+        List<CountPara>countParaList=new ArrayList<>();
+        for (String paraCode : paraCountMap.keySet()) {
+
+            CountPara countPara=new CountPara();
+            countPara.setParaValue(paraCountMap.get(paraCode));
+            countPara.setParaName();
+        }
+        countParaService.saveParaCount();
+    }
+
+    public static Map<String,Double> getParaCountMap(String satelliteName){
+
+        Map<String,Double> paraCountMap=new HashMap<>();
+
+
+        List<CountPara> paraCountList = countParaService.getParaCountBySatelliteName(satelliteName);
+        if(paraCountList!=null&&paraCountList.size()>0){
+            for (CountPara countPara : paraCountList) {
+
+                paraCountMap.put(countPara.getParaCode(),countPara.getParaValue());
+            }
+        }
+
+
+        return paraCountMap;
     }
 
 

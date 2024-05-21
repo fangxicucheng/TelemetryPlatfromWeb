@@ -57,13 +57,7 @@ public class FileSaver {
     private void saveRecord() {
         Date startRecord = UTCUtils.convertLocalDateTimeToDate(this.startTime);
         Date endRecord = UTCUtils.convertLocalDateTimeToDate(this.updateTime);
-        ReceiveRecord receiveRecord=new ReceiveRecord();
-        receiveRecord.setSatelliteName(this.satelliteName);
-        receiveRecord.setException(null);
-        receiveRecord.setEndTime(endRecord);
-        receiveRecord.setStartTime(startRecord);
-        ReceiveRecordService receiveRecordService = DataBaseManagerService.getReceiveRecordService();
-        receiveRecordService.save(receiveRecord);
+        DataBaseManagerService.saveReceiveRecord(startRecord,endRecord,this.satelliteName,this.filePath);
     }
 
 

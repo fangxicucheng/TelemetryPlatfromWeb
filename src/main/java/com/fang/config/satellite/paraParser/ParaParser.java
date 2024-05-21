@@ -22,10 +22,10 @@ public interface ParaParser {
    FrameInfo parseFrameInfoFromBytes(byte[]receiveBytes);
    void parseTelemetryFrame(byte[]dataBytes,FrameInfo frameInfo,TelemetryFrame telemetryFrame);
 
-   void setUnchangedParaValue(List<CountPara>countPara);
+   void setUnchangedParaValue();
 
    Map<String,Double>getUnchangedParaValue();
-
+  void updateUnchangedParaValue();
 
   default void setSatelliteConfigClass(SatelliteConfigClass satelliteConfigClass){}
    SatelliteConfigClass getSatelliteConfigClass();

@@ -1,5 +1,6 @@
 package com.fang.service.telemetryService;
 
+import com.fang.service.dataBaseManager.DataBaseManagerService;
 import com.fang.utils.UTCUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,8 +24,11 @@ public class SatelliteTimeManager {
     private String restartTimeStr;
     private String restartTimeDelayStr;
 
-    public SatelliteTimeManager() {
+    public SatelliteTimeManager(String satelliteName) {
         this.restartTimeChangeTimes=0;
+        this.satelliteName=satelliteName;
+        getRestartTime();
+
     }
 
     public void setSatelliteTime(double paraValue){
@@ -37,6 +41,14 @@ public class SatelliteTimeManager {
         this.satelliteTimeDelay=UTCUtils.getUTCTime(paraValue);
         this.restartTimeDelayStr=UTCUtils.convertLocalTimeToStr(this.satelliteTimeDelay);
 
+
+    }
+    public void saveRestartTime(){
+        if(this.restartTime==null){
+            return;
+        }
+        Date restartTime = UTCUtils.convertLocalDateTimeToDate(this.restartTime);
+        DataBaseManagerService.saveOrUpdateRestartTime(this.satelliteName,restartTime);
 
     }
 
@@ -68,8 +80,9 @@ public class SatelliteTimeManager {
         }
     }
 
-    public void setRestartTime(Date restartTime){
+    private void getRestartTime(){
 
+        Date restartTime = DataBaseManagerService.getRestartTime(this.satelliteName);
         if(restartTime==null){
             return;
         }

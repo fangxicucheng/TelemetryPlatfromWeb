@@ -7,6 +7,7 @@ import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
 import com.fang.config.satellite.configStruct.SatelliteConfigClass;
 import com.fang.database.postgresql.entity.CountPara;
 import com.fang.database.postgresql.entity.SatelliteDb;
+import com.fang.service.dataBaseManager.DataBaseManagerService;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.telemetryService.SatelliteTimeManager;
 import com.fang.telemetry.TelemetryFrame;
@@ -103,30 +104,25 @@ public class BaseParaParser implements ParaParser {
     }
 
     @Override
-    public void setUnchangedParaValue(List<CountPara> countParaList) {
-        if (countParaList != null && countParaList.size() > 0) {
+    public void setUnchangedParaValue() {
+        Map<String, Double> paraCountMap = DataBaseManagerService.getParaCountMap(satelliteName);
             Map<String, ParaConfigLineConfigClass> unchangedJudgeParaMap = this.satelliteConfigClass.getUnchangedJudgeParaMap();
             if (unchangedJudgeParaMap == null || unchangedJudgeParaMap.size() == 0) {
                 return;
             }
-            for (CountPara countPara : countParaList) {
-                if (unchangedJudgeParaMap.containsKey(countPara.getParaCode())) {
-                    unchangedJudgeParaMap.get(countPara).getParaJudge().refresh(countPara.getParaValue());
+            for (ParaConfigLineConfigClass configLine : unchangedJudgeParaMap.values()) {
+                if (paraCountMap.containsKey(configLine.getParaCode())) {
+                    configLine.getParaJudge().refresh(paraCountMap.get(configLine.getParaCode()));
                 }
                 else
                 {
-              unchangedJudgeParaMap.get(countPara).getParaJudge().refresh(-10000.0);
-
-
+                    configLine.getParaJudge().refresh(-10000.0);
                 }
-
-
             }
 
-
-        }
-
     }
+
+
 
     @Override
     public Map<String, Double> getUnchangedParaValue() {
@@ -136,11 +132,17 @@ public class BaseParaParser implements ParaParser {
         for (String paraCode : unchangedJudgeParaMap.keySet()) {
 
             unChangedParaValueMap.put(paraCode, unchangedJudgeParaMap.get(paraCode).getParaJudgeBufferValue());
-
-
         }
 
         return unChangedParaValueMap;
+    }
+
+    @Override
+    public void updateUnchangedParaValue() {
+
+        Map<String, Double> unchangedParaValue = getUnchangedParaValue();
+        DataBaseManagerService.
+
     }
 
     private String getDisplay(ParaConfigLineConfigClass configLine, String hexCodeStr, double paraValue) {
@@ -246,8 +248,9 @@ public class BaseParaParser implements ParaParser {
     @Override
     public void initThread() {
         this.threadLocalMap.set(getInitRealMap());
-        this.satelliteTimeManagerThreadLocal.set(new SatelliteTimeManager());
+        this.satelliteTimeManagerThreadLocal.set(new SatelliteTimeManager(this.satelliteName));
         this.satelliteConfigClass.initThread();
+        this.getUnchangedParaValue();
 
     }
 
@@ -255,6 +258,8 @@ public class BaseParaParser implements ParaParser {
     public void destroyThread() {
         this.threadLocalMap.remove();
         this.satelliteConfigClass.destroyTread();
+        SatelliteTimeManager satelliteTimeManager = this.satelliteTimeManagerThreadLocal.get();
+        satelliteTimeManager.saveRestartTime();
         this.satelliteTimeManagerThreadLocal.remove();
     }
 }

@@ -30,12 +30,12 @@ public class ManageSatelliteConfigFileService {
 
     }
 
-    public FrameCatalogDb readFrameCatalogDbConfigFile(List<File> fileList){
-        FrameCatalogDb frameCatalogDb=new FrameCatalogDb();
-        List<String> paraCodeList=new ArrayList<>();
+    public FrameCatalogDb readFrameCatalogDbConfigFile(List<File> fileList) {
+        FrameCatalogDb frameCatalogDb = new FrameCatalogDb();
+        List<String> paraCodeList = new ArrayList<>();
         for (File file : fileList) {
-            if(file.getName().contains(".xlsx")){
-                readFrameCatalogFromExcelFile(file,frameCatalogDb,paraCodeList);
+            if (file.getName().contains(".xlsx")) {
+                readFrameCatalogFromExcelFile(file, frameCatalogDb, paraCodeList);
             }
         }
         reflashFrameNumber(frameCatalogDb);
@@ -77,12 +77,12 @@ public class ManageSatelliteConfigFileService {
     }
 
 
-    public void readFrameCatalogFromExcelFile(File file,FrameCatalogDb catalogDb,List<String> paraCodeList) {
+    public void readFrameCatalogFromExcelFile(File file, FrameCatalogDb catalogDb, List<String> paraCodeList) {
         try {
             ConfigFileInfoClass fileInfo = getFrameInfo(file);
             if (fileInfo.isHasInit()) {
                 FrameDb frameDb = getFrameDb(fileInfo, file, paraCodeList);
-                setFrameCatalog(frameDb,catalogDb);
+                setFrameCatalog(frameDb, catalogDb);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,14 +94,14 @@ public class ManageSatelliteConfigFileService {
             ConfigFileInfoClass fileInfo = getFrameInfo(file);
             if (fileInfo.isHasInit()) {
                 FrameDb frameDb = getFrameDb(fileInfo, file, paraCodeList);
-                setSatelliteDb(frameDb,satelliteDb,fileInfo);
+                setSatelliteDb(frameDb, satelliteDb, fileInfo);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void setSatelliteDb(FrameDb frameDb,SatelliteDb satelliteDb,ConfigFileInfoClass fileInfo){
+    public void setSatelliteDb(FrameDb frameDb, SatelliteDb satelliteDb, ConfigFileInfoClass fileInfo) {
         FrameCatalogDb catalogDb = null;
         if (satelliteDb.getFrameCatalogDbList() == null) {
             satelliteDb.setFrameCatalogDbList(new ArrayList<>());
@@ -117,22 +117,18 @@ public class ManageSatelliteConfigFileService {
             catalogDb.setCatalogCode(fileInfo.getCatalogCode());
             satelliteDb.getFrameCatalogDbList().add(catalogDb);
         }
-        setFrameCatalog(frameDb,catalogDb);
+        setFrameCatalog(frameDb, catalogDb);
 
 
     }
 
 
-
-    public void setFrameCatalog(FrameDb frameDb,FrameCatalogDb catalogDb){
+    public void setFrameCatalog(FrameDb frameDb, FrameCatalogDb catalogDb) {
         if (catalogDb.getFrameDbList() == null) {
             catalogDb.setFrameDbList(new ArrayList<>());
         }
         catalogDb.getFrameDbList().add(frameDb);
     }
-
-
-
 
 
     public void readTextFile(File file, SatelliteDb satelliteDb) throws IOException {
@@ -173,7 +169,7 @@ public class ManageSatelliteConfigFileService {
 
     public FrameDb readFrameDbFromFile(File file) throws FileNotFoundException {
         FrameDb frameDb = new FrameDb();
-        frameDb.setParaConfigLineDbList(readFrameExcel(file,new ArrayList<>()));
+        frameDb.setParaConfigLineDbList(readFrameExcel(file, new ArrayList<>()));
 
         return frameDb;
     }
@@ -195,47 +191,75 @@ public class ManageSatelliteConfigFileService {
     public List<ParaConfigLineDb> readFrameExcel(File file, List<String> paraCodeList) throws FileNotFoundException {
         List<ParaConfigLineDb> result = new ArrayList<>();
         List<Object[]> objects = ExcelUtils.importExcel(new FileInputStream(file)).get(0);
+        if (objects == null) {
+            return result;
+        }
         for (Object[] object : objects) {
             ParaConfigLineDb paraConfigLineDb = new ParaConfigLineDb();
-            paraConfigLineDb.setRound(10);
-            paraConfigLineDb.setBitStart(Integer.parseInt(((String) object[0]).replaceAll("\\D", "")));
-            paraConfigLineDb.setBitNum(Integer.parseInt(((String) object[1]).replaceAll("\\D", "")));
-            String dimension = ((String) object[10]).replaceAll("\\p{C}", "").replaceAll(" ", "");
-            if (dimension.isEmpty()) {
-                dimension = "1";
+
+            try {
+                if (object == null||object.length<3) {
+                    continue;
+                }
+                paraConfigLineDb.setRound(10);
+                Integer bitStart = -1;
+                try {
+                    bitStart = Integer.parseInt(((String) object[0]).replaceAll("\\D", ""));
+                    System.out.println(bitStart);
+                } catch (Exception startException) {
+                    startException.printStackTrace();
+
+                    continue;
+                }
+                paraConfigLineDb.setBitStart(bitStart);
+                Integer bitNum = -1;
+                try {
+                    bitNum = Integer.parseInt(((String) object[1]).replaceAll("\\D", ""));
+                } catch (Exception numException) {
+                    numException.printStackTrace();
+                    continue;
+                }
+                paraConfigLineDb.setBitNum(bitNum);
+                String dimension = (object.length < 11 || object[10] == null) ? "1" : ((String) object[10]).replaceAll("\\p{C}", "").replaceAll(" ", "");
+                if (dimension.isEmpty()) {
+                    dimension = "1";
+                }
+                paraConfigLineDb.setDimension(dimension);
+                String paraCode = object[2] == null ? "" : ((String) object[2]).replaceAll("\\p{C}", "").replaceAll(" ", "");
+                String sourceCodeSaveType = object[4] == null ? "" : ((String) object[4]).replaceAll("\\p{C}", "").replaceAll(" ", "");
+                paraConfigLineDb.setSourceCodeSaveType(sourceCodeSaveType);
+                if (paraCodeList.contains(paraCode)) {
+                    String finalParaCode = paraCode;
+                    paraCode = paraCode + "_" + paraCodeList.stream().filter(t -> t.contains(finalParaCode)).count();
+                }
+
+                paraConfigLineDb.setParaCode(paraCode);
+                String paraName = object[3] == null ? "" : ((String) object[3]).replaceAll("\\p{C}", "").replaceAll(" ", "");
+                paraConfigLineDb.setParaName(paraName);
+                String handleType = object[5] == null ? "" : ((String) object[5]).replaceAll("\\p{C}", "").replaceAll(" ", "");
+                if(handleType.equals("公式")){
+                    handleType="十进制显示";
+                }
+                paraConfigLineDb.setHandleType(handleType);
+                paraConfigLineDb.setParseType(10);
+                if (paraConfigLineDb.getParaCode().equals("ZT-C002") && paraConfigLineDb.getBitNum() == 32 && paraConfigLineDb.getBitStart() == 16) {
+
+                    paraConfigLineDb.setHandleType("十进制显示");
+                }
+                if (paraConfigLineDb.getParaCode().contains("ZT-C002_") && paraConfigLineDb.getBitNum() == 32 && paraConfigLineDb.getBitStart() == 16) {
+
+                    paraConfigLineDb.setHandleType("时间");
+                }
+
+                String handleParam = object[6] == null ? "" : ((String) object[6]).replaceAll("\\p{C}", "").replaceAll(" ", "").replaceAll("；", ";");
+                if (handleParam.endsWith(";")) {
+                    handleParam = handleParam.substring(0, handleParam.length() - 2);
+                }
+                paraConfigLineDb.setHandleParam(handleParam.replaceAll(";", "\r\n"));
+                result.add(paraConfigLineDb);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException(e);
             }
-
-
-            paraConfigLineDb.setDimension(dimension);
-            String paraCode = ((String) object[2]).replaceAll("\\p{C}", "").replaceAll(" ", "");
-            paraConfigLineDb.setSourceCodeSaveType(((String) object[4]).replaceAll("\\p{C}", "").replaceAll(" ", ""));
-            if (paraCodeList.contains(paraCode)) {
-
-                String finalParaCode = paraCode;
-                paraCode = paraCode + "_" + paraCodeList.stream().filter(t -> t.contains(finalParaCode)).count();
-            }
-
-            paraConfigLineDb.setParaCode(paraCode);
-
-            paraConfigLineDb.setParaName(((String) object[3]).replaceAll("\\p{C}", "").replaceAll(" ", ""));
-            paraConfigLineDb.setHandleType(((String) object[5]).replaceAll("\\p{C}", "").replaceAll(" ", ""));
-            paraConfigLineDb.setParseType(10);
-            if (paraConfigLineDb.getParaCode().equals("ZT-C002") && paraConfigLineDb.getBitNum() == 32 && paraConfigLineDb.getBitStart() == 16) {
-
-                paraConfigLineDb.setHandleType("十进制显示");
-            }
-            if (paraConfigLineDb.getParaCode().contains("ZT-C002_") && paraConfigLineDb.getBitNum() == 32 && paraConfigLineDb.getBitStart() == 16) {
-
-                paraConfigLineDb.setHandleType("时间");
-            }
-            String handleParam = ((String) object[6]).replaceAll("\\p{C}", "").replaceAll(" ", "").replaceAll("；", ";");
-            if (handleParam.endsWith(";")) {
-                handleParam = handleParam.substring(0, handleParam.length() - 2);
-            }
-            paraConfigLineDb.setHandleParam(handleParam.replaceAll(";", "\r\n"));
-
-
-            result.add(paraConfigLineDb);
 
 
         }
@@ -245,4 +269,5 @@ public class ManageSatelliteConfigFileService {
         return result;
 
     }
+
 }

@@ -21,6 +21,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -71,6 +72,10 @@ class TelemetryParseServiceApplicationTests {
     private TeleSatelliteNameConfigMqRepository satelliteNameConfigMqRepository;
     @Autowired
     private SatelliteNameConfigRepository satelliteNameConfigRepository;
+    @Autowired
+    private KafkaTemplate<String,String> kafkaTemplate;
+
+
 
 
     @Test
