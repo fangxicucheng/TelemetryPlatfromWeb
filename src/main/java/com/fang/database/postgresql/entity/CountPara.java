@@ -1,5 +1,6 @@
 package com.fang.database.postgresql.entity;
 
+import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,4 +29,11 @@ public class CountPara  {
     private String paraName;
     @Column(name="para_value")
     private Double paraValue;
+
+    public CountPara(String satelliteName,ParaConfigLineConfigClass configLine) {
+        this.satelliteName=satelliteName;
+        this.paraCode=configLine.getParaCode();
+        this.paraName=configLine.getParaName();
+        this.paraValue=configLine.getParaJudgeBufferValue();
+    }
 }

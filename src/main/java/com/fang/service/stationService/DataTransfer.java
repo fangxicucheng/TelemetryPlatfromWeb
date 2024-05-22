@@ -42,7 +42,7 @@ public class DataTransfer {
 
     public void start() {
         if(this.stationName.contains("北斗")){
-            this.transferThread=new Thread(()->transferNormalData());
+            this.transferThread=new Thread(()->transferBDNormalData());
 
         }else{
             this.transferThread=new Thread(()->transferNormalData());
@@ -61,7 +61,7 @@ public class DataTransfer {
                 System.out.println(stationName + "启动了transfer线程");
                 byte[] bytes = this.queue.take();
 
-                byte[] receiveBuf = Arrays.copyOfRange(bytes, 1, bytes.length - 1);
+                byte[] receiveBuf = Arrays.copyOfRange(bytes, 1, bytes.length );
                 byte missionTypeByte1 = receiveBuf[10];
                 byte missionTypeByte2 = receiveBuf[11];
                 byte missionTypeByte3 = receiveBuf[12];
@@ -89,10 +89,13 @@ public class DataTransfer {
                 } else {
                     this.satelliteReceiveDateTime.put(satelliteName, LocalTime.now());
                 }
+                if(parseTelemetryMap==null){
+                    parseTelemetryMap=new HashMap<>();
+                }
                 if (!parseTelemetryMap.containsKey(satelliteName)) {
                     parseTelemetryMap.put(satelliteName, new ParseTelemetry(satelliteName,this.stationName,this.stationId));
                 }
-                parseTelemetryMap.get(satelliteName).enQueue(bytes);
+                parseTelemetryMap.get(satelliteName).enQueue(receiveBuf);
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

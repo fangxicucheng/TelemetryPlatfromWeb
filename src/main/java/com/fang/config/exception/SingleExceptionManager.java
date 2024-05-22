@@ -51,6 +51,8 @@ public class SingleExceptionManager {
         return this.judgeExpression.getParaValue();
     }
 
+
+
     public void initCondition(String condition) {
         this.hasCondition=false;
         if (condition != null && condition.contains("=")) {

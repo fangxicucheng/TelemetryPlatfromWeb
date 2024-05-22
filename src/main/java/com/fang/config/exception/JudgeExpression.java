@@ -9,6 +9,7 @@ public interface JudgeExpression {
     default  void refreshUnchanged(Double paraValue){}
     default Double getParaValue(){return null;}
 
+
     default void destroyThread(){}
     default void initFormula(ExceptionManager exceptionManager){}
     boolean judgeMatch(Double paraValue, Map<String, Double> real, String paraCode);

@@ -15,6 +15,7 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 @Data
@@ -25,7 +26,7 @@ public class ParseTelemetry {
     private String stationName;
     private String stationId;
     private Thread parseThread;
-    private LinkedBlockingDeque<byte[]> queue;
+    private LinkedBlockingQueue<byte[]> queue;
     private ParaParser paraParser;
     private DataQualityManager dataQualityManager;
     private long waitSeconds;
@@ -42,7 +43,7 @@ public class ParseTelemetry {
         this.stationName = stationName;
         this.stationId = stationId;
         this.satelliteId = ConfigUtils.getSatelliteIdBySatelliteName(satelliteName);
-        this.queue = new LinkedBlockingDeque<>();
+        this.queue = new LinkedBlockingQueue<>();
         this.paraParser = ConfigUtils.getParaParser(satelliteName);
         this.dataQualityManager = new DataQualityManager();
         this.waitSeconds = 30;
@@ -55,17 +56,18 @@ public class ParseTelemetry {
         start();
     }
     public void enQueue(byte[] bytes) {
-        queue.push(bytes);
+        queue.add(bytes);
     }
     //处理业务
     public void parseService() {
 
         while (true) {
             try {
-                byte[] receiveBytes = this.isReceiving ? queue.poll(waitSeconds, TimeUnit.SECONDS) : queue.poll();
+                byte[] receiveBytes = this.isReceiving ? queue.poll(waitSeconds, TimeUnit.SECONDS) : queue.take();
                 if (!this.isReceiving) {
                     initThreadLocal();
                 }
+
                 this.fileSaver.writeLine(receiveBytes);
                 TelemetryFrame frame = new TelemetryFrame();
                 frame.setTelemetryPlanId(telemetryPlanId);

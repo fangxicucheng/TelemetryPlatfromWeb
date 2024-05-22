@@ -70,19 +70,13 @@ public class DataBaseManagerService {
 
     }
 
-    public static void updateParaCountMap(String satelliteName,Map<String,Double>paraCountMap){
+        public static void updateSatelliteParaCountList(String satelliteName,List<CountPara>countParaList){
 
-        if(paraCountMap==null||paraCountMap.size()==0){
+        if(countParaList==null||countParaList.size()==0){
             return;
         }
-        List<CountPara>countParaList=new ArrayList<>();
-        for (String paraCode : paraCountMap.keySet()) {
 
-            CountPara countPara=new CountPara();
-            countPara.setParaValue(paraCountMap.get(paraCode));
-            countPara.setParaName();
-        }
-        countParaService.saveParaCount();
+        countParaService.saveParaCount(satelliteName,countParaList);
     }
 
     public static Map<String,Double> getParaCountMap(String satelliteName){

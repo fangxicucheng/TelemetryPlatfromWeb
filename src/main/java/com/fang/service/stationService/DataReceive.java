@@ -42,7 +42,7 @@ public class DataReceive {
             String[] socketInfoArray = waveContentArray[1].split(",");
             String ip=socketInfoArray[0];
             int port=Integer.parseInt(socketInfoArray[1]);
-            SocketManager socketManager = new SocketManager(ip, port, this.stationName, waveName, this.receiveBlockQueue);
+            SocketManager socketManager = new SocketManager(ip, port,this.localIp, this.stationName, waveName, this.receiveBlockQueue);
             if(this.waveSocketMap==null){
                 this.waveSocketMap=new HashMap<>();
             }

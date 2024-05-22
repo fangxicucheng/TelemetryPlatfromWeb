@@ -18,20 +18,31 @@ public class SocketManager {
     private String waveName;
     private LinkedBlockingQueue<byte[]> queue;
     private Thread receiveThread;
+    private boolean isBd;
+    private boolean isXwave;
 
-    public SocketManager(String ip, int port, String stationName, String waveName, LinkedBlockingQueue<byte[]> queue) {
+    public SocketManager(String ip, int port, String localIp, String stationName, String waveName, LinkedBlockingQueue<byte[]> queue) {
         this.ip = ip;
         this.port = port;
         this.stationName = stationName;
         this.waveName = waveName;
         this.queue = queue;
-        start();
+        this.localIp = localIp;
+        this.isBd = false;
+        if (this.stationName.contains("北斗")) {
+            this.isBd = true;
+        }
+        this.isXwave=true;
+        if (this.waveName.contains("S")){
+            this.isXwave=false;
+        }
+            start();
     }
 
     public void start() {
 
-        if(initSocket()){
-            this.receiveThread=new Thread(()->startThread());
+        if (initSocket()) {
+            this.receiveThread = new Thread(() -> startThread());
             this.receiveThread.start();
         }
 
@@ -57,22 +68,36 @@ public class SocketManager {
 
 
     public void startThread() {
-        while(!Thread.interrupted()){
-            try{
-                byte[]buffer=new byte[1024];
-                DatagramPacket packet=new DatagramPacket(buffer, buffer.length);
-                System.out.println(stationName + ":" + this.ip + "," + this.port + "启动成功");
+        while (!Thread.interrupted()) {
+            try {
+                byte[] buffer = new byte[1024];
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                //System.out.println(stationName + ":" + this.ip + "," + this.port + "启动成功");
                 this.socket.receive(packet);
-                byte[] receiveBytes = Arrays.copyOfRange(packet.getData(), 0, packet.getLength() - 1);
-                this.queue.add(receiveBytes);
-                if(Thread.interrupted()){
+                byte[] receiveBytes = Arrays.copyOfRange(packet.getData(), 0, packet.getLength() );
+                byte[]dataBytes=null;
+                if(this.isBd){
+                    dataBytes=receiveBytes;
+                }
+                else  {
+
+                    dataBytes=new byte[receiveBytes.length+1];
+                    System.arraycopy(receiveBytes,0,dataBytes,1,receiveBytes.length);
+                    if(isXwave){
+                        dataBytes[0]=1;
+                    }else{
+                        dataBytes[0]=0;
+                    }
+
+                }
+                this.queue.add(dataBytes);
+                if (Thread.interrupted()) {
                     break;
                 }
-            }
-            catch(IOException ioE){
-                if(Thread.interrupted()){
+            } catch (IOException ioE) {
+                if (Thread.interrupted()) {
                     continue;
-                }else{
+                } else {
                     ioE.printStackTrace();
                 }
             }

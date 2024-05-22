@@ -61,7 +61,7 @@ public class ParseMCUtils {
     public static boolean validateNormalFrameBytes(byte[] dataBytes) {
         byte checksum = 0;
         byte checksum1 = 0; //
-        if (!(dataBytes[0] == 0xEB && dataBytes[1] == 0x90)) {
+        if (!((dataBytes[0]&0xff) == 0xEB && (dataBytes[1]&0xff )== 0x90)) {
             return false;
         }
 
@@ -85,14 +85,14 @@ public class ParseMCUtils {
         byte byte_61 = dataBytes[61];
         byte byte_62 = dataBytes[62];
         frameInfo.setSerialNum(byte_62 & 0x07);
-        frameInfo.setCatalogCode(byte_62 & 0xf0 >> 4);
+        frameInfo.setCatalogCode((byte_62 & 0xf0) >> 4);
         frameInfo.setFrameFlag(byte_62 & 0x08);
         frameInfo.setDataBytes(dataBytes);
         if (satelliteConfigClass.isHasSixBitWidthFrameCode()) {
-            frameInfo.setReuseChannel(byte_61 & 0xC0 >> 6);
+            frameInfo.setReuseChannel((byte_61 & 0xC0) >> 6);
             frameInfo.setFrameCode(byte_61 & 0x3f);
         } else {
-            frameInfo.setReuseChannel(byte_61 & 0xe0 >> 5);
+            frameInfo.setReuseChannel((byte_61 & 0xe0) >> 5);
             frameInfo.setFrameCode(byte_61 & 0x1f);
         }
         if (satelliteConfigClass.isGPSatellite()) {

@@ -1,8 +1,11 @@
 package com.fang.utils;
+
 import com.fang.config.satellite.configStruct.*;
 import com.fang.database.postgresql.entity.ParaConfigLineDb;
+
 import java.util.HashMap;
 import java.util.Map;
+
 public class ParseUtils {
     public static Double getDimension(String dimension) {
         double result = 1;
@@ -17,6 +20,7 @@ public class ParseUtils {
         }
         return result;
     }
+
     //宽带节点的校验
     public static Double parseStrToValue(String str) {
         double result = 1;
@@ -33,6 +37,7 @@ public class ParseUtils {
         }
         return result;
     }
+
     public static boolean[] getBitArray(byte[] dataBytes) {
         boolean[] bitArray = null;
         if (dataBytes != null) {
@@ -110,10 +115,10 @@ public class ParseUtils {
     }
 
     /*
-    * 解析float类型
-    *
-    *
-    * */
+     * 解析float类型
+     *
+     *
+     * */
     public static double parseIEEE754(Long sourceCode) {
         double paraValue = 0;
         double s = (sourceCode >> 31) & 0x01;
@@ -125,7 +130,8 @@ public class ParseUtils {
 
 
     public static void initParaConfigClass(ParaConfigLineDb paraConfigLineDb, ParaConfigLineConfigClass paraConfigLineConfigClass) {
-
+        paraConfigLineConfigClass.setSourceCodeSaveType(SourceCodeSaveType.无符号);
+        paraConfigLineConfigClass.setHandleType(HandleType.十进制显示);
         switch (paraConfigLineDb.getParseType()) {
             case 3:
             case 4: {
@@ -206,6 +212,9 @@ public class ParseUtils {
                 setDecimalShow(paraConfigLineConfigClass);
             }
             break;
+        }
+        if (paraConfigLineConfigClass.getSourceCodeSaveType() == null) {
+            System.out.println("断点位置");
         }
     }
 

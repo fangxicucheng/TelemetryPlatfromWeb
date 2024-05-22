@@ -30,7 +30,7 @@ public class BaseParaParser implements ParaParser {
     private ThreadLocal<SatelliteTimeManager> satelliteTimeManagerThreadLocal;
 
     @Override
-    public String getDisplayValue(String paraCode, Double paraValue, SatelliteTimeManager satelliteTimeManager) {
+    public String getDisplayValue(String paraCode, Double paraValue ,int frameFlag,SatelliteTimeManager satelliteTimeManager) {
         return paraValue.toString();
     }
 
@@ -65,6 +65,7 @@ public class BaseParaParser implements ParaParser {
     public void parseTelemetryFrame(byte[] dataBytes, FrameInfo frameInfo, TelemetryFrame frame) {
         frame.setDelayFlag(frameInfo.getFrameFlag());
         frame.setCorrSate(frameInfo.isValid());
+        frame.setFrameFlag(frameInfo.getFrameFlag().toString());
         if (!frame.isCorrSate()) {
             return;
         }
@@ -79,7 +80,7 @@ public class BaseParaParser implements ParaParser {
                 Long sourceCode = getSourceSourceCode(configLine, bitArray);
                 String hexCodeStr = StringConvertUtils.getHexString(sourceCode);
                 double paraValue = getParaValue(sourceCode, bitArray, configLine);
-                String paraValueStr = getDisplay(configLine, hexCodeStr, paraValue);
+                String paraValueStr = getDisplay(configLine, frame.getDelayFlag(),hexCodeStr, paraValue);
                 boolean isException = configLine.judgeException(paraValue, realMap);
                 updateRealMap(configLine.getParaCode(), paraValue, realMap);
                 TelemetryParameterModel parameterModel = new TelemetryParameterModel();
@@ -106,22 +107,19 @@ public class BaseParaParser implements ParaParser {
     @Override
     public void setUnchangedParaValue() {
         Map<String, Double> paraCountMap = DataBaseManagerService.getParaCountMap(satelliteName);
-            Map<String, ParaConfigLineConfigClass> unchangedJudgeParaMap = this.satelliteConfigClass.getUnchangedJudgeParaMap();
-            if (unchangedJudgeParaMap == null || unchangedJudgeParaMap.size() == 0) {
-                return;
+        Map<String, ParaConfigLineConfigClass> unchangedJudgeParaMap = this.satelliteConfigClass.getUnchangedJudgeParaMap();
+        if (unchangedJudgeParaMap == null || unchangedJudgeParaMap.size() == 0) {
+            return;
+        }
+        for (ParaConfigLineConfigClass configLine : unchangedJudgeParaMap.values()) {
+            if (paraCountMap.containsKey(configLine.getParaCode())) {
+                configLine.getParaJudge().refresh(paraCountMap.get(configLine.getParaCode()));
+            } else {
+                configLine.getParaJudge().refresh(-10000.0);
             }
-            for (ParaConfigLineConfigClass configLine : unchangedJudgeParaMap.values()) {
-                if (paraCountMap.containsKey(configLine.getParaCode())) {
-                    configLine.getParaJudge().refresh(paraCountMap.get(configLine.getParaCode()));
-                }
-                else
-                {
-                    configLine.getParaJudge().refresh(-10000.0);
-                }
-            }
+        }
 
     }
-
 
 
     @Override
@@ -139,18 +137,28 @@ public class BaseParaParser implements ParaParser {
 
     @Override
     public void updateUnchangedParaValue() {
+        Map<String, ParaConfigLineConfigClass> unchangedJudgeParaMap = this.satelliteConfigClass.getUnchangedJudgeParaMap();
+        if (unchangedJudgeParaMap != null) {
+            List<CountPara> countParaList = new ArrayList<>();
 
-        Map<String, Double> unchangedParaValue = getUnchangedParaValue();
-        DataBaseManagerService.
+            for (ParaConfigLineConfigClass configLine : unchangedJudgeParaMap.values()) {
+
+                countParaList.add(new CountPara(this.satelliteName,configLine));
+            }
+            DataBaseManagerService.updateSatelliteParaCountList(this.satelliteName,countParaList);
+        }
+
+
+
 
     }
 
-    private String getDisplay(ParaConfigLineConfigClass configLine, String hexCodeStr, double paraValue) {
+    private String getDisplay(ParaConfigLineConfigClass configLine, int frameFlag, String hexCodeStr, double paraValue) {
         String paraValueStr = switch (configLine.getHandleType()) {
             case 时间 -> UTCUtils.getUTCTimeStr(paraValue);
             case 源码 -> hexCodeStr;
             case 状态码 -> configLine.getParseState(paraValue);
-            default -> getDisplayValue(configLine.getParaCode(), paraValue, this.satelliteTimeManagerThreadLocal.get());
+            default -> getDisplayValue(configLine.getParaCode(), paraValue, frameFlag,this.satelliteTimeManagerThreadLocal.get());
         };
         return paraValueStr;
     }
@@ -167,6 +175,10 @@ public class BaseParaParser implements ParaParser {
 
     private double getParaValue(Long sourceCode, boolean[] bitArray, ParaConfigLineConfigClass configLine) {
         double paraValue = sourceCode;
+        if (configLine.getSourceCodeSaveType()==null) {
+            System.out.println("开始了");
+        }
+
         paraValue = switch (configLine.getSourceCodeSaveType()) {
             case 有符号位 -> ParseUtils.parseTypeOne(bitArray, configLine);
             case 无符号 -> switch (configLine.getHandleType()) {
@@ -250,7 +262,7 @@ public class BaseParaParser implements ParaParser {
         this.threadLocalMap.set(getInitRealMap());
         this.satelliteTimeManagerThreadLocal.set(new SatelliteTimeManager(this.satelliteName));
         this.satelliteConfigClass.initThread();
-        this.getUnchangedParaValue();
+        this.updateUnchangedParaValue();
 
     }
 

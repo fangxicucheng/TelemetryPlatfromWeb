@@ -15,35 +15,36 @@ import java.util.List;
 import java.util.Map;
 
 public interface ParaParser {
-   String getDisplayValue(String paraCode, Double paraValue, SatelliteTimeManager satelliteTimeManager);
+    String getDisplayValue(String paraCode, Double paraValue,int frameFlag,SatelliteTimeManager satelliteTimeManager);
 
-   void init(String satelliteName, SatelliteDb satelliteDb, List<ThresholdInfo> thresholdInfoList);
+    void init(String satelliteName, SatelliteDb satelliteDb, List<ThresholdInfo> thresholdInfoList);
 
-   FrameInfo parseFrameInfoFromBytes(byte[]receiveBytes);
-   void parseTelemetryFrame(byte[]dataBytes,FrameInfo frameInfo,TelemetryFrame telemetryFrame);
+    FrameInfo parseFrameInfoFromBytes(byte[] receiveBytes);
 
-   void setUnchangedParaValue();
+    void parseTelemetryFrame(byte[] dataBytes, FrameInfo frameInfo, TelemetryFrame telemetryFrame);
 
-   Map<String,Double>getUnchangedParaValue();
-  void updateUnchangedParaValue();
+    void setUnchangedParaValue();
 
-  default void setSatelliteConfigClass(SatelliteConfigClass satelliteConfigClass){}
-   SatelliteConfigClass getSatelliteConfigClass();
+    Map<String, Double> getUnchangedParaValue();
 
-   FrameConfigClass getFrameConfigClass(Integer catalogCode,Integer frameCode,Integer reuseChannel);
+    void updateUnchangedParaValue();
 
-   default double getSpecialFormulaValue(String paraCode,double paraValue){
-       return paraValue;
-   }
+    default void setSatelliteConfigClass(SatelliteConfigClass satelliteConfigClass) {
+    }
 
+    SatelliteConfigClass getSatelliteConfigClass();
 
+    FrameConfigClass getFrameConfigClass(Integer catalogCode, Integer frameCode, Integer reuseChannel);
 
-   default Map<String,Double> getInitRealMap(){
-       return new HashMap<>();
-   }
+    default double getSpecialFormulaValue(String paraCode, double paraValue) {
+        return paraValue;
+    }
 
+    default Map<String, Double> getInitRealMap() {
+        return new HashMap<>();
+    }
 
-   void initThread();
-   void destroyThread();
+    void initThread();
 
+    void destroyThread();
 }

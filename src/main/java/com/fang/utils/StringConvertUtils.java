@@ -30,7 +30,7 @@ public class StringConvertUtils {
         for(int i=0;i<bytes.length;i++)
         {
             byte b=bytes[i];
-            String hex = Integer.toHexString(0xff & b);
+            String hex = Integer.toHexString(0xff & b).toUpperCase();
             if (hex.length() == 1) {
                 hexString.append('0');
             }
@@ -78,7 +78,7 @@ public class StringConvertUtils {
         return result;
     }
     public static String getHexString(Long sourceCode){
-        String hexString = Long.toHexString(sourceCode);
+        String hexString = Long.toHexString(sourceCode).toUpperCase();
         if(hexString.length()%2==0){
             hexString="0x"+hexString;
         }else{

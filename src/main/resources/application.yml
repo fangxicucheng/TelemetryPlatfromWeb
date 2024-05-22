@@ -46,6 +46,7 @@ spring:
    producer:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 #  kafka:
 #    bootstrap-servers: hadoop1:9092,hadoop2:9092,hadoop3:9092
 #    producer:

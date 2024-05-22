@@ -4,12 +4,9 @@ import com.fang.service.dataBaseManager.DataBaseManagerService;
 import com.fang.utils.UTCUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
+
 @Data
 @AllArgsConstructor
 public class SatelliteTimeManager {
@@ -27,8 +24,7 @@ public class SatelliteTimeManager {
     public SatelliteTimeManager(String satelliteName) {
         this.restartTimeChangeTimes=0;
         this.satelliteName=satelliteName;
-        getRestartTime();
-
+        refreshRestartTime();
     }
 
     public void setSatelliteTime(double paraValue){
@@ -72,15 +68,13 @@ public class SatelliteTimeManager {
         }
     }
     public void setResRestartDelayTime(double paraValue){
-
         if(this.satelliteTimeDelay!=null){
             this.restartTimeDelay = this.satelliteTimeDelay.plusSeconds(-(long) paraValue);
             this.restartTimeDelayStr=UTCUtils.convertLocalTimeToStr(this.restartTimeDelay);
-
         }
     }
 
-    private void getRestartTime(){
+    public void refreshRestartTime(){
 
         Date restartTime = DataBaseManagerService.getRestartTime(this.satelliteName);
         if(restartTime==null){

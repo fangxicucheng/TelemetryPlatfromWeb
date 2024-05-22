@@ -23,6 +23,12 @@ public class UnchangedJudge implements JudgeExpression {
     }
 
     @Override
+    public Double getParaValue() {
+        return this.oldValue.get();
+    }
+
+
+    @Override
     public void destroyThread() {
         this.oldValue.remove();
         this.changedTimes.remove();
