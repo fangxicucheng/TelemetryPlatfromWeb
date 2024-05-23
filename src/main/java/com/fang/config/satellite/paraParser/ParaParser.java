@@ -21,7 +21,7 @@ public interface ParaParser {
 
     FrameInfo parseFrameInfoFromBytes(byte[] receiveBytes);
 
-    void parseTelemetryFrame(byte[] dataBytes, FrameInfo frameInfo, TelemetryFrame telemetryFrame);
+    void parseTelemetryFrame( FrameInfo frameInfo, TelemetryFrame telemetryFrame);
 
     void setUnchangedParaValue();
 

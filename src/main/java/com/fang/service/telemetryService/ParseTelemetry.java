@@ -4,6 +4,7 @@ package com.fang.service.telemetryService;
 import com.fang.config.satellite.paraParser.FrameInfo;
 import com.fang.config.satellite.paraParser.ParaParser;
 import com.fang.service.dataBaseManager.DataBaseManagerService;
+import com.fang.service.gpsService.gpsManager.GPSRecordManager;
 import com.fang.service.kafkaService.KafkaRestTemplateService;
 import com.fang.service.restartTimeService.RestartTimeService;
 import com.fang.service.saveService.FileSaver;
@@ -36,6 +37,7 @@ public class ParseTelemetry {
     private boolean runMark;
     private String telemetryPlanId;
     private FileSaver fileSaver;
+    private GPSRecordManager gpsRecordManager;
 
 
     public ParseTelemetry(String satelliteName, String stationName, String stationId) {
@@ -49,6 +51,7 @@ public class ParseTelemetry {
         this.waitSeconds = 30;
         this.runMark = true;
         this.fileSaver = new FileSaver(satelliteName, stationName);
+        this.gpsRecordManager=new GPSRecordManager(this.satelliteName,this.stationName);
         if (satelliteName.contains("北斗")) {
             this.waitSeconds = 60 * 5;
         }
@@ -64,6 +67,10 @@ public class ParseTelemetry {
         while (true) {
             try {
                 byte[] receiveBytes = this.isReceiving ? queue.poll(waitSeconds, TimeUnit.SECONDS) : queue.take();
+                if(receiveBytes==null){
+                    overTimeNotReceive();
+                    continue;
+                }
                 if (!this.isReceiving) {
                     initThreadLocal();
                 }
@@ -74,7 +81,9 @@ public class ParseTelemetry {
                 FrameInfo frameInfo = this.paraParser.parseFrameInfoFromBytes(receiveBytes);
                 frame.setRealTimeContent(StringConvertUtils.bytesToHex(frameInfo.getDataBytes()));
                 this.dataQualityManager.setFrameInfo(frameInfo);
-                this.paraParser.parseTelemetryFrame(receiveBytes, frameInfo, frame);
+                this.paraParser.parseTelemetryFrame( frameInfo, frame);
+                this.dataQualityManager.serFrame(frame);
+                this.gpsRecordManager.setGpsData(frame);
                 KafkaRestTemplateService.sendKafkaMsg("telemetry",frame);
             } catch (InterruptedException e) {
                 overTimeNotReceive();
@@ -111,6 +120,7 @@ public class ParseTelemetry {
         destroyTheadLocal();
         this.dataQualityManager.refresh();
         saveFile();
+        this.gpsRecordManager.saveGps();
     }
 
     private void initThreadLocal() {
@@ -119,6 +129,7 @@ public class ParseTelemetry {
         this.dataQualityManager.refresh();
         this.paraParser.initThread();
         this.fileSaver.refresh();
+        this.gpsRecordManager.refreshGpsConfigInfo();
 
     }
 

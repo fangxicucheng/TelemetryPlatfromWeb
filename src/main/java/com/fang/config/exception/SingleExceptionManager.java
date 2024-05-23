@@ -17,9 +17,10 @@ public class SingleExceptionManager {
     JudgeExpression judgeExpression;
     private boolean unChanged;
     public void init(String minStr, String maxStr, String condition, ExceptionManager exceptionManager) {
+        this.unChanged=false;
         initCondition(condition);
         initJudgeExpression(minStr,maxStr,exceptionManager);
-        this.unChanged=false;
+
     }
     public void initJudgeExpression(String minStr, String maxStr, ExceptionManager exceptionManager) {
 
@@ -27,6 +28,7 @@ public class SingleExceptionManager {
             if (minStr.equals(maxStr)) {
                 if (minStr.contains("不变")) {
                     this.judgeExpression = new UnchangedJudge();
+                    this.judgeExpression.init(minStr,maxStr);
                     this.unChanged=true;
 
                 } else {

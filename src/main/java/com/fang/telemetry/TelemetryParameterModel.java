@@ -17,7 +17,7 @@ public class TelemetryParameterModel {
     private double paraDouble;
     @JSONField(name="ParaHex")
     private String paraHex;
-    @JSONField(name="ReceiveCount")
+    @JSONField(name="RecieveCount")
     private Integer receiveCount;
 //    @JSONField(name="name")
 //    private String paraName;

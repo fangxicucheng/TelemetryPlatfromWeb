@@ -38,6 +38,8 @@ public class ConfigUtils {
         gpsParaConfigMap.put(gpsParaConfig.getSatelliteName(), new GpsConfigInfo(gpsParaConfig));
     }
 
+
+
     public static List<CommandCount>getCommandCountList(String satelliteName){
         if(commandCountMap.containsKey(satelliteName)){
             return commandCountMap.get(satelliteName);

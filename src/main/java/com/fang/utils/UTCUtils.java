@@ -21,8 +21,8 @@ public class UTCUtils {
 //    }
     public static LocalDateTime getUTCTime(double seconds) {
         LocalDateTime localDateTime = LocalDateTime.of(2000, 1, 1, 20, 0, 0);
-        localDateTime.plusSeconds((long) seconds);
-        return localDateTime;
+
+        return localDateTime.plusSeconds((long) seconds);
     }
 
     public static String getUTCDirectory(){
@@ -64,6 +64,9 @@ public class UTCUtils {
     public static String convertLocalTimeToStr(LocalDateTime dateTime) {
         return dateTime.format(dateTimeFormatter);
 
+    }
+    public static String convertLocalTimeToStrFilePath(LocalDateTime dateTime){
+        return dateTime.format(dateTimeStrFormatter);
     }
 
 

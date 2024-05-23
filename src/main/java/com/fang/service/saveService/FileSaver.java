@@ -49,7 +49,7 @@ public class FileSaver {
             this.hasStart = true;
             this.startTime = this.updateTime;
 
-            this.startTimeStr = UTCUtils.convertLocalTimeToStr(this.startTime);
+            this.startTimeStr = UTCUtils.convertLocalTimeToStrFilePath(this.startTime);
         }
         this.dataBytesList.add(dataBytes);
     }
@@ -133,7 +133,7 @@ public class FileSaver {
     }
 
     private String getDirectory() {
-        String directoryPath = ConfigUtils.getDataRootPath() + "\\" + UTCUtils.getUTCDirectory().replaceAll("/", "\\");
+        String directoryPath = ConfigUtils.getDataRootPath() + "\\" + UTCUtils.getUTCDirectory().replaceAll("/", "\\\\");
         File directory = new File(directoryPath);
         if (!directory.exists()) {
             directory.mkdirs();

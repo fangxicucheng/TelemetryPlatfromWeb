@@ -60,6 +60,11 @@ public class ParaConfigLineConfigClass {
 
     public void initThread() {
         this.count.set(0);
+        if(this.paraJudge!=null){
+            this.paraJudge.initThread();
+        }
+
+
     }
 
     public void destroyThread() {

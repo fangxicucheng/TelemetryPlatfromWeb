@@ -1,12 +1,9 @@
 package com.fang.config.exception.judgeStruct;
-
 import com.fang.config.exception.JudgeExpression;
 import com.fang.utils.StringConvertUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 public class StateJudge implements JudgeExpression {
     private List<Double> stateBufferList;
 

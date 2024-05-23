@@ -97,7 +97,7 @@ public class OBSUtils {
     /// <param name="path"></param>
     /// <returns></returns>
     private static String getRealPath(String path) {
-        return path.replaceAll("D:/卫星遥测数据监控平台", "");
+        return path.replaceAll("D:\\\\卫星遥测数据监控平台\\\\", "").replaceAll("\\\\","/");
     }
 
 

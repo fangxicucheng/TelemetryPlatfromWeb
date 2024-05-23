@@ -1,10 +1,7 @@
 package com.fang.config.satellite.paraParser;
 
 import com.fang.config.exception.ExceptionManager;
-import com.fang.config.satellite.configStruct.FrameCatalogConfigClass;
-import com.fang.config.satellite.configStruct.FrameConfigClass;
-import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
-import com.fang.config.satellite.configStruct.SatelliteConfigClass;
+import com.fang.config.satellite.configStruct.*;
 import com.fang.database.postgresql.entity.CountPara;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.service.dataBaseManager.DataBaseManagerService;
@@ -38,7 +35,6 @@ public class BaseParaParser implements ParaParser {
     public void init(String satelliteName, SatelliteDb satelliteDb, List<ThresholdInfo> thresholdInfoList) {
         this.satelliteName = satelliteName;
         this.isBd = false;
-
         if (this.satelliteName.contains("北斗")) {
             isBd = true;
         }
@@ -62,16 +58,19 @@ public class BaseParaParser implements ParaParser {
     }
 
     @Override
-    public void parseTelemetryFrame(byte[] dataBytes, FrameInfo frameInfo, TelemetryFrame frame) {
+    public void parseTelemetryFrame( FrameInfo frameInfo, TelemetryFrame frame) {
         frame.setDelayFlag(frameInfo.getFrameFlag());
         frame.setCorrSate(frameInfo.isValid());
         frame.setFrameFlag(frameInfo.getFrameFlag().toString());
+        frame.setSerialNum(frameInfo.getSerialNum());
+
         if (!frame.isCorrSate()) {
             return;
         }
         FrameConfigClass config = frameInfo.getFrameConfigClass();
+        frame.setFrameName(config.getFrameName());
         if (config != null) {
-            boolean[] bitArray = getBitArray(dataBytes);
+            boolean[] bitArray = getBitArray(frameInfo.getDataBytes());
             for (ParaConfigLineConfigClass configLine : config.getConfigLineList()) {
                 if (configLine.getBitStart() + configLine.getBitNum() > bitArray.length) {
                     continue;
@@ -80,6 +79,9 @@ public class BaseParaParser implements ParaParser {
                 Long sourceCode = getSourceSourceCode(configLine, bitArray);
                 String hexCodeStr = StringConvertUtils.getHexString(sourceCode);
                 double paraValue = getParaValue(sourceCode, bitArray, configLine);
+                if(configLine.getHandleType()== HandleType.时间){
+                    System.out.println("结束了");
+                }
                 String paraValueStr = getDisplay(configLine, frame.getDelayFlag(),hexCodeStr, paraValue);
                 boolean isException = configLine.judgeException(paraValue, realMap);
                 updateRealMap(configLine.getParaCode(), paraValue, realMap);
@@ -193,18 +195,14 @@ public class BaseParaParser implements ParaParser {
         return paraValue;
     }
 
-    private String getHexValue(Long sourceCode) {
-        return StringConvertUtils.getHexString(sourceCode);
-    }
+
 
     private void setExceptionManager(ExceptionManager exceptionManager, List<ThresholdInfo> thresholdInfoList) {
         Map<String, ParaConfigLineConfigClass> configLineMap = new HashMap<>();
         Map<String, FrameCatalogConfigClass> catalogMap = this.satelliteConfigClass.getCatalogNameConfigClassMap();
-
         if (catalogMap == null || catalogMap.size() == 0) {
             return;
         }
-
         for (FrameCatalogConfigClass catalog : catalogMap.values()) {
             Map<String, FrameConfigClass> frameMap = catalog.getFrameNameMap();
             if (frameMap == null || frameMap.size() == 0) {
@@ -220,13 +218,12 @@ public class BaseParaParser implements ParaParser {
                 }
             }
         }
-
         for (ThresholdInfo thresholdInfo : thresholdInfoList) {
             if (configLineMap.containsKey(thresholdInfo.getParaCode())) {
                 ParaConfigLineConfigClass configLine = configLineMap.get(thresholdInfo.getParaCode());
                 configLine.initExceptionManager(thresholdInfo, exceptionManager);
                 if (configLine.checkUnchanged()) {
-
+                    this.satelliteConfigClass.setUnchangedPara(configLine);
                 }
             }
         }
@@ -262,7 +259,7 @@ public class BaseParaParser implements ParaParser {
         this.threadLocalMap.set(getInitRealMap());
         this.satelliteTimeManagerThreadLocal.set(new SatelliteTimeManager(this.satelliteName));
         this.satelliteConfigClass.initThread();
-        this.updateUnchangedParaValue();
+        this.setUnchangedParaValue();
 
     }
 

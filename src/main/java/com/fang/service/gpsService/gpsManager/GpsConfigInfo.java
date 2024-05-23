@@ -23,18 +23,19 @@ public class GpsConfigInfo {
 
     private String frameName;
 
-    public GpsConfigInfo(GpsParaConfig gpsParaConfig){
-    this.timeParaCode=gpsParaConfig.getTimeParaCode();
-    this.xLocationParaCode=gpsParaConfig.getXLocationParaCode();
-    this.yLocationParaCode=gpsParaConfig.getYLocationParaCode();
-    this.zLocationParaCode=gpsParaConfig.getZLocationParaCode();
-    this.xSpeedParaCode=gpsParaConfig.getXSpeedParaCode();
-    this.ySpeedParaCode=gpsParaConfig.getYSpeedParaCode();
-    this.zSpeedParaCode=gpsParaConfig.getZSpeedParaCode();
+    public GpsConfigInfo(GpsParaConfig gpsParaConfig) {
+        this.frameName = gpsParaConfig.getFrameName();
+        this.timeParaCode = gpsParaConfig.getTimeParaCode();
+        this.xLocationParaCode = gpsParaConfig.getXLocationParaCode();
+        this.yLocationParaCode = gpsParaConfig.getYLocationParaCode();
+        this.zLocationParaCode = gpsParaConfig.getZLocationParaCode();
+        this.xSpeedParaCode = gpsParaConfig.getXSpeedParaCode();
+        this.ySpeedParaCode = gpsParaConfig.getYSpeedParaCode();
+        this.zSpeedParaCode = gpsParaConfig.getZSpeedParaCode();
     }
 
 
-    public boolean checkGpsFrame(String frameName){
+    public boolean checkGpsFrame(String frameName) {
         return frameName.equals(this.frameName);
     }
 

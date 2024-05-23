@@ -40,7 +40,7 @@ public class GPSRecordManager {
 
 
     public void setGpsData(TelemetryFrame frame) {
-        if (!hasGps && gpsConfigInfo.checkGpsFrame(frame.getFrameName())) {
+        if (hasGps && gpsConfigInfo.checkGpsFrame(frame.getFrameName())) {
             for (TelemetryParameterModel parameterModel : frame.getParameterList()) {
                 String paraCode = parameterModel.getParaCode();
                 if (paraCode.equals(this.gpsConfigInfo.getTimeParaCode())) {
@@ -66,7 +66,7 @@ public class GPSRecordManager {
 
     public void saveGps() {
         if (this.gpsContentDataList.size() > 5) {
-            if (!checkOverTime()) {
+            if (!checkOverTime()||true) {
 
                 try {
                     saveGPSFile();
@@ -87,7 +87,7 @@ public class GPSRecordManager {
     }
 
     private String getDirectoryPath() {
-        String directoryPath = "D:\\卫星遥测数据监控平台\\GPS参数\\" + this.satelliteName + "\\" + UTCUtils.getUTCDirectory();
+        String directoryPath = ConfigUtils.getGPSRootPath()+"\\" + this.satelliteName + "\\" + UTCUtils.getUTCDirectory();
         File directory = new File(directoryPath);
         if (!directory.exists()) {
             directory.mkdirs();
@@ -117,6 +117,7 @@ public class GPSRecordManager {
         this.gpsContentDataList.clear();
         this.gpsContentData = null;
         this.gpsConfigInfo = null;
+        this.hasGps=false;
     }
 
     private String getContent() {

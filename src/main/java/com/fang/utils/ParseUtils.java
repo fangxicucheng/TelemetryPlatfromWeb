@@ -55,8 +55,12 @@ public class ParseUtils {
     public static Long getSourceCode(ParaConfigLineConfigClass configLine, boolean[] bitArray) {
         Long sourceCode = 0L;
         for (int i = 0; i < configLine.getBitNum(); i++) {
-            Long bit = bitArray[i + configLine.getBitStart()] == true ? 1L : 0L;
-            sourceCode = sourceCode << 1 + bit;
+          //  Long bit = bitArray[i + configLine.getBitStart()] == true ? 1L : 0L;
+            sourceCode = sourceCode << 1 ;
+            if(bitArray[i + configLine.getBitStart()] ){
+                sourceCode++;
+            }
+
         }
         return sourceCode;
     }
