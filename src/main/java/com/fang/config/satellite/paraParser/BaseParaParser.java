@@ -25,7 +25,6 @@ public class BaseParaParser implements ParaParser {
     private ExceptionManager exceptionManager;
     private boolean isBd;
     private ThreadLocal<SatelliteTimeManager> satelliteTimeManagerThreadLocal;
-
     @Override
     public String getDisplayValue(String paraCode, Double paraValue ,int frameFlag,SatelliteTimeManager satelliteTimeManager) {
         return paraValue.toString();
@@ -61,9 +60,8 @@ public class BaseParaParser implements ParaParser {
     public void parseTelemetryFrame( FrameInfo frameInfo, TelemetryFrame frame) {
         frame.setDelayFlag(frameInfo.getFrameFlag());
         frame.setCorrSate(frameInfo.isValid());
-        frame.setFrameFlag(frameInfo.getFrameFlag().toString());
-        frame.setSerialNum(frameInfo.getSerialNum());
-
+        frame.setFrameFlag(frameInfo.getFrameFlag());
+        frame.setFrameNum(frameInfo.getFrameNum());
         if (!frame.isCorrSate()) {
             return;
         }
@@ -79,22 +77,19 @@ public class BaseParaParser implements ParaParser {
                 Long sourceCode = getSourceSourceCode(configLine, bitArray);
                 String hexCodeStr = StringConvertUtils.getHexString(sourceCode);
                 double paraValue = getParaValue(sourceCode, bitArray, configLine);
-                if(configLine.getHandleType()== HandleType.时间){
-                    System.out.println("结束了");
-                }
                 String paraValueStr = getDisplay(configLine, frame.getDelayFlag(),hexCodeStr, paraValue);
                 boolean isException = configLine.judgeException(paraValue, realMap);
                 updateRealMap(configLine.getParaCode(), paraValue, realMap);
                 TelemetryParameterModel parameterModel = new TelemetryParameterModel();
                 parameterModel.setParaCode(configLine.getParaCode());
                 parameterModel.setParaDouble(paraValue);
-                parameterModel.setException(isException);
+                parameterModel.setExpFlag(isException);
                 parameterModel.setParaHex(hexCodeStr);
                 parameterModel.setParaValue(paraValueStr);
                 parameterModel.setReceiveCount(configLine.getParaCodeCount());
                 frame.addParameter(parameterModel);
             }
-            frame.setFrameFlag(frameInfo.getFrameFlag() + "");
+            frame.setFrameFlag(frameInfo.getFrameFlag() );
             SatelliteTimeManager satelliteTimeManager = this.satelliteTimeManagerThreadLocal.get();
             if (frameInfo.getFrameFlag() == 0) {
                 frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeStr());
@@ -105,7 +100,6 @@ public class BaseParaParser implements ParaParser {
             }
         }
     }
-
     @Override
     public void setUnchangedParaValue() {
         Map<String, Double> paraCountMap = DataBaseManagerService.getParaCountMap(satelliteName);
@@ -120,7 +114,6 @@ public class BaseParaParser implements ParaParser {
                 configLine.getParaJudge().refresh(-10000.0);
             }
         }
-
     }
 
 
@@ -128,12 +121,9 @@ public class BaseParaParser implements ParaParser {
     public Map<String, Double> getUnchangedParaValue() {
         Map<String, Double> unChangedParaValueMap = new HashMap<>();
         Map<String, ParaConfigLineConfigClass> unchangedJudgeParaMap = this.satelliteConfigClass.getUnchangedJudgeParaMap();
-
         for (String paraCode : unchangedJudgeParaMap.keySet()) {
-
             unChangedParaValueMap.put(paraCode, unchangedJudgeParaMap.get(paraCode).getParaJudgeBufferValue());
         }
-
         return unChangedParaValueMap;
     }
 
@@ -149,10 +139,6 @@ public class BaseParaParser implements ParaParser {
             }
             DataBaseManagerService.updateSatelliteParaCountList(this.satelliteName,countParaList);
         }
-
-
-
-
     }
 
     private String getDisplay(ParaConfigLineConfigClass configLine, int frameFlag, String hexCodeStr, double paraValue) {
@@ -177,9 +163,7 @@ public class BaseParaParser implements ParaParser {
 
     private double getParaValue(Long sourceCode, boolean[] bitArray, ParaConfigLineConfigClass configLine) {
         double paraValue = sourceCode;
-        if (configLine.getSourceCodeSaveType()==null) {
-            System.out.println("开始了");
-        }
+
 
         paraValue = switch (configLine.getSourceCodeSaveType()) {
             case 有符号位 -> ParseUtils.parseTypeOne(bitArray, configLine);
@@ -190,6 +174,7 @@ public class BaseParaParser implements ParaParser {
             case 补码 -> ParseUtils.parseTowsComplement(bitArray, configLine);
         };
         paraValue = paraValue * configLine.getDimension();
+
         paraValue = getSpecialFormulaValue(configLine.getParaCode(), paraValue);
 
         return paraValue;
@@ -228,8 +213,6 @@ public class BaseParaParser implements ParaParser {
             }
         }
     }
-
-
     @Override
     public void setSatelliteConfigClass(SatelliteConfigClass satelliteConfigClass) {
 
@@ -256,6 +239,7 @@ public class BaseParaParser implements ParaParser {
 
     @Override
     public void initThread() {
+        this.exceptionManager.initThread();
         this.threadLocalMap.set(getInitRealMap());
         this.satelliteTimeManagerThreadLocal.set(new SatelliteTimeManager(this.satelliteName));
         this.satelliteConfigClass.initThread();
@@ -266,6 +250,7 @@ public class BaseParaParser implements ParaParser {
     @Override
     public void destroyThread() {
         this.threadLocalMap.remove();
+        this.exceptionManager.detroyThread();
         this.satelliteConfigClass.destroyTread();
         SatelliteTimeManager satelliteTimeManager = this.satelliteTimeManagerThreadLocal.get();
         satelliteTimeManager.saveRestartTime();

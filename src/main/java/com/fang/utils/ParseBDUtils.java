@@ -40,7 +40,7 @@ public class ParseBDUtils {
         boolean isValid = bdSelfValidate(frameBytes);
         frameInfo.setFrameCode(1);
         frameInfo.setCatalogCode(255);
-        frameInfo.setSerialNum(8);
+        frameInfo.setFrameNum(8);
         frameInfo.setReuseChannel(0);
         //frameInfo.setDataBytes(Arrays.copyOfRange(frameBytes, 0, 27));
         FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());
@@ -91,14 +91,14 @@ public class ParseBDUtils {
             frameInfo.setCatalogCode((frameBytes[5] & 0xf0) >> 4);
             frameInfo.setFrameCode(frameBytes[5] & 0x0f);
             frameInfo.setReuseChannel(0);
-            frameInfo.setSerialNum(frameBytes[6] & 0x70 >> 4);
+            frameInfo.setFrameNum(frameBytes[6] & 0x70 >> 4);
             frameInfo.setValid(bcBDValidateFrameBytes(frameBytes));
             frameInfo.setDataBytes(Arrays.copyOfRange(frameBytes, 8, frameBytes[3] + 7));
         } else {
             frameInfo.setCatalogCode((frameBytes[8] & 0xf0) >> 4);
             frameInfo.setFrameCode(frameBytes[8] & 0x0f);
             frameInfo.setReuseChannel(0);
-            frameInfo.setSerialNum(frameBytes[9] & 0x70 >> 4);
+            frameInfo.setFrameNum(frameBytes[9] & 0x70 >> 4);
             frameInfo.setValid(bdValidateFrameBytes(frameBytes));
         }
         FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());

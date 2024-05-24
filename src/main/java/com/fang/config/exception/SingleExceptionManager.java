@@ -72,7 +72,7 @@ public class SingleExceptionManager {
     }
     public boolean matchCondition(Map<String, Double> realMap) {
         if (hasCondition && realMap.containsKey(this.conditionParaCode)) {
-            this.conditionJudge.judgeMatch(realMap.get(this.conditionParaCode), realMap, this.conditionParaCode);
+          return  this.conditionJudge.judgeMatch(realMap.get(this.conditionParaCode), realMap, this.conditionParaCode);
         }
         return true;
     }

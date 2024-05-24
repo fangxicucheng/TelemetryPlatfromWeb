@@ -10,24 +10,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataQualityManager {
-    private int frameNumber;
+    private int serialNum;
     private int errorCount;
     private double errorCodeRate;
 
     public void setFrameInfo(FrameInfo frameInfo) {
-        this.frameNumber++;
+        this.serialNum++;
         if (!frameInfo.isValid()) {
             this.errorCount++;
-            this.errorCodeRate = Math.round(this.errorCount / this.frameNumber);
+            this.errorCodeRate = Math.round(this.errorCount / this.serialNum);
         }
     }
 
     public void serFrame(TelemetryFrame frame){
         frame.setErrorCodeNum(this.errorCount);
+        frame.setSerialNum(this.serialNum);
        // frame.set
     }
     public void refresh(){
-        this.frameNumber=0;
+        this.serialNum=0;
         this.errorCount=0;
         this.errorCodeRate=0.0;
     }

@@ -22,7 +22,7 @@ public class TelemetryParameterModel {
 //    @JSONField(name="name")
 //    private String paraName;
     @JSONField(name="ExpFlag")
-    private boolean isException;
+    private boolean expFlag;
 //    @JSONField(serialize = false)
 //    private String subsystemName;
 //    @JSONField(serialize = false)

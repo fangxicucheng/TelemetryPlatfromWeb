@@ -79,7 +79,7 @@ public class ParseUtils {
             for (int i = 1; i < bitNum; i++) {
                 boolean aBit = bitArray[i + bitStart];
                 paraValue = paraValue << 1;
-                if (aBit) {
+                if (!aBit) {
                     paraValue++;
                 }
             }

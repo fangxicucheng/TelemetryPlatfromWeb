@@ -15,6 +15,6 @@ public class ProgramJudge implements JudgeExpression {
     @Override
     public boolean judgeMatch(Double paraValue, Map<String,Double>realMap,String paraCode) {
 
-        return exceptionManager.judgeException(realMap,paraCode,paraValue);
+        return exceptionManager.judgeMatch(realMap,paraCode,paraValue);
     }
 }

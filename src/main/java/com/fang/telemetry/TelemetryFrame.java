@@ -23,9 +23,10 @@ public class TelemetryFrame {
     private int needInsertCommand;
     private int hasInsertCommand;
     private int errorCodeNum;
-    private String frameFlag;
+    private Integer frameFlag;
     private int order;
     private boolean isCorrSate;
+    private double errorRate;
     @JSONField(name="parameterList")
     private List<TelemetryParameterModel>parameterList;
 

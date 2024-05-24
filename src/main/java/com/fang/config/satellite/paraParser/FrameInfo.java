@@ -17,5 +17,5 @@ public class FrameInfo {
     private Integer frameFlag;
     private byte[] dataBytes;
     private boolean isValid;
-    private Integer serialNum;//序列号
+    private Integer frameNum;//序列号
 }

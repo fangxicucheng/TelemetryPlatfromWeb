@@ -34,7 +34,7 @@ public class ParaJudge {
         if (number == 0) {
             SingleExceptionManager singleExceptionManager = new SingleExceptionManager();
             singleExceptionManager.init(minThresholdStr, maxThresholdStr, condition, exceptionManager);
-
+            this.exceptionManagerList.add(singleExceptionManager);
         } else {
             for (int i = 0; i < number; i++) {
 
@@ -90,19 +90,17 @@ public class ParaJudge {
 
     public boolean judgeException(Double paraValue, Map<String, Double> realMap, String paraCode) {
 
-        boolean judgeResult = false;
+        boolean judgeResult = true;
         for (SingleExceptionManager singleExceptionManager : this.exceptionManagerList) {
 
             if (singleExceptionManager.matchCondition(realMap)) {
-
-
                 judgeResult = singleExceptionManager.judgeParaValue(paraValue, realMap, paraCode);
                 break;
             }
         }
         boolean hasError = false;
         Integer errorTimes = this.errorCount.get();
-        if (judgeResult) {
+        if (!judgeResult) {
 
             errorTimes++;
         } else {
@@ -113,6 +111,9 @@ public class ParaJudge {
             hasError = true;
         }
 
+        if(hasError){
+            System.out.println("判定异常");
+        }
 
         return hasError;
     }

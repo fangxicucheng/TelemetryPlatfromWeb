@@ -11,7 +11,7 @@ public class ParseMCUtils {
         boolean result = false;
         //= frameInfo.getDataBytes();
         if (dataBytes != null && dataBytes.length == 224) {
-            if (dataBytes[0] != 0xFA || dataBytes[1] != 0xF2 || dataBytes[2] != 0x20) {
+            if ((dataBytes[0]&0xff) != 0xFA || (dataBytes[1]&0xff) != 0xF3 || (dataBytes[2]&0xff) != 0x20) {
                 result = false;
             } else {
                 int crcSum = dataBytes[dataBytes.length - 2] * 256 + dataBytes[dataBytes.length - 1];
@@ -28,7 +28,7 @@ public class ParseMCUtils {
         byte byte_212 = dataBytes[8 + 212];
         byte byte_213 = dataBytes[8 + 213];
         frameInfo.setDataBytes(dataBytes);
-        frameInfo.setSerialNum(byte_213 & 0x07);
+        frameInfo.setFrameNum(byte_213 & 0x07);
         frameInfo.setValid(isValid);
         frameInfo.setFrameFlag(byte_213 & 0x08);
         if (isValid) {
@@ -84,7 +84,7 @@ public class ParseMCUtils {
     public static void setNormalFrameInfo(byte[] dataBytes, FrameInfo frameInfo, SatelliteConfigClass satelliteConfigClass) {
         byte byte_61 = dataBytes[61];
         byte byte_62 = dataBytes[62];
-        frameInfo.setSerialNum(byte_62 & 0x07);
+        frameInfo.setFrameNum(byte_62 & 0x07);
         frameInfo.setCatalogCode((byte_62 & 0xf0) >> 4);
         frameInfo.setFrameFlag(byte_62 & 0x08);
         frameInfo.setDataBytes(dataBytes);
@@ -104,6 +104,7 @@ public class ParseMCUtils {
         }
         FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());
         frameInfo.setFrameConfigClass(frame);
+
         frameInfo.setValid(validateNormalFrameBytes(dataBytes));
 
     }

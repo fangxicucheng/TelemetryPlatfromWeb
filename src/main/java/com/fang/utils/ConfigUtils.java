@@ -1,17 +1,12 @@
 package com.fang.utils;
 
 import com.fang.config.exception.ExceptionManager;
-import com.fang.config.exception.satelliteExcetionManager.BaseExceptionManager;
-import com.fang.config.satellite.configStruct.FrameCatalogConfigClass;
-import com.fang.config.satellite.configStruct.FrameConfigClass;
-import com.fang.config.satellite.configStruct.ParaConfigLineConfigClass;
-import com.fang.config.satellite.configStruct.SatelliteConfigClass;
+import com.fang.config.exception.satelliteExceptionManager.BaseExceptionManager;
 import com.fang.config.satellite.paraParser.BaseParaParser;
 import com.fang.config.satellite.paraParser.ParaParser;
 import com.fang.database.postgresql.entity.CommandCount;
 import com.fang.database.postgresql.entity.GpsParaConfig;
 import com.fang.database.postgresql.entity.SatelliteDb;
-import com.fang.database.postgresql.entity.StationInfo;
 import com.fang.service.gpsService.gpsManager.GpsConfigInfo;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import lombok.Data;
@@ -89,7 +84,7 @@ public class ConfigUtils {
         if (satelliteName.contains("-")) {
             satelliteName = satelliteName.replaceAll("-", "_");
         }
-        String className = "com.fang.config.satellite.paraParser.ParaParser_" + satelliteName;
+        String className = "com.fang.config.satellite.paraParser.satelliteParaParser.ParaParser_" + satelliteName;
         try {
             paraParser = (ParaParser) Class.forName(className).newInstance();
             // ConfigUtils.setSatelliteExceptionManager(satelliteName, exceptionManager);
@@ -149,7 +144,7 @@ public class ConfigUtils {
         if (satelliteName.contains("-")) {
             satelliteName = satelliteName.replaceAll("-", "_");
         }
-        String className = "com.fang.config.satelliteExceptionManager.ExceptionManager_" + satelliteName;
+        String className = "com.fang.config.exception.satelliteExceptionManager.ExceptionManager_" + satelliteName;
         try {
             return (ExceptionManager) Class.forName(className).newInstance();
             // ConfigUtils.setSatelliteExceptionManager(satelliteName, exceptionManager);

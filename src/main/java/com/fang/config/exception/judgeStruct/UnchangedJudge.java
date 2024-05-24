@@ -37,14 +37,14 @@ public class UnchangedJudge implements JudgeExpression {
 
     @Override
     public boolean judgeMatch(Double paraValue, Map<String,Double>realMap,String paraCode) {
-        boolean result = false;
+        boolean result = true;
         Double buffer = oldValue.get();
         Integer times = this.changedTimes.get();
         if (paraValue != buffer) {
             times++;
         }
         if (times > 3) {
-            result = true;
+            result = false;
             this.oldValue.set(paraValue);
             this.changedTimes.set(0);
         }

@@ -78,7 +78,7 @@ public class ParaConfigLineConfigClass {
         if (this.needJudgeException) {
             return this.paraJudge.judgeException(paraValue, localMap, this.paraCode);
         }
-        return true;
+        return false;
     }
 
     public Integer getParaCodeCount() {

@@ -1,7 +1,5 @@
 package com.fang.config.satellite;
 
-import com.fang.config.exception.ExceptionManager;
-import com.fang.config.exception.satelliteExcetionManager.BaseExceptionManager;
 import com.fang.database.postgresql.entity.GpsParaConfig;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.database.postgresql.repository.SatelliteDbRepository;
@@ -10,10 +8,8 @@ import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.setSatelliteConfig.SatelliteConfigService;
 import com.fang.utils.ConfigUtils;
 import com.fang.utils.StringConvertUtils;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
