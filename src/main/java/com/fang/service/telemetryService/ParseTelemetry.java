@@ -79,6 +79,7 @@ public class ParseTelemetry {
                 TelemetryFrame frame = new TelemetryFrame();
                 frame.setTelemetryPlanId(telemetryPlanId);
                 FrameInfo frameInfo = this.paraParser.parseFrameInfoFromBytes(receiveBytes);
+
                 frame.setRealTimeContent(StringConvertUtils.bytesToHex(frameInfo.getDataBytes()));
                 this.dataQualityManager.setFrameInfo(frameInfo);
                 this.paraParser.parseTelemetryFrame( frameInfo, frame);

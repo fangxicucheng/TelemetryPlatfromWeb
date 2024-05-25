@@ -40,6 +40,7 @@ public class GPSRecordManager {
 
 
     public void setGpsData(TelemetryFrame frame) {
+
         if (hasGps && gpsConfigInfo.checkGpsFrame(frame.getFrameName())) {
             for (TelemetryParameterModel parameterModel : frame.getParameterList()) {
                 String paraCode = parameterModel.getParaCode();

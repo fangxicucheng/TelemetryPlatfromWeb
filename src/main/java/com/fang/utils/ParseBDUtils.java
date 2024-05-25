@@ -28,12 +28,12 @@ public class ParseBDUtils {
 
     }
 
-    public static boolean matchBDSelfFrame(byte[] frameBytes) {
-        return frameBytes[0] == 0xB2 && frameBytes[1] == 0xA4;
+    public static boolean matchBDMsgFrame(byte[] frameBytes) {
+        return (frameBytes[0]&0xff) == 0xB2 && (frameBytes[1]&0xff) == 0xA4;
     }
 
-    public static boolean matchBDMsgFrame(byte[] frameBytes) {
-        return frameBytes[0] == 0xEB && frameBytes[1] == 0xE9;
+    public static boolean matchBDSelfFrame(byte[] frameBytes) {
+        return (frameBytes[0]&0xff) == 0xEB && (frameBytes[1]&0xff) == 0xE9;
     }
 
     public static void setBDSelfFrameInfo(byte[] frameBytes, FrameInfo frameInfo, SatelliteConfigClass satelliteConfigClass) {
@@ -91,26 +91,27 @@ public class ParseBDUtils {
             frameInfo.setCatalogCode((frameBytes[5] & 0xf0) >> 4);
             frameInfo.setFrameCode(frameBytes[5] & 0x0f);
             frameInfo.setReuseChannel(0);
-            frameInfo.setFrameNum(frameBytes[6] & 0x70 >> 4);
+            frameInfo.setFrameNum((frameBytes[6] & 0x70) >> 4);
             frameInfo.setValid(bcBDValidateFrameBytes(frameBytes));
             frameInfo.setDataBytes(Arrays.copyOfRange(frameBytes, 8, frameBytes[3] + 7));
         } else {
             frameInfo.setCatalogCode((frameBytes[8] & 0xf0) >> 4);
             frameInfo.setFrameCode(frameBytes[8] & 0x0f);
             frameInfo.setReuseChannel(0);
-            frameInfo.setFrameNum(frameBytes[9] & 0x70 >> 4);
+            frameInfo.setFrameNum((frameBytes[9] & 0x70) >> 4);
             frameInfo.setValid(bdValidateFrameBytes(frameBytes));
         }
         FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());
+        frameInfo.setFrameConfigClass(frame);
         if (frame != null && frame.getFrameName().contains("X测控遥测应答帧")) {
-            byte[] dataBytes = Arrays.copyOfRange(frameBytes, frameBytes.length - 64, frameBytes.length - 1);
+            byte[] dataBytes = Arrays.copyOfRange(frameBytes, frameBytes.length - 64, frameBytes.length );
             ParseMCUtils.setNormalFrameInfo(dataBytes, frameInfo, satelliteConfigClass);
             frameInfo.setDataBytes(dataBytes);
         }
     }
 
     public static boolean bdSelfValidate(byte[] buf_receive) {
-        int crcSum = buf_receive[buf_receive.length - 2] * 256 + buf_receive[buf_receive.length - 1];
+        int crcSum = (buf_receive[buf_receive.length - 2]&0xff) * 256 + (buf_receive[buf_receive.length - 1]&0xff);
         byte[] needCheckBytes = Arrays.copyOfRange(buf_receive, 0, buf_receive.length - 2);
         if (crcSum == CrcUtils.calculateCrcSum(needCheckBytes)) {
             return true;
@@ -149,7 +150,7 @@ public class ParseBDUtils {
             for (char c : needCheck.toCharArray()) {
                 checkSum ^= c;
             }
-            if (contentArray[contentArray.length - 1].equals(String.format("%04x", (int) checkSum))) {
+            if (contentArray[contentArray.length - 1].equals(StringConvertUtils.convertCharToHexString(checkSum) )) {
                 return true;
             }
         }

@@ -179,7 +179,7 @@ public class ConfigUtils {
     }
 
     public static void setIcCard(String satelliteName, String icCard) {
-        icCardMap.put(satelliteName, icCard);
+        icCardMap.put(icCard, satelliteName);
     }
 
     public static void setMid(String satelliteName, byte[] midBytes) {

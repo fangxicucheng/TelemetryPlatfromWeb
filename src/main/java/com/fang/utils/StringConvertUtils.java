@@ -5,6 +5,14 @@ import java.nio.charset.StandardCharsets;
 
 
 public class StringConvertUtils {
+    public static String convertCharToHexString(char item){
+        String result=Integer.toHexString(item).toUpperCase();
+        if(result.length()%2==1){
+            result="0"+result;
+        }
+        return result;
+
+    }
     public static String removeInvisibleCharacters(String input){
         String cleaned = input.replaceAll("\\p{C}", "");
         return cleaned;

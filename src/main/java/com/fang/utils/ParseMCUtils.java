@@ -14,9 +14,9 @@ public class ParseMCUtils {
             if ((dataBytes[0]&0xff) != 0xFA || (dataBytes[1]&0xff) != 0xF3 || (dataBytes[2]&0xff) != 0x20) {
                 result = false;
             } else {
-                int crcSum = dataBytes[dataBytes.length - 2] * 256 + dataBytes[dataBytes.length - 1];
+                int crcSum = (dataBytes[dataBytes.length - 2]&0xff) * 256 + (dataBytes[dataBytes.length - 1]&0xff);
 
-                byte[] needCheckBytes = Arrays.copyOfRange(dataBytes, 8, 221);
+                byte[] needCheckBytes = Arrays.copyOfRange(dataBytes, 8, 222);
                 result = CrcUtils.calculateCrcSum(needCheckBytes) == crcSum;
             }
         }

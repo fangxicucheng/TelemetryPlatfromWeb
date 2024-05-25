@@ -36,7 +36,7 @@ public class GpsConfigInfo {
 
 
     public boolean checkGpsFrame(String frameName) {
-        return frameName.equals(this.frameName);
+        return this.frameName.equals(frameName);
     }
 
 }

@@ -130,6 +130,9 @@ public class DataTransfer {
                 if (!ParseBDUtils.validateBDMsgHeader(dataContent)) {
                     continue;
                 }
+                if(parseTelemetryMap==null){
+                    parseTelemetryMap=new HashMap<>();
+                }
                 if (!parseTelemetryMap.containsKey(satelliteName)) {
                     parseTelemetryMap.put(satelliteName, new ParseTelemetry(satelliteName,this.stationName,this.stationId));
                 }
