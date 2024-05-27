@@ -101,8 +101,15 @@ public class ParseBDUtils {
             frameInfo.setFrameNum((frameBytes[9] & 0x70) >> 4);
             frameInfo.setValid(bdValidateFrameBytes(frameBytes));
         }
+        if (!frameInfo.isValid()) {
+            return;
+        }
         FrameConfigClass frame = satelliteConfigClass.getFrameConfigClassByFrameCode(frameInfo.getCatalogCode(), frameInfo.getFrameCode(), frameInfo.getReuseChannel());
         frameInfo.setFrameConfigClass(frame);
+        System.out.println(frameInfo.getFrameConfigClass().getFrameName());
+//        if(!frameInfo.isValid()){
+//            System.out.println("校验不过");
+//        }
         if (frame != null && frame.getFrameName().contains("X测控遥测应答帧")) {
             byte[] dataBytes = Arrays.copyOfRange(frameBytes, frameBytes.length - 64, frameBytes.length );
             ParseMCUtils.setNormalFrameInfo(dataBytes, frameInfo, satelliteConfigClass);

@@ -53,7 +53,7 @@ public class ParseTelemetry {
         this.fileSaver = new FileSaver(satelliteName, stationName);
         this.gpsRecordManager=new GPSRecordManager(this.satelliteName,this.stationName);
         if (satelliteName.contains("北斗")) {
-            this.waitSeconds = 60 * 5;
+           // this.waitSeconds = 60 * 5;
         }
         this.telemetryPlanId = this.satelliteId + "_" + this.stationId + "_-1";
         start();
@@ -74,17 +74,21 @@ public class ParseTelemetry {
                 if (!this.isReceiving) {
                     initThreadLocal();
                 }
-
                 this.fileSaver.writeLine(receiveBytes);
                 TelemetryFrame frame = new TelemetryFrame();
                 frame.setTelemetryPlanId(telemetryPlanId);
                 FrameInfo frameInfo = this.paraParser.parseFrameInfoFromBytes(receiveBytes);
-
                 frame.setRealTimeContent(StringConvertUtils.bytesToHex(frameInfo.getDataBytes()));
                 this.dataQualityManager.setFrameInfo(frameInfo);
                 this.paraParser.parseTelemetryFrame( frameInfo, frame);
                 this.dataQualityManager.serFrame(frame);
                 this.gpsRecordManager.setGpsData(frame);
+                if(frame.getParameterList()==null){
+                    System.out.println("开始le");
+                }
+                if(frame==null){
+                    System.out.println("空数据");
+                }
                 KafkaRestTemplateService.sendKafkaMsg("telemetry",frame);
             } catch (InterruptedException e) {
                 overTimeNotReceive();

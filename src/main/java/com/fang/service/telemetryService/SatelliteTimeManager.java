@@ -29,13 +29,13 @@ public class SatelliteTimeManager {
 
     public void setSatelliteTime(double paraValue){
        this.satelliteTime=UTCUtils.getUTCTime(paraValue);
-       this.restartTimeStr=UTCUtils.convertLocalTimeToStr(this.satelliteTime);
+       this.satelliteTimeStr=UTCUtils.convertLocalTimeToStr(this.satelliteTime);
     }
 
     public void setSatelliteTimeDelay(double paraValue){
 
         this.satelliteTimeDelay=UTCUtils.getUTCTime(paraValue);
-        this.restartTimeDelayStr=UTCUtils.convertLocalTimeToStr(this.satelliteTimeDelay);
+        this.satelliteTimeDelayStr=UTCUtils.convertLocalTimeToStr(this.satelliteTimeDelay);
 
 
     }

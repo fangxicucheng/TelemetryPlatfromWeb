@@ -25,6 +25,7 @@ public class DataQualityManager {
     public void serFrame(TelemetryFrame frame){
         frame.setErrorCodeNum(this.errorCount);
         frame.setSerialNum(this.serialNum);
+        frame.setErrorRate(this.errorCodeRate);
        // frame.set
     }
     public void refresh(){
