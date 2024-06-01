@@ -2,8 +2,17 @@ server:
   port: 8083
 spring:
   autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
   data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 10
+          max-wait: 2000
+          max-idle: 5
+          min-idle: 5
+      port: 6379
+      host: localhost
 #   redis:
 #    cluster:
 #      nodes:
