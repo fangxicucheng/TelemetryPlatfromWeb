@@ -41,7 +41,7 @@ public class StationConfig {
         }
         if (needStartStationInfoList.size() == 0) {
             for (StationInfo stationInfo : stationInfoList) {
-                stationInfo.setServerIp("192.168.3.82");
+                stationInfo.setServerIp("172.20.10.4");
                 needStartStationInfoList.add(stationInfo);
             }
         }

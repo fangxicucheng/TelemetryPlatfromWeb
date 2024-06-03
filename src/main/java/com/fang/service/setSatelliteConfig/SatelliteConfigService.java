@@ -92,6 +92,10 @@ public class SatelliteConfigService {
         return getTeleSatelliteDbModelList();
     }
 
+    public List<String> getSatelliteNameList(){
+       return this.satelliteDbRepository.getSatelliteNameList();
+    }
+
     public CheckConfigResult insertSatellite(SatelliteDb satelliteDb) {
         CheckConfigResult result = new CheckConfigResult();
         if (satelliteDb.getSatelliteName() == null || satelliteDb.getSatelliteName().isEmpty()) {

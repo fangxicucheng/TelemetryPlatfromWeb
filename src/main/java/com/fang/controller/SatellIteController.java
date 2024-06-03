@@ -28,10 +28,7 @@ public class SatellIteController {
 
     @Autowired
     private SatelliteConfigService satelliteConfigService;
-    @GetMapping
-    public List<TeleSatelliteDbModel> getSatelliteNameInfo() {
-        return this.satelliteConfigService.getTeleSatelliteDbModelList();
-    }
+
     @PostMapping("/updateSatelliteInfo")
     public List<TeleSatelliteDbModel> updateSatelliteNameInfo(@RequestBody TeleSatelliteDbModel teleSatelliteDbModel) {
         return this.satelliteConfigService.updateTeleSatelliteDbInfo(teleSatelliteDbModel);
@@ -48,6 +45,10 @@ public class SatellIteController {
     public CheckConfigResult insertSatelliteDb(@RequestBody SatelliteDb satellite){
 
         return satelliteConfigService.insertSatellite(satellite);
+    }
+    @GetMapping("/getSatelliteNameList")
+    public List<String> getSatelliteNameList(){
+        return this.satelliteConfigService.getSatelliteNameList();
     }
 
     @PostMapping("/download")

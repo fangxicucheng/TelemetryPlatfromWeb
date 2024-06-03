@@ -24,6 +24,12 @@ public class TeleReceiveRecordMq {
     private Date startTime;
     @Column(name = "end_time")
     private Date endTime;
+    @Column(name = "error_rate")
+    private Double errorRate;
+    @Column(name = "frame_num")
+    private Integer frameNum;
+    @Column(name = "localframe_num")
+    private Integer localFrameNum;
     @Column(name = "file_path")
     private String filePath;
     @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)

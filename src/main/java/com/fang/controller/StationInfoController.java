@@ -12,6 +12,14 @@ import java.util.List;
 public class StationInfoController {
     @Autowired
     private StationInfoService stationInfoService;
+
+
+    @GetMapping("/getStationNameList")
+    public List<String> getStationNameList(){
+        return this.stationInfoService.getStationNameList();
+    }
+
+
     @GetMapping("/getAllData")
     public List<StationInfo>getStationInfoList(){
         return this.stationInfoService.getStationInfoList();

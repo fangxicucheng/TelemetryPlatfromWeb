@@ -11,6 +11,9 @@ import java.util.List;
 public class StationInfoService {
     @Autowired
     private StationInfoRepository stationInfoRepository;
+    public List<String> getStationNameList(){
+        return this.stationInfoRepository.getStationNameList();
+    }
 
     public void addOrUpdateStationIfo(StationInfo stationInfo) {
 
