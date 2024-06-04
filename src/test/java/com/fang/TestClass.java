@@ -30,6 +30,7 @@ public class TestClass {
     }
     @Test
     public void reSaveTest(){
+
         this.receiveRecordService.reSave();
     }
 }

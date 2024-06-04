@@ -40,7 +40,7 @@ public class ReceiveRecord {
     private String stationName;
 
     public ReceiveRecord(TeleReceiveRecordMq receiveRecordMq) {
-        this.satelliteName= receiveRecordMq.getSatelliteName();;
+        this.satelliteName= receiveRecordMq.getSatelliteName()!=null?receiveRecordMq.getSatelliteName().replaceAll("_北斗",""):receiveRecordMq.getSatelliteName();;
         this.startTime=receiveRecordMq.getStartTime();
         this.endTime=receiveRecordMq.getEndTime();
         this.filePath=receiveRecordMq.getFilePath();

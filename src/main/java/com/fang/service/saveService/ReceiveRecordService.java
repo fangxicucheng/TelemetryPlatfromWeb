@@ -27,6 +27,8 @@ public class ReceiveRecordService {
     private TeleReceiveRecordMqRepository recordMqRepository;
 
     public void reSave(){
+        this.receiveRecordDao.deleteAll();
+
         List<TeleReceiveRecordMq> receiveRecordMqList = recordMqRepository.findAll();
         List<ReceiveRecord>receiveRecordList=new ArrayList<>();
         for (TeleReceiveRecordMq teleReceiveRecordMq : receiveRecordMqList) {
@@ -42,7 +44,7 @@ public class ReceiveRecordService {
 
 
     public Page<ReceiveRecord> getTelemetryReplayList(ReceiveRecordRequestInfo requestInfo) {
-        Pageable pageable = PageRequest.of(requestInfo.getPageNum(), requestInfo.getPageSize(), Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(requestInfo.getPageNum(), requestInfo.getPageSize(), Sort.by("startTime").descending());
         Specification<ReceiveRecord> spec=new Specification<ReceiveRecord>() {
             @Override
             public Predicate toPredicate(Root<ReceiveRecord> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
@@ -52,7 +54,7 @@ public class ReceiveRecordService {
                     predicateList.add(builder.greaterThan(root.get("startTime"), requestInfo.getStartTime()));
                 }
                 if(requestInfo.getEndTime()!=null){
-                    predicateList.add(builder.lessThan(root.get("startTime"), requestInfo.getStartTime()));
+                    predicateList.add(builder.lessThan(root.get("startTime"), requestInfo.getEndTime()));
                 }
                 if(requestInfo.getSatelliteNameList()!=null&&requestInfo.getSatelliteNameList().size()>0){
                     predicateList.add(root.get("satelliteName").in(requestInfo.getSatelliteNameList())) ;

@@ -93,7 +93,20 @@ public class SatelliteConfigService {
     }
 
     public List<String> getSatelliteNameList(){
-       return this.satelliteDbRepository.getSatelliteNameList();
+
+        List<String> satelliteNameList= new ArrayList<>();
+        for (String satelliteNameSave : this.satelliteDbRepository.getSatelliteNameList()) {
+
+            String satelliteName = satelliteNameSave.replaceAll("_北斗", "");
+
+            if(!satelliteNameList.contains(satelliteName)){
+                satelliteNameList.add(satelliteName);
+            }
+
+        }
+
+        return satelliteNameList;
+
     }
 
     public CheckConfigResult insertSatellite(SatelliteDb satelliteDb) {
