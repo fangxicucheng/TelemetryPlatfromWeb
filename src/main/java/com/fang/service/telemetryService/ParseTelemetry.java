@@ -3,19 +3,16 @@ package com.fang.service.telemetryService;
 
 import com.fang.config.satellite.paraParser.FrameInfo;
 import com.fang.config.satellite.paraParser.ParaParser;
+import com.fang.database.postgresql.entity.ReceiveRecord;
 import com.fang.service.dataBaseManager.DataBaseManagerService;
 import com.fang.service.gpsService.gpsManager.GPSRecordManager;
 import com.fang.service.kafkaService.KafkaRestTemplateService;
-import com.fang.service.restartTimeService.RestartTimeService;
 import com.fang.service.saveService.FileSaver;
-import com.fang.service.saveService.ReceiveRecordService;
-import com.fang.telemetry.TelemetryFrame;
+import com.fang.telemetry.TelemetryFrameModel;
 import com.fang.utils.ConfigUtils;
 import com.fang.utils.StringConvertUtils;
 import lombok.Data;
 
-import java.util.Date;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -51,23 +48,25 @@ public class ParseTelemetry {
         this.waitSeconds = 30;
         this.runMark = true;
         this.fileSaver = new FileSaver(satelliteName, stationName);
-        this.gpsRecordManager=new GPSRecordManager(this.satelliteName,this.stationName);
+        this.gpsRecordManager = new GPSRecordManager(this.satelliteName, this.stationName);
         if (satelliteName.contains("北斗")) {
-           // this.waitSeconds = 60 * 5;
+            // this.waitSeconds = 60 * 5;
         }
         this.telemetryPlanId = this.satelliteId + "_" + this.stationId + "_-1";
         start();
     }
+
     public void enQueue(byte[] bytes) {
         queue.add(bytes);
     }
+
     //处理业务
     public void parseService() {
 
         while (true) {
             try {
                 byte[] receiveBytes = this.isReceiving ? queue.poll(waitSeconds, TimeUnit.SECONDS) : queue.take();
-                if(receiveBytes==null){
+                if (receiveBytes == null) {
                     overTimeNotReceive();
                     continue;
                 }
@@ -75,21 +74,21 @@ public class ParseTelemetry {
                     initThreadLocal();
                 }
                 this.fileSaver.writeLine(receiveBytes);
-                TelemetryFrame frame = new TelemetryFrame();
+                TelemetryFrameModel frame = new TelemetryFrameModel();
                 frame.setTelemetryPlanId(telemetryPlanId);
                 FrameInfo frameInfo = this.paraParser.parseFrameInfoFromBytes(receiveBytes);
                 frame.setRealTimeContent(StringConvertUtils.bytesToHex(frameInfo.getDataBytes()));
                 this.dataQualityManager.setFrameInfo(frameInfo);
-                this.paraParser.parseTelemetryFrame( frameInfo, frame);
+                this.paraParser.parseTelemetryFrame(frameInfo, frame);
                 this.dataQualityManager.serFrame(frame);
                 this.gpsRecordManager.setGpsData(frame);
-                if(frame.getParameterList()==null){
+                if (frame.getParameterList() == null) {
                     System.out.println("开始le");
                 }
-                if(frame==null){
+                if (frame == null) {
                     System.out.println("空数据");
                 }
-                KafkaRestTemplateService.sendKafkaMsg("telemetry",frame);
+                KafkaRestTemplateService.sendKafkaMsg("telemetry", frame);
             } catch (InterruptedException e) {
                 overTimeNotReceive();
                 if (!runMark) {
@@ -110,8 +109,6 @@ public class ParseTelemetry {
         }
 
 
-
-
     }
 
     public void start() {
@@ -123,8 +120,9 @@ public class ParseTelemetry {
     private void overTimeNotReceive() {
         this.isReceiving = false;
         destroyTheadLocal();
-        this.dataQualityManager.refresh();
         saveFile();
+        this.dataQualityManager.refresh();
+
         this.gpsRecordManager.saveGps();
     }
 
@@ -143,6 +141,13 @@ public class ParseTelemetry {
     }
 
     private void saveFile() {
-        this.fileSaver.save();
+        ReceiveRecord receiveRecord = this.fileSaver.save();
+        receiveRecord.setStationName(this.stationName);
+        receiveRecord.setSatelliteName(this.satelliteName);
+        receiveRecord.setFrameNum(this.dataQualityManager.getSerialNum());
+        receiveRecord.setErrorRate(this.dataQualityManager.getErrorCodeRate());
+        receiveRecord.setLocalFrameNum(0);
+        DataBaseManagerService.saveReceiveRecord(receiveRecord);
+
     }
 }

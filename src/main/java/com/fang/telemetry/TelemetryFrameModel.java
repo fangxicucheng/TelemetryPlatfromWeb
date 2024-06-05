@@ -1,6 +1,8 @@
 package com.fang.telemetry;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.fang.database.postgresql.entity.FrameDb;
+import com.fang.database.postgresql.entity.ParaConfigLineDb;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TelemetryFrame {
+public class TelemetryFrameModel {
     private String telemetryPlanId;
     private String frameName;
     private int serialNum;
@@ -29,6 +31,20 @@ public class TelemetryFrame {
     private double errorRate;
     @JSONField(name="parameterList")
     private List<TelemetryParameterModel>parameterList;
+
+    public TelemetryFrameModel(FrameDb frame){
+        this.frameName=frame.getFrameName();
+        if(frame.getParaConfigLineDbList()!=null&&frame.getParaConfigLineDbList().size()>0){
+            for (ParaConfigLineDb paraConfigLineDb : frame.getParaConfigLineDbList()) {
+                if(parameterList==null){
+                    parameterList=new ArrayList<>();
+                }
+                parameterList.add(new TelemetryParameterModel(paraConfigLineDb));
+
+            }
+        }
+    }
+
 
     public void addParameter(TelemetryParameterModel parameterModel){
         if(this.parameterList==null){

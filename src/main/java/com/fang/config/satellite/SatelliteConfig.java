@@ -25,6 +25,7 @@ public class SatelliteConfig {
     private Map<String, List<ThresholdInfo>> thresholdInfoMap;
 
 
+
     @Autowired
     private GPSConfigService gpsConfigService;
 
@@ -126,9 +127,13 @@ public class SatelliteConfig {
         setSatelliteNameBytes(satelliteDb);
         setBdICard(satelliteDb);
         setSatelliteParaParser(satelliteDb);
+        setSatelliteModel(satelliteDb);
     }
 
 
+    private void setSatelliteModel(SatelliteDb satelliteDb){
+        SatelliteModelConfig.setTeleSatelliteNameModel(satelliteDb);
+    }
     private void setSatelliteName(SatelliteDb satelliteDb) {
         ConfigUtils.setSatelliteName(satelliteDb.getSatelliteName(), satelliteDb.getSatelliteId());
     }

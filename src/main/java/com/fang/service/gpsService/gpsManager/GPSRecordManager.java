@@ -1,6 +1,6 @@
 package com.fang.service.gpsService.gpsManager;
 
-import com.fang.telemetry.TelemetryFrame;
+import com.fang.telemetry.TelemetryFrameModel;
 import com.fang.telemetry.TelemetryParameterModel;
 import com.fang.utils.ConfigUtils;
 import com.fang.utils.UTCUtils;
@@ -39,7 +39,7 @@ public class GPSRecordManager {
     }
 
 
-    public void setGpsData(TelemetryFrame frame) {
+    public void setGpsData(TelemetryFrameModel frame) {
 
         if (hasGps && gpsConfigInfo.checkGpsFrame(frame.getFrameName())) {
             for (TelemetryParameterModel parameterModel : frame.getParameterList()) {

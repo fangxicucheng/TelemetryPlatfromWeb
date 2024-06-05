@@ -1,8 +1,7 @@
 package com.fang.config.satelliteNameConfirm;
 
 import com.fang.database.postgresql.entity.SatelliteNameConfig;
-import com.fang.telemetry.TelemetryFrame;
-import com.fang.telemetry.TelemetryParameterModel;
+import com.fang.telemetry.TelemetryFrameModel;
 
 public interface SatelliteNameConfirmInterface {
 
@@ -16,7 +15,7 @@ public interface SatelliteNameConfirmInterface {
 
     void checkFrame(String frameName);
 
-    default void setSatelliteName(TelemetryFrame frame) {
+    default void setSatelliteName(TelemetryFrameModel frame) {
 //        if (needCheckSatellite() && checkFrameName(frame)) {
 //            for (TelemetryParameterModel telemetryParameterModel : frame.getParameterList()) {
 //                setSatelliteNameInfoFromPara(telemetryParameterModel.getParaCode(),telemetryParameterModel.getParaValue());
@@ -24,7 +23,7 @@ public interface SatelliteNameConfirmInterface {
 //        }
     }
 
-    default boolean checkFrameName(TelemetryFrame frame) {
+    default boolean checkFrameName(TelemetryFrameModel frame) {
         return false;
     }
 

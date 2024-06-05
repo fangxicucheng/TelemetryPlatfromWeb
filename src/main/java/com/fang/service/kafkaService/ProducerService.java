@@ -1,6 +1,6 @@
 package com.fang.service.kafkaService;
 
-import com.fang.telemetry.TelemetryFrame;
+import com.fang.telemetry.TelemetryFrameModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProducerService {
   @Autowired
-    KafkaTemplate<String, TelemetryFrame> kafkaTemplate;
+    KafkaTemplate<String, TelemetryFrameModel> kafkaTemplate;
     private int indexTopic1 = 0;
     private int indexTopic2 = 0;
     private int indexTopic3 = 0;

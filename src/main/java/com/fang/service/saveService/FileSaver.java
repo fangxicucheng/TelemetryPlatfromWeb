@@ -54,10 +54,16 @@ public class FileSaver {
         this.dataBytesList.add(dataBytes);
     }
 
-    private void saveRecord() {
+    private ReceiveRecord getRecord() {
         Date startRecord = UTCUtils.convertLocalDateTimeToDate(this.startTime);
         Date endRecord = UTCUtils.convertLocalDateTimeToDate(this.updateTime);
-        DataBaseManagerService.saveReceiveRecord(startRecord,endRecord,this.satelliteName,this.filePath);
+        ReceiveRecord receiveRecord=new ReceiveRecord();
+        receiveRecord.setFilePath(this.filePath);
+        receiveRecord.setStartTime(startRecord);
+        receiveRecord.setEndTime(endRecord);
+        return receiveRecord;
+
+        //DataBaseManagerService.saveReceiveRecord(startRecord,endRecord,this.satelliteName,this.filePath);
     }
 
 
@@ -65,15 +71,16 @@ public class FileSaver {
 
     //  }
 
-    public void save() {
+    public ReceiveRecord save() {
         byte[] saveBytes = getSaveBytes();
         if (saveBytes != null) {
             this.filePath = getFilePath();
             saveLocalFile(this.filePath, saveBytes);
             saveOBSFile(this.filePath, saveBytes);
         }
-        saveRecord();
+        ReceiveRecord receiveRecord=getRecord();
         refresh();
+        return receiveRecord;
     }
 
     private String getFilePath() {

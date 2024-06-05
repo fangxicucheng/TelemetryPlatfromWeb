@@ -7,7 +7,7 @@ import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.service.dataBaseManager.DataBaseManagerService;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.telemetryService.SatelliteTimeManager;
-import com.fang.telemetry.TelemetryFrame;
+import com.fang.telemetry.TelemetryFrameModel;
 import com.fang.telemetry.TelemetryParameterModel;
 import com.fang.utils.*;
 import lombok.Data;
@@ -60,7 +60,7 @@ public class BaseParaParser implements ParaParser {
     }
 
     @Override
-    public void parseTelemetryFrame( FrameInfo frameInfo, TelemetryFrame frame) {
+    public void parseTelemetryFrame( FrameInfo frameInfo, TelemetryFrameModel frame) {
         frame.setDelayFlag(frameInfo.getFrameFlag());
         frame.setCorrSate(frameInfo.isValid());
         frame.setFrameFlag(frameInfo.getFrameFlag());

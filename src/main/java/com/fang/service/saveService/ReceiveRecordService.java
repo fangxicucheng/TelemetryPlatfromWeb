@@ -42,6 +42,10 @@ public class ReceiveRecordService {
         this.receiveRecordDao.save(receiveRecord);
     }
 
+    public ReceiveRecord getReceiveRecordById(Integer id){
+        return this.receiveRecordDao.findById(id).get();
+    }
+
 
     public Page<ReceiveRecord> getTelemetryReplayList(ReceiveRecordRequestInfo requestInfo) {
         Pageable pageable = PageRequest.of(requestInfo.getPageNum(), requestInfo.getPageSize(), Sort.by("startTime").descending());

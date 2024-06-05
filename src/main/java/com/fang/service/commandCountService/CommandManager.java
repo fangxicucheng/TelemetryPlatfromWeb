@@ -1,11 +1,10 @@
 package com.fang.service.commandCountService;
 
 import com.fang.database.postgresql.entity.CommandCount;
-import com.fang.telemetry.TelemetryFrame;
+import com.fang.telemetry.TelemetryFrameModel;
 import com.fang.telemetry.TelemetryParameterModel;
 import com.fang.utils.ConfigUtils;
 import lombok.Data;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +51,7 @@ public class CommandManager {
         this.hasInsertCommandCount = 0;
     }
 
-    public void setCommandCount(TelemetryFrame frame) {
+    public void setCommandCount(TelemetryFrameModel frame) {
         if (commandCountMap.containsKey(frame.getFrameName())) {
 
         }
@@ -60,7 +59,7 @@ public class CommandManager {
 
     }
 
-    private void setCommandParaValue(TelemetryFrame frame, CommandCount commandCount) {
+    private void setCommandParaValue(TelemetryFrameModel frame, CommandCount commandCount) {
         String errorCommandParaCode = commandCount.getErrorCommandParaCode();
         String totalCommandParaCode = commandCount.getTotalCommandParaCode();
         int totalCommandCountBuffer = 0;

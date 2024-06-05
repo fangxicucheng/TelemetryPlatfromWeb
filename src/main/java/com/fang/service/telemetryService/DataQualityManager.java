@@ -1,7 +1,7 @@
 package com.fang.service.telemetryService;
 
 import com.fang.config.satellite.paraParser.FrameInfo;
-import com.fang.telemetry.TelemetryFrame;
+import com.fang.telemetry.TelemetryFrameModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +22,7 @@ public class DataQualityManager {
         }
     }
 
-    public void serFrame(TelemetryFrame frame){
+    public void serFrame(TelemetryFrameModel frame){
         frame.setErrorCodeNum(this.errorCount);
         frame.setSerialNum(this.serialNum);
         frame.setErrorRate(this.errorCodeRate);

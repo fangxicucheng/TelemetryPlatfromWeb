@@ -21,5 +21,10 @@ public class ReceiveRecordController {
 
     }
 
+    @GetMapping("/getRecord/{id}")
+    public ReceiveRecord getReceiveRecordById(@PathVariable Integer id){
+        return this.receiveRecordService.getReceiveRecordById(id);
+    }
+
 
 }

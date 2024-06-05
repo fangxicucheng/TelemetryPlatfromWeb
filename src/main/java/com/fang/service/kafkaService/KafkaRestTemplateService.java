@@ -1,7 +1,7 @@
 package com.fang.service.kafkaService;
 
 import com.alibaba.fastjson2.JSON;
-import com.fang.telemetry.TelemetryFrame;
+import com.fang.telemetry.TelemetryFrameModel;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -19,7 +19,7 @@ public class KafkaRestTemplateService {
         kafkaTemplate=this.kafkaTemplateAutoWried;
     }
 
-    public static void sendKafkaMsg(String stationId,TelemetryFrame frame){
+    public static void sendKafkaMsg(String stationId, TelemetryFrameModel frame){
         String frameStr = JSON.toJSONString(frame);
 
         kafkaTemplate.send(stationId,frameStr);

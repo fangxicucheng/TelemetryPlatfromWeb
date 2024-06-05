@@ -59,12 +59,12 @@ public class DataBaseManagerService {
         return restartTimeService.getRestartTimeBySatelliteName(satelliteName);
     }
 
-    public static void saveReceiveRecord(Date startTime,Date endTime,String satelliteName,String filePath){
-        ReceiveRecord receiveRecord=new ReceiveRecord();
-        receiveRecord.setStartTime(startTime);
-        receiveRecord.setEndTime(endTime);
-        receiveRecord.setSatelliteName(satelliteName);
-        receiveRecord.setFilePath(filePath);
+    public static void saveReceiveRecord(ReceiveRecord receiveRecord){
+//        ReceiveRecord receiveRecor=new ReceiveRecord();
+////        receiveRecord.setStartTime(startTime);
+////        receiveRecord.setEndTime(endTime);
+////        receiveRecord.setSatelliteName(satelliteName);
+////        receiveRecord.setFilePath(filePath);d
 
         receiveRecordService.save(receiveRecord);
 

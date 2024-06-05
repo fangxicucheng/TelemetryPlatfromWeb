@@ -82,7 +82,12 @@ public class ParaConfigLineConfigClass {
     }
 
     public Integer getParaCodeCount() {
-        this.count.set(this.count.get() + 1);
+        try{        this.count.set(this.count.get() + 1);}
+        catch (Exception e)
+        {
+            System.out.println(this.paraName + this.paraCode);
+        }
+
         return this.count.get();
     }
 
