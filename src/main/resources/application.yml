@@ -13,6 +13,7 @@ spring:
           min-idle: 5
       port: 6379
       host: localhost
+
 #   redis:
 #    cluster:
 #      nodes:

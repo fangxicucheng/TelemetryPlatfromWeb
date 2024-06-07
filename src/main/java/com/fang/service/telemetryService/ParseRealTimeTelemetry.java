@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 @Data
 
-public class ParseTelemetry {
+public class ParseRealTimeTelemetry {
     private String satelliteId;
     private String satelliteName;
     private String stationName;
@@ -37,7 +37,7 @@ public class ParseTelemetry {
     private GPSRecordManager gpsRecordManager;
 
 
-    public ParseTelemetry(String satelliteName, String stationName, String stationId) {
+    public ParseRealTimeTelemetry(String satelliteName, String stationName, String stationId) {
         this.satelliteName = satelliteName;
         this.stationName = stationName;
         this.stationId = stationId;

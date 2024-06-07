@@ -1,6 +1,6 @@
 package com.fang.service.stationService;
 
-import com.fang.service.telemetryService.ParseTelemetry;
+import com.fang.service.telemetryService.ParseRealTimeTelemetry;
 import com.fang.utils.ParseBDUtils;
 import com.fang.utils.ConfigUtils;
 import com.fang.utils.StringConvertUtils;
@@ -25,7 +25,7 @@ public class DataTransfer {
     private String stationId;
 
     private Map<String, LocalTime> satelliteReceiveDateTime;
-    private Map<String, ParseTelemetry> parseTelemetryMap;
+    private Map<String, ParseRealTimeTelemetry> parseTelemetryMap;
     //转换线程;
     private Thread transferThread;
 
@@ -93,7 +93,7 @@ public class DataTransfer {
                     parseTelemetryMap=new HashMap<>();
                 }
                 if (!parseTelemetryMap.containsKey(satelliteName)) {
-                    parseTelemetryMap.put(satelliteName, new ParseTelemetry(satelliteName,this.stationName,this.stationId));
+                    parseTelemetryMap.put(satelliteName, new ParseRealTimeTelemetry(satelliteName,this.stationName,this.stationId));
                 }
                 parseTelemetryMap.get(satelliteName).enQueue(receiveBuf);
 
@@ -134,7 +134,7 @@ public class DataTransfer {
                     parseTelemetryMap=new HashMap<>();
                 }
                 if (!parseTelemetryMap.containsKey(satelliteName)) {
-                    parseTelemetryMap.put(satelliteName, new ParseTelemetry(satelliteName,this.stationName,this.stationId));
+                    parseTelemetryMap.put(satelliteName, new ParseRealTimeTelemetry(satelliteName,this.stationName,this.stationId));
                 }
                 parseTelemetryMap.get(satelliteName).enQueue(bytes);
 

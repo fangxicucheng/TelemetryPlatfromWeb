@@ -43,12 +43,12 @@ public class RedisCaffeineCache extends AbstractValueAdaptingCache {
 
         Object value = this.caffeineCache.getIfPresent(key);
         if (value != null) {
-            System.out.println("找到本地数据"+value);
+           // System.out.println("找到本地数据"+value);
             return value;
         }
         value = this.redisTemplate.opsForValue().get(key);
         if (value != null) {
-            System.out.println("找到远程数据"+value);
+        //    System.out.println("找到远程数据"+value);
             this.caffeineCache.put(key, value);
         }
 
