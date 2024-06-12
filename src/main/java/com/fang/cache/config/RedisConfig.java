@@ -19,7 +19,7 @@ public class RedisConfig
 //        // 配置 Redis 连接工厂（使用 Lettuce）
 //        return new LettuceConnectionFactory();
 //    }
-    @Bean
+   // @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
@@ -36,7 +36,7 @@ public class RedisConfig
         return template;
     }
 
-    @Bean
+   // @Bean
     public RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
 
                                                    MessageListenerAdapter removedListenerAdapter, MessageListenerAdapter setListenerAdapter) {
@@ -47,11 +47,11 @@ public class RedisConfig
         container.addMessageListener(setListenerAdapter, new PatternTopic("__keyevent@*__:set"));
         return container;
     }
-    @Bean
+   // @Bean
     public MessageListenerAdapter removedListenerAdapter(RedisKeyRemoveListener listener) {
         return new MessageListenerAdapter(listener, "onMessage");
     }
-    @Bean
+   // @Bean
     public MessageListenerAdapter setListenerAdapter(RedisUpdateAndAddListener listener) {
         return new MessageListenerAdapter(listener, "onMessage");
     }

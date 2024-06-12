@@ -1,6 +1,9 @@
 server:
   port: 8083
 spring:
+#  cache:
+#    caffeine:
+#      spec: expireAfterWrite=30m
   autoconfigure:
     org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
   data:

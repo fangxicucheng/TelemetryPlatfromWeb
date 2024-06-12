@@ -1,5 +1,6 @@
 package com.fang.service.replayService;
 
+import com.alibaba.fastjson2.JSON;
 import com.fang.database.postgresql.entity.ReceiveRecord;
 import com.fang.service.saveService.ReceiveRecordService;
 import com.fang.service.telemetryService.ParseReplayTelemetry;
@@ -17,7 +18,9 @@ public class ReplayService
 {
     @Autowired
     private ReceiveRecordService receiveRecordService;
-    @Cacheable(value="caffeineCacheManager",key="#id+'_'+#serialNum",sync = true)
+    @Autowired
+    private ReplayBufferService replayBufferService;
+/*    @Cacheable(value="replay",key="#id+'_'+#serialNum",cacheManager = "caffeineCacheManager")
     public TelemetryFrameModel getTelemetryFrameModel( int serialNum,int id) throws IOException {
 
         ReceiveRecord receiveRecord = receiveRecordService.getReceiveRecordById(id);
@@ -26,16 +29,26 @@ public class ReplayService
         for (int i = 0; i < telemetryFrameModelList.size(); i++) {
 
             if(i!=serialNum-1){
-                putTelemetryFrameModel(i+1,id,telemetryFrameModelList.get(i));
+                replayBufferService.putTelemetryFrameModel(i+1,id,telemetryFrameModelList.get(i));
             }
         }
         System.out.println("再次緩存");
         return telemetryFrameModelList.get(serialNum-1);
-    }
-    @CachePut(value="caffeineCacheManager",key="#id+'_'+#serialNum")
-    public TelemetryFrameModel putTelemetryFrameModel(int serialNum,int id,TelemetryFrameModel frameModel){
+    }*/
+    @Cacheable(value="replay",key="#id+'_'+#serialNum",cacheManager = "caffeineCacheManager")
+    public String getTelemetryFrameModel( int serialNum,int id) throws IOException {
 
-        return frameModel;
+        ReceiveRecord receiveRecord = receiveRecordService.getReceiveRecordById(id);
+        List<TelemetryFrameModel> telemetryFrameModelList = ParseReplayTelemetry.parseTelemetry(receiveRecord.getFilePath());
+
+        for (int i = 0; i < telemetryFrameModelList.size(); i++) {
+
+            if(i!=serialNum-1){
+                replayBufferService.putTelemetryFrameModel(i+1,id,telemetryFrameModelList.get(i));
+            }
+        }
+        System.out.println("再次緩存");
+        return JSON.toJSONString(telemetryFrameModelList.get(serialNum-1));
     }
 
 
