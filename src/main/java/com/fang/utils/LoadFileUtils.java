@@ -14,7 +14,7 @@ public class LoadFileUtils {
         if (filePath.contains(".dat")) {
             byte[] bytes = FileUtils.readFileToByteArray(new File(filePath));
             if (filePath.contains("宽带节点")) {
-                for (int i = 0; i < bytes.length; i = +285) {
+                for (int i = 0; i < bytes.length; i =i +285) {
                     if (i + 285 <= bytes.length)
                         receiveBytesList.add(Arrays.copyOfRange(bytes, i, i + 285));
                 }
@@ -27,7 +27,7 @@ public class LoadFileUtils {
             }
         } else if (filePath.contains(".txt")) {
             String content = FileUtils.readFileToString(new File(filePath));
-            String[] strArray = content.replaceAll("\\\\r", "").split("\\\\n");
+            String[] strArray = content.replaceAll("\\r", "").split("\\n");
             if (strArray!=null&&strArray.length>0) {
                 for (String str : strArray) {
                     receiveBytesList.add(str.getBytes("US-ASCII"));

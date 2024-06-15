@@ -143,7 +143,7 @@ public class ParseRealTimeTelemetry {
     private void saveFile() {
         ReceiveRecord receiveRecord = this.fileSaver.save();
         receiveRecord.setStationName(this.stationName);
-        receiveRecord.setSatelliteName(this.satelliteName);
+        receiveRecord.setSatelliteName(this.satelliteName.replaceAll("_北斗",""));
         receiveRecord.setFrameNum(this.dataQualityManager.getSerialNum());
         receiveRecord.setErrorRate(this.dataQualityManager.getErrorCodeRate());
         receiveRecord.setLocalFrameNum(0);

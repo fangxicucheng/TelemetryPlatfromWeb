@@ -77,7 +77,8 @@ public class ReceiveRecordService {
                 return query.where(predicateList.toArray(predicateList.toArray(new Predicate[predicateList.size()]))).getRestriction();
             }
         };
-        return receiveRecordDao.findAll(spec,pageable);
+        Page<ReceiveRecord> all = receiveRecordDao.findAll(spec, pageable);
+        return all;
 
     }
 

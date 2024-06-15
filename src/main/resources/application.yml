@@ -1,7 +1,9 @@
 server:
   port: 8083
 spring:
-#  cache:
+  jackson:
+    time-zone: Asia/Shanghai
+  #  cache:
 #    caffeine:
 #      spec: expireAfterWrite=30m
   autoconfigure:
@@ -45,12 +47,12 @@ spring:
     show-sql: false
   datasource:
     mysqlsource:
-      jdbc-url: jdbc:mysql://127.0.0.1:3306/telemetry_data?useSSL=false&serverTimezone=UTC&useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8
+      jdbc-url: jdbc:mysql://127.0.0.1:3306/telemetry_data?useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8
       driver-class-name: com.mysql.cj.jdbc.Driver
       username: root
       password: 123456
     postgresqlsource:
-      jdbc-url: jdbc:postgresql://127.0.0.1:5432/telemetry
+      jdbc-url: jdbc:postgresql://127.0.0.1:5432/telemetry?serverTimezone=Asia/Shanghai
       driver-class-name: org.postgresql.Driver
       username: postgres
       password: 123456

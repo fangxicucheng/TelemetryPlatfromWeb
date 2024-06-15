@@ -29,7 +29,7 @@ public class FileSaver {
     private String filePath;
 
     public FileSaver(String satelliteName, String stationName) {
-        this.satelliteName = satelliteName;
+        this.satelliteName = satelliteName.replaceAll("_北斗","");
         this.stationName = stationName;
         this.dataBytesList = new ArrayList<>();
     }
@@ -132,7 +132,7 @@ public class FileSaver {
     }
 
     private boolean checkIsBd() {
-        return this.satelliteName.contains("北斗");
+        return this.stationName.contains("北斗");
     }
 
     private String getFileName() {

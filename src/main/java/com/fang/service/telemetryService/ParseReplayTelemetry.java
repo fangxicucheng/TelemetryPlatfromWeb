@@ -33,7 +33,7 @@ public class ParseReplayTelemetry {
 
         String satelliteName = infoArray[2];
         String stationName = infoArray[1];
-        if (stationName.contains("北斗")&&satelliteName.contains("_北斗")) {
+        if (stationName.contains("北斗")&&!satelliteName.contains("_北斗")) {
             satelliteName += "_北斗";
         }
         String satelliteId = ConfigUtils.getSatelliteIdBySatelliteName(satelliteName);
