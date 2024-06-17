@@ -256,7 +256,13 @@ public class BaseParaParser implements ParaParser {
         this.exceptionManager.detroyThread();
         this.satelliteConfigClass.destroyTread();
         SatelliteTimeManager satelliteTimeManager = this.satelliteTimeManagerThreadLocal.get();
-        satelliteTimeManager.saveRestartTime();
+        if(satelliteTimeManager!=null){
+
+            satelliteTimeManager.saveRestartTime();
+
+        }
+
+
         this.satelliteTimeManagerThreadLocal.remove();
     }
 }

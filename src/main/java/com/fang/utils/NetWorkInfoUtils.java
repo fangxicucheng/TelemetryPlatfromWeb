@@ -11,7 +11,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NetWorkInfoUtils {
+public class  NetWorkInfoUtils {
 
   public static List<InetAddress> getMachineIpAddress(){
 
