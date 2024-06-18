@@ -37,7 +37,6 @@ public class ReplayService
     }*/
     @Cacheable(value="replay",key="#id+'_'+#serialNum",cacheManager = "caffeineCacheManager")
     public String getTelemetryFrameModel( int serialNum,int id) throws IOException {
-
         ReceiveRecord receiveRecord = receiveRecordService.getReceiveRecordById(id);
         List<TelemetryFrameModel> telemetryFrameModelList = ParseReplayTelemetry.parseTelemetry(receiveRecord.getFilePath());
 

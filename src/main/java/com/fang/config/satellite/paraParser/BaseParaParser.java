@@ -94,13 +94,17 @@ public class BaseParaParser implements ParaParser {
             }
             frame.setFrameFlag(frameInfo.getFrameFlag() );
             SatelliteTimeManager satelliteTimeManager = this.satelliteTimeManagerThreadLocal.get();
-            if (frameInfo.getFrameFlag() == 0) {
-                frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeStr());
-                frame.setRestartTime(satelliteTimeManager.getRestartTimeStr());
-            } else {
-                frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeDelayStr());
-                frame.setRestartTime(satelliteTimeManager.getRestartTimeDelayStr());
+            if(satelliteTimeManager!=null){
+                if (frameInfo.getFrameFlag() == 0) {
+
+                    frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeStr());
+                    frame.setRestartTime(satelliteTimeManager.getRestartTimeStr());
+                } else {
+                    frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeDelayStr());
+                    frame.setRestartTime(satelliteTimeManager.getRestartTimeDelayStr());
+                }
             }
+
         }
     }
     @Override
