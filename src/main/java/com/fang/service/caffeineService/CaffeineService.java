@@ -11,7 +11,7 @@ public class CaffeineService {
     private BufferService bufferService;
     @Cacheable(value="caffeineCacheManager",key="#recordId+'_'+#serialNum")
     public String testGet(int recordId, int serialNum) {
-        System.out.println("获取");
+
         for (int i = 0; i < 200; i++) {
 
             if(i!=serialNum){

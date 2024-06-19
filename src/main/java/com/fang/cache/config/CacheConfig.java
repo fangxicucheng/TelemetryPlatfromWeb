@@ -12,27 +12,27 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class CacheConfig {
-    //    @Bean
-//    public RedisCaffeineCacheManager redisCaffeineCacheManager(RedisTemplate<String, Object> redisTemplate){
-//        return new RedisCaffeineCacheManager(redisTemplate);
-//    }
     @Bean("caffeineCacheManager")
-    public CacheManager cacheManager(Caffeine<Object,Object> caffeineCache) {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCaffeine(caffeineCache);
-        return cacheManager;
+    public RedisCaffeineCacheManager redisCaffeineCacheManager(RedisTemplate<String, Object> redisTemplate) {
+        return new RedisCaffeineCacheManager(redisTemplate);
     }
-    @Bean("caffeineCache")
-    public Caffeine<Object,Object>getCaffeineCache(){
-       return Caffeine.newBuilder()
-                // 设置最后一次写入或访问后经过固定时间过期
-                .expireAfterWrite(30, TimeUnit.MINUTES);
-                // 初始的缓存空间大小
-//                .initialCapacity(100)
-                // 缓存的最大条数
-            //    /*.maximumSize(1000)*/.recordStats()
-           //    ;
-    }
+//    @Bean("caffeineCacheManager")
+//    public CacheManager cacheManager(Caffeine<Object,Object> caffeineCache) {
+//        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+//        cacheManager.setCaffeine(caffeineCache);
+//        return cacheManager;
+//    }
+//    @Bean("caffeineCache")
+//    public Caffeine<Object,Object>getCaffeineCache(){
+//       return Caffeine.newBuilder()
+//                // 设置最后一次写入或访问后经过固定时间过期
+//                .expireAfterWrite(30, TimeUnit.MINUTES);
+//                // 初始的缓存空间大小
+////                .initialCapacity(100)
+//                // 缓存的最大条数
+//            //    /*.maximumSize(1000)*/.recordStats()
+//           //    ;
+//    }
 
 //————————————————
 //

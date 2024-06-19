@@ -5,6 +5,7 @@ import com.fang.database.postgresql.entity.ReceiveRecord;
 import com.fang.service.saveService.ReceiveRecordService;
 import com.fang.service.telemetryService.ParseReplayTelemetry;
 import com.fang.telemetry.TelemetryFrameModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ReplayService
 {
     @Autowired
@@ -46,7 +48,7 @@ public class ReplayService
                 replayBufferService.putTelemetryFrameModel(i+1,id,telemetryFrameModelList.get(i));
             }
         }
-        System.out.println("再次緩存");
+        log.info("再次緩存");
         return JSON.toJSONString(telemetryFrameModelList.get(serialNum-1));
     }
 

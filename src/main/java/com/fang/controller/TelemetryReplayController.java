@@ -2,6 +2,7 @@ package com.fang.controller;
 
 import com.fang.service.replayService.ReplayService;
 import com.fang.telemetry.TelemetryFrameModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-
+@Slf4j
 @RestController
 @RequestMapping("/replay")
 public class TelemetryReplayController {
@@ -26,7 +27,7 @@ public class TelemetryReplayController {
         String telemetryFrameModel = replayService.getTelemetryFrameModel(serialNum, recordId);
         //Duration between = Duration.between(startTime, LocalDateTime.now());
        //*//* System.out.println(between.toMillis());*//*
-        System.out.println(System.currentTimeMillis() - startTime);
+
         return telemetryFrameModel;
     }
 

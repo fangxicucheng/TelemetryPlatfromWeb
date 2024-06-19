@@ -1,12 +1,7 @@
 package com.fang.telemetry.satelliteConfigModel;
-
-import com.fang.database.postgresql.entity.FrameDb;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

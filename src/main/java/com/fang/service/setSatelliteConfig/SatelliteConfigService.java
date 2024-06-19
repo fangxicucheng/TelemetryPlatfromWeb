@@ -91,6 +91,9 @@ public class SatelliteConfigService {
         this.satelliteDbRepository.deleteById(id);
         return getTeleSatelliteDbModelList();
     }
+    public List<String>getAllSatelliteNameList(){
+        return this.satelliteDbRepository.getSatelliteNameList();
+    }
 
     public List<String> getSatelliteNameList(){
 
