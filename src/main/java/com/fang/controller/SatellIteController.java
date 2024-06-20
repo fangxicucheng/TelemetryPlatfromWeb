@@ -53,7 +53,10 @@ public class SatellIteController {
     public List<String> getSatelliteNameList(){
         return this.satelliteConfigService.getSatelliteNameList();
     }
-
+    @GetMapping("/getAllSatelliteNameList")
+    public List<String> getAllSatelliteNameList(){
+        return this.satelliteConfigService.getAllSatelliteNameList();
+    }
     @PostMapping("/download")
     public void downLoadSatelliteConfigFile(@RequestBody Integer satellteId, HttpServletResponse reponse){
 
