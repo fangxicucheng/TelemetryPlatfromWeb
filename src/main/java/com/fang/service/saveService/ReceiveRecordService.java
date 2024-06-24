@@ -17,6 +17,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -47,27 +49,37 @@ public class ReceiveRecordService {
     }
 
 
+    public List<ReceiveRecord>getReceiveRecordList(String satelliteName, List<String> stationNameList, Date startTime,Date endTime)
+    {
+       return receiveRecordDao.findAll(getSpecification(new ArrayList<>(Arrays.asList(satelliteName)) , stationNameList, startTime, endTime));
+    }
+
     public Page<ReceiveRecord> getTelemetryReplayList(ReceiveRecordRequestInfo requestInfo) {
         Pageable pageable = PageRequest.of(requestInfo.getPageNum(), requestInfo.getPageSize(), Sort.by("startTime").descending());
+
+        Page<ReceiveRecord> all = receiveRecordDao.findAll(getSpecification(requestInfo.getSatelliteNameList(),requestInfo.getStationNameList(),requestInfo.getStartTime(),requestInfo.getEndTime()), pageable);
+        return all;
+    }
+    Specification<ReceiveRecord> getSpecification(List<String> satelliteNameList,List<String>stationNameList,Date starTime,Date endTime){
         Specification<ReceiveRecord> spec=new Specification<ReceiveRecord>() {
             @Override
             public Predicate toPredicate(Root<ReceiveRecord> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
 
                 List <Predicate> predicateList=new ArrayList<>();
-                if(requestInfo.getStartTime()!=null){
-                    predicateList.add(builder.greaterThan(root.get("startTime"), requestInfo.getStartTime()));
+                if(starTime!=null){
+                    predicateList.add(builder.greaterThan(root.get("startTime"),starTime));
                 }
-                if(requestInfo.getEndTime()!=null){
-                    predicateList.add(builder.lessThan(root.get("startTime"), requestInfo.getEndTime()));
+                if(endTime!=null){
+                    predicateList.add(builder.lessThan(root.get("startTime"), endTime));
                 }
-                if(requestInfo.getSatelliteNameList()!=null&&requestInfo.getSatelliteNameList().size()>0){
-                    predicateList.add(root.get("satelliteName").in(requestInfo.getSatelliteNameList())) ;
+                if(satelliteNameList!=null&&satelliteNameList.size()>0){
+                    predicateList.add(root.get("satelliteName").in(satelliteNameList)) ;
                 }
-                if(requestInfo.getStationNameList()!=null&&requestInfo.getStationNameList().size()>0){
+                if(stationNameList!=null&&stationNameList.size()>0){
 
                     List<Predicate>preList=new ArrayList<>();
 
-                    for (String stationName : requestInfo.getStationNameList()) {
+                    for (String stationName : stationNameList) {
 
                         preList.add(builder.like(root.get("filePath"),"%"+stationName+"%"));
 
@@ -77,9 +89,9 @@ public class ReceiveRecordService {
                 return query.where(predicateList.toArray(predicateList.toArray(new Predicate[predicateList.size()]))).getRestriction();
             }
         };
-        Page<ReceiveRecord> all = receiveRecordDao.findAll(spec, pageable);
-        return all;
-
+        return spec;
     }
+
+
 
 }

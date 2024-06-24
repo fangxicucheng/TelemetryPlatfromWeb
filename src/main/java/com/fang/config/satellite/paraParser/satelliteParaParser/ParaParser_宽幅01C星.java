@@ -9,11 +9,11 @@ import java.util.Map;
 public class ParaParser_宽幅01C星 extends BaseParaParser {
     private ThreadLocal<Double> v5_1 = new ThreadLocal<>();
     private ThreadLocal<Double> v5_2 = new ThreadLocal<>();
-    private ThreadLocal<Double> v5 =new ThreadLocal<>();// 4.8;
-    private ThreadLocal<Double> sampleTime  =new ThreadLocal<>();//1;
+    private ThreadLocal<Double> v5 = new ThreadLocal<>();// 4.8;
+    private ThreadLocal<Double> sampleTime = new ThreadLocal<>();//1;
     private ThreadLocal<Double> tmc011 = new ThreadLocal<>();//0;
 
-    private ThreadLocal<Double> tmc012= new ThreadLocal<>();// 0;
+    private ThreadLocal<Double> tmc012 = new ThreadLocal<>();// 0;
 
     @Override
     public void initThread() {
@@ -42,88 +42,88 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
     @Override
     public double getSpecialFormulaValue(String paraCode, double paraValue) {
 
-        double calValue=paraValue;
+        double calValue = paraValue;
 
         switch (paraCode) {
             case "RK-C260": {
                 double k = 0.22;
-                calValue=(paraValue * 5 / 255 + k) * 12;
+                calValue = (paraValue * 5 / 255 + k) * 12;
             }
             break;
             case "RK-C266": {
                 double A = 0.714556537;
                 double B = -0.076525602;
-                calValue=paraValue * A * 10 / 4095 + B;
+                calValue = paraValue * A * 10 / 4095 + B;
             }
             break;
             /*母线电压*/
             case "DY-C001": {
-                calValue=dy(paraValue, 7.725, 0);
+                calValue = dy(paraValue, 7.725, 0);
             }
             break;
             /*负载电流*/
             case "DY-C002": {
-                calValue=dy(paraValue, 15.969, 0.2309);
+                calValue = dy(paraValue, 15.969, 0.2309);
             }
             break;
             /*蓄电池A电压*/
             case "DY-C003": {
-                calValue=dy(paraValue, 7.7494, -0.012);
+                calValue = dy(paraValue, 7.7494, -0.012);
             }
             break;
             /*蓄电池B电压*/
             case "DY-C004": {
-                calValue=dy(paraValue, 7.8125, -0.104);
+                calValue = dy(paraValue, 7.8125, -0.104);
             }
             break;
             /*（+X阵，-X阵）输入电流*/
             case "DY-C005": {
-                calValue=dy(paraValue, 12.014, 0.0977);
+                calValue = dy(paraValue, 12.014, 0.0977);
             }
             break;
             /*（+Y阵，-Y阵）输入电流*/
             case "DY-C006": {
-                calValue=dy(paraValue, 11.976, 0.02);
+                calValue = dy(paraValue, 11.976, 0.02);
             }
             break;
             /*主误差放大器电压*/
             case "DY-C007": {
-                calValue=dy(paraValue, 3.0596, -0.058);
+                calValue = dy(paraValue, 3.0596, -0.058);
             }
             break;
             /*A-BEA电压（充电器恒流恒压分界点）*/
             case "DY-C008": {
-                calValue=dy(paraValue, 3.0627, 0.0005);
+                calValue = dy(paraValue, 3.0627, 0.0005);
             }
             break;
             /*蓄电池A充电电流1*/
             case "DY-C009": {
-                calValue=dy(paraValue, 4.043, -0.1317);
+                calValue = dy(paraValue, 4.043, -0.1317);
             }
             break;
             /*蓄电池A充电电流2*/
             case "DY-C010": {
-                calValue=dy(paraValue, 4.0154, 0.0941);
+                calValue = dy(paraValue, 4.0154, 0.0941);
             }
             break;
             /*蓄电池A充电器1输入电流*/
             case "DY-C011": {
-                calValue=dy(paraValue, 5.9241, -0.4289);
+                calValue = dy(paraValue, 5.9241, -0.4289);
             }
             break;
             /*蓄电池A充电器2输入电流*/
             case "DY-C012": {
-                calValue=dy(paraValue, 5.9202, -0.4258);
+                calValue = dy(paraValue, 5.9202, -0.4258);
             }
             break;
             /*蓄电池A充电器3输入电流*/
             case "DY-C013": {
-                calValue=dy(paraValue, 5.9417, -0.4405);
+                calValue = dy(paraValue, 5.9417, -0.4405);
             }
             break;
             /*蓄电池A充电器4输入电流*/
             case "DY-C014": {
-                calValue=dy(paraValue, 5.9697, -0.5207);
+                calValue = dy(paraValue, 5.9697, -0.5207);
             }
             break;
             /*蓄电池A单体1电压*/
@@ -140,42 +140,42 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
             case "DY-C020":
                 /*蓄电池A单体7电压*/
             case "DY-C021": {
-                calValue=dy(paraValue, 1, 0);
+                calValue = dy(paraValue, 1, 0);
             }
             break;
             /*B-BEA电压（充电器恒流恒压分界点）*/
             case "DY-C022": {
-                calValue=dy(paraValue, 3.0386, 0.0449);
+                calValue = dy(paraValue, 3.0386, 0.0449);
             }
             break;
             /*蓄电池B充电电流1*/
             case "DY-C023": {
-                calValue=dy(paraValue, 4.0304, -0.1928);
+                calValue = dy(paraValue, 4.0304, -0.1928);
             }
             break;
             /*蓄电池B充电电流2*/
             case "DY-C024": {
-                calValue=dy(paraValue, 4.0211, -0.0998);
+                calValue = dy(paraValue, 4.0211, -0.0998);
             }
             break;
             /*蓄电池B充电器1输入电流*/
             case "DY-C025": {
-                calValue=dy(paraValue, 5.9135, -0.426);
+                calValue = dy(paraValue, 5.9135, -0.426);
             }
             break;
             /*蓄电池B充电器2输入电流*/
             case "DY-C026": {
-                calValue=dy(paraValue, 5.9801, -0.4757);
+                calValue = dy(paraValue, 5.9801, -0.4757);
             }
             break;
             /*蓄电池B充电器3输入电流*/
             case "DY-C027": {
-                calValue=dy(paraValue, 5.9066, -0.4114);
+                calValue = dy(paraValue, 5.9066, -0.4114);
             }
             break;
             /*蓄电池B充电器4输入电流*/
             case "DY-C028": {
-                calValue=dy(paraValue, 5.9415, -0.4316);
+                calValue = dy(paraValue, 5.9415, -0.4316);
             }
             break;
             /*蓄电池B单体1电压*/
@@ -192,71 +192,71 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
             case "DY-C034":
                 /*蓄电池B单体7电压*/
             case "DY-C035": {
-                calValue=dy(paraValue, 1, 0);
+                calValue = dy(paraValue, 1, 0);
             }
             break;
             /*蓄电池A放电电流*/
             case "DY-C036": {
-                calValue=dy(paraValue, 15.954, 0.0433);
+                calValue = dy(paraValue, 15.954, 0.0433);
             }
             break;
             /*蓄电池B放电电流*/
             case "DY-C037": {
-                calValue=dy(paraValue, 15.862, 0.0135);
+                calValue = dy(paraValue, 15.862, 0.0135);
             }
             break;
             /*控制+12V电压遥测*/
             case "DY-C038": {
-                calValue=dy255(paraValue, 4.1072, 0);
+                calValue = dy255(paraValue, 4.1072, 0);
             }
             break;
             /*下位机-12V电压*/
             case "DY-C039": {
-                calValue=dy255(paraValue, -3.9294, 0);
+                calValue = dy255(paraValue, -3.9294, 0);
             }
             break;
             /*下位机+12V电压*/
             case "DY-C040": {
-                calValue=dy255(paraValue, 4.0048, 0);
+                calValue = dy255(paraValue, 4.0048, 0);
             }
             break;
             /*下位机5V电压*/
             case "DY-C041": {
-                calValue=dy255(paraValue, 2.0008, 0);
+                calValue = dy255(paraValue, 2.0008, 0);
             }
             break;
             case "GP-C021":
             case "GP-C022": {
-                calValue=paraValue * 2 + 30;
+                calValue = paraValue * 2 + 30;
             }
             break;
             case "TM-C011": {
-                double value=((long) paraValue & 0xFFFFFF00);
-                this.tmc011.set (value );
+                double value = ((long) paraValue & 0xFFFFFF00);
+                this.tmc011.set(value);
             }
             break;
 
             case "ZG-C060": {
-                calValue=paraValue + this.tmc011.get();
+                calValue = paraValue + this.tmc011.get();
             }
             break;
             case "TM-C012": {
-               double value= ((long) paraValue) & 0xFFFFFF00;
+                double value = ((long) paraValue) & 0xFFFFFF00;
                 this.tmc012.set(value);
             }
             break;
             case "ZG-C090": {
-                calValue=paraValue + this.tmc012.get();
+                calValue = paraValue + this.tmc012.get();
             }
             break;
             case "ZG-C100": {
-                calValue=paraValue + this.tmc012.get();
+                calValue = paraValue + this.tmc012.get();
             }
             break;
 
 
             case "ZG-C042": {
-                calValue=dy(paraValue, 2.0008, 0);
+                calValue = dy(paraValue, 2.0008, 0);
             }
             break;
 
@@ -267,7 +267,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -5.7;
                 double b = 4474.95;
                 double c = -69934.65;
-                calValue=calculateT(R, a, b, c);
+                calValue = calculateT(R, a, b, c);
             }
             break;
 
@@ -302,7 +302,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -6.01188;
                 double b = 4622.533;
                 double c = -86421.7;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
 
@@ -323,7 +323,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -6.01188;
                 double b = 4622.533;
                 double c = -86421.7;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
 
@@ -358,7 +358,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -6.01188;
                 double b = 4622.533;
                 double c = -86421.7;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             case "RK-C357":
@@ -388,7 +388,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -6.01188;
                 double b = 4622.533;
                 double c = -86421.7;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             case "RK-C386":
@@ -419,7 +419,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -6.01188;
                 double b = 4622.533;
                 double c = -86421.7;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             case "RK-C412":
@@ -452,7 +452,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -6.01188;
                 double b = 4622.533;
                 double c = -86421.7;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             case "RK-C438":
@@ -463,17 +463,18 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -2.30134;
                 double b = 2737.27;
                 double c = 121842.04;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             case "RK-C442": {
-                v5_1.set( paraValue * 5 / 255);;
-                calValue=v5_1.get();
+                v5_1.set(paraValue * 5 / 255);
+                ;
+                calValue = v5_1.get();
             }
             break;
             case "RK-C443": {
                 v5_2.set(paraValue * 5 / 255);
-                calValue=v5_2.get();
+                calValue = v5_2.get();
             }
             break;
             /*F1推力器头部温度*/
@@ -482,7 +483,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -1.55514;
                 double b = 4198.9898;
                 double c = -191780.6207;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             /*F2推力器头部温度*/
@@ -491,7 +492,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -1.57640;
                 double b = 4208.0506;
                 double c = -192016.7885;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             /*F3推力器头部温度*/
@@ -500,7 +501,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -1.65099;
                 double b = 4208.0506;
                 double c = -188884.1835;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             /*F4推力器头部温度*/
@@ -509,7 +510,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -1.45753;
                 double b = 4162.0182;
                 double c = -182943.0829;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             /*F5推力器头部温度*/
@@ -518,7 +519,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -1.42319;
                 double b = 4116.4526;
                 double c = -178823.3003;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             /*F5法兰盘*/
@@ -527,7 +528,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -1.61219;
                 double b = 4240.2913;
                 double c = -191663.1638;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
 
@@ -591,31 +592,31 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
             case "XJ-C714":
             case "XJ-C715":
             case "XJ-C716": {
-                calValue=Math.pow(10, (0.0359 * paraValue + 5.76) / 20);
+                calValue = Math.pow(10, (0.0359 * paraValue + 5.76) / 20);
             }
             break;
 
             case "FL-C003": {
-                calValue=4050 / (4.98 + Math.log(7500 * paraValue / (256 - paraValue))) - 273;
+                calValue = 4050 / (4.98 + Math.log(7500 * paraValue / (256 - paraValue))) - 273;
             }
             break;
             case "ST-C004": {
                 if (paraValue != 0)
                     this.sampleTime.set(paraValue / 1000000);
-                calValue=paraValue / 1000000;
+                calValue = paraValue / 1000000;
             }
             break;
             case "ST-C001":
             case "ST-C002":
             case "ST-C003": {
-                calValue=paraValue / 450000 / this.sampleTime.get();
+                calValue = paraValue / 450000 / this.sampleTime.get();
             }
             break;
             case "ST-C056":
             case "ST-C057":
             case "ST-C058":
             case "ST-C059": {
-                calValue=tout(paraValue, 4300, 298.15, 12);
+                calValue = tout(paraValue, 4300, 298.15, 12);
             }
             break;
             case "RK-C500":
@@ -696,7 +697,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -6.01188;
                 double b = 4622.533;
                 double c = -86421.7;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             case "RK-C568":
@@ -803,63 +804,70 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                 double a = -6.01188;
                 double b = 4622.533;
                 double c = -86421.7;
-                calValue=calculateMF501(R, a, b, c);
+                calValue = calculateMF501(R, a, b, c);
             }
             break;
             case "ZY-C172": {
-                calValue=paraValue * 4 + 6800000;
+                calValue = paraValue * 4 + 6800000;
             }
             break;
             case "ZY-C174": {
-                calValue=paraValue / Math.pow(2, 16) + 1.5;
+                calValue = paraValue / Math.pow(2, 16) + 1.5;
             }
             break;
             case "ZY-C182": {
-                calValue=paraValue / Math.pow(2, 29) + 1.06e-3;
+                calValue = paraValue / Math.pow(2, 29) + 1.06e-3;
             }
             break;
             case "ZY-C304": {
-                calValue=paraValue * 4 + 6.8e6;
+                calValue = paraValue * 4 + 6.8e6;
             }
             break;
             case "ZY-C306": {
-                calValue=paraValue / 0x10000 + 1.5;
+                calValue = paraValue / 0x10000 + 1.5;
             }
             break;
             case "ZY-C314": {
-                calValue=paraValue / 0x20000000 + 1.06e-3;
+                calValue = paraValue / 0x20000000 + 1.06e-3;
             }
             break;
             case "WL-C001":
             case "WL-C090": {
-                calValue=paraValue * 8 + 1;
+                calValue = paraValue * 8 + 1;
             }
+            break;
             case "WL-C008":
             case "WL-C097": {
-                calValue=paraValue * 8 + 2;
+                calValue = paraValue * 8 + 2;
             }
+            break;
             case "WL-C015":
             case "WL-C104": {
-                calValue=paraValue * 8 + 3;
+                calValue = paraValue * 8 + 3;
             }
+            break;
             case "WL-C022":
             case "WL-C111": {
-                calValue=paraValue * 8 + 4;
+                calValue = paraValue * 8 + 4;
             }
+            break;
             case "WL-C029":
             case "WL-118": {
-                calValue=paraValue * 8 + 5;
+                calValue = paraValue * 8 + 5;
             }
+            break;
             case "WL-C036":
             case "WL-C125": {
-                calValue=paraValue * 8 + 6;
+                calValue = paraValue * 8 + 6;
             }
+            break;
             case "WL-C043":
             case "WL-C051":
             case "WL-C132":
             case "WL-C140": {
-                calValue=paraValue * 8 + 7;
+                calValue = paraValue * 8 + 7;
             }
+            break;
             case "CA-C003":
             case "CA-C004":
             case "CA-C005":
@@ -1052,20 +1060,23 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
             case "CA-C538":
             case "CA-C539":
             case "CA-C540": {
-                calValue=Math.pow(10, (paraValue * 0.0359 + 5.76) / 20);
+                calValue = Math.pow(10, (paraValue * 0.0359 + 5.76) / 20);
             }
+            break;
             case "ZN-C008": {
-                calValue=paraValue + 2017;
+                calValue = paraValue + 2017;
             }
+            break;
             case "ZN-C209":
             case "ZN-C210":
             case "ZN-C211":
             case "ZN-C212": {
-                calValue=(paraValue * 5 / 255 + 0.22) * 12;
+                calValue = (paraValue * 5 / 255 + 0.22) * 12;
             }
+            break;
         }
 
-        return   calValue;
+        return calValue;
     }
 
     @Override

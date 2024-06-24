@@ -1,5 +1,4 @@
 package com.fang.config.satellite.paraParser;
-
 import com.fang.config.exception.ExceptionManager;
 import com.fang.config.satellite.configStruct.*;
 import com.fang.database.postgresql.entity.CountPara;
@@ -29,7 +28,6 @@ public class BaseParaParser implements ParaParser {
     public String getDisplayValue(String paraCode, Double paraValue ,int frameFlag,SatelliteTimeManager satelliteTimeManager) {
         return paraValue.toString();
     }
-
     @Override
     public void init(String satelliteName, SatelliteDb satelliteDb, List<ThresholdInfo> thresholdInfoList) {
         this.satelliteName = satelliteName;
