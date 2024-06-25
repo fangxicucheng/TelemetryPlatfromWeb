@@ -1175,6 +1175,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
             }
             break;
             case "ZT-C003": {
+
                 if (frameFlag == 0) {
                     satelliteTimeManager.setSatelliteTime(paraValue);
                     return satelliteTimeManager.getSatelliteTimeStr();
@@ -1183,6 +1184,7 @@ public class ParaParser_宽幅01C星 extends BaseParaParser {
                     satelliteTimeManager.setResRestartDelayTime(paraValue);
                     return satelliteTimeManager.getSatelliteTimeDelayStr();
                 }
+
             }
             break;
         }

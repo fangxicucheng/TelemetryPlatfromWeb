@@ -261,6 +261,8 @@ public class ExcelUtils {
         return listMap;
     }
 
+
+
     public static void exportExcelFile(List<List<String[]>> needExport, OutputStream outputStream, List<Map<Integer, String[]>>excelListShowMapList) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook();
         CellStyle headerStyle = workbook.createCellStyle();
@@ -296,33 +298,18 @@ public class ExcelUtils {
                         sheet.autoSizeColumn(i1);
                     }
                     if(excelListShowMapList!=null&&excelListShowMapList.size()>=i){
-
                         Map<Integer, String[]> excelCellListSelectShowMap = excelListShowMapList.get(i);
-
-
                         for (Integer columIndex : excelCellListSelectShowMap.keySet()) {
-
                             if(exportContent.size()<3){
                                 continue;
                             }
                           CellRangeAddressList rangeAddressList=new CellRangeAddressList(1,exportContent.size() - 2,columIndex,columIndex);
-
                                 DataValidationHelper dvHelper = sheet.getDataValidationHelper();
-
                                 DataValidationConstraint dvConstraint = dvHelper.createExplicitListConstraint(excelCellListSelectShowMap.get(columIndex));
                                 DataValidation validation = dvHelper.createValidation(dvConstraint, rangeAddressList);
                                 validation.setShowErrorBox(true);
                                 sheet.addValidationData(validation);
-
-
-
-
-
                         }
-
-
-
-
                     }
                 }
             }

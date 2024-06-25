@@ -19,20 +19,7 @@ public class OBSUtils {
     }
 
     public static void saveFile(byte[] bytes, String fileName) {
-//        if (bytesList.size() == 0) {
-//            return;
-//        }
-//        int length = 0;
-//        for (byte[] bytes : bytesList) {
-//            length += bytes.length;
-//        }
-//        if (length == 0) {
-//            return;
-//        }
-//        byte[] bytes = new byte[length];
-//        for (var i = 0; i < bytesList.size(); i++) {
-//            System.arraycopy(bytesList.get(i), 0, bytes, i * 8, 8);
-//        }
+
         String objcetPath = getObjectName(fileName);
         ObsClient obsClient = getObsClient();
         for (int i = 0; i < 3; i++) {
@@ -61,11 +48,8 @@ public class OBSUtils {
         String objectPath = "";
         try {
             objectPath = getRealPath(path);
-
         } catch (Exception e) {
-
         }
-
         return objectPath;
     }
 
@@ -97,7 +81,8 @@ public class OBSUtils {
     /// <param name="path"></param>
     /// <returns></returns>
     private static String getRealPath(String path) {
-        return path.replaceAll("D:\\\\卫星遥测数据监控平台\\\\", "").replaceAll("\\\\","/");
+        String[] pathArray = path.replaceAll("\\\\","/").split(":/");
+        return pathArray[pathArray.length-1];
     }
 
 
@@ -108,8 +93,6 @@ public class OBSUtils {
     /// <returns></returns>
     public static boolean fileExist(String filePath) {
         boolean fileExists = false;
-
-
         ObsClient client = getObsClient();
         try {
             String objectName = getObjectName(filePath);
@@ -137,7 +120,7 @@ public class OBSUtils {
         try {
             DeleteObjectRequest request = new DeleteObjectRequest(bucketName, objectName);
             DeleteObjectResult deleteObjectResult = client.deleteObject(request);
-            //client.close();
+
         } catch (Exception ex) {
 
         } finally {

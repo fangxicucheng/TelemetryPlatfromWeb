@@ -3,7 +3,6 @@ package com.fang.config.satellite;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.telemetry.TeleSatelliteNameModel;
 import org.springframework.context.annotation.Configuration;
-
 import java.util.HashMap;
 import java.util.Map;
 

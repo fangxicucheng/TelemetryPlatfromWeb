@@ -4,6 +4,8 @@ import com.fang.config.satellite.configStruct.*;
 import com.fang.database.postgresql.entity.CountPara;
 import com.fang.database.postgresql.entity.SatelliteDb;
 import com.fang.service.dataBaseManager.DataBaseManagerService;
+import com.fang.service.exportService.exportResult.ExportFrameSingleFrameResult;
+import com.fang.service.exportService.needExport.NeedExportFrameInfo;
 import com.fang.service.setExcpetionJuge.ThresholdInfo;
 import com.fang.service.telemetryService.SatelliteTimeManager;
 import com.fang.telemetry.TelemetryFrameModel;
@@ -94,7 +96,6 @@ public class BaseParaParser implements ParaParser {
             SatelliteTimeManager satelliteTimeManager = this.satelliteTimeManagerThreadLocal.get();
             if(satelliteTimeManager!=null){
                 if (frameInfo.getFrameFlag() == 0) {
-
                     frame.setSatelliteTime(satelliteTimeManager.getSatelliteTimeStr());
                     frame.setRestartTime(satelliteTimeManager.getRestartTimeStr());
                 } else {
@@ -105,6 +106,28 @@ public class BaseParaParser implements ParaParser {
 
         }
     }
+
+    @Override
+    public ExportFrameSingleFrameResult exportTelemetryFrame(FrameInfo frameInfo, NeedExportFrameInfo needExportFrame,int delayFlag) {
+        ExportFrameSingleFrameResult exportResult=new ExportFrameSingleFrameResult();
+        FrameConfigClass config = frameInfo.getFrameConfigClass();
+        exportResult.setFrameName(config.getFrameName());
+        boolean[] bitArray = getBitArray(frameInfo.getDataBytes());
+        for (ParaConfigLineConfigClass configLine : config.getConfigLineList()) {
+            if(needExportFrame.checkParamNeedExport(configLine.getParaCode())){
+                if (configLine.getBitStart() + configLine.getBitNum() > bitArray.length) {
+                    continue;
+                }
+                Long sourceCode = getSourceSourceCode(configLine, bitArray);
+                String hexCodeStr = StringConvertUtils.getHexString(sourceCode);
+                double paraValue = getParaValue(sourceCode, bitArray, configLine);
+                String paraValueStr = getDisplay(configLine, delayFlag,hexCodeStr, paraValue);
+                exportResult.addParaCodeResult(configLine.getParaCode(),hexCodeStr,paraValueStr);
+            }
+        }
+        return exportResult;
+    }
+
     @Override
     public void setUnchangedParaValue() {
         Map<String, Double> paraCountMap = DataBaseManagerService.getParaCountMap(satelliteName);
