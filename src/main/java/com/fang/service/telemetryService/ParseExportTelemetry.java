@@ -15,7 +15,6 @@ import java.util.List;
 public class ParseExportTelemetry {
     public static void exportTelemetry(String satelliteName, List<ReceiveRecord> receiveRecordList, NeedExportInfo needExportInfo, ExportResult exportResult,int frameFlag) {
         ParaParser paraParser = ConfigUtils.getParaParser(satelliteName);
-
         if (paraParser == null || receiveRecordList == null || receiveRecordList.size() == 0) {
             return;
         }

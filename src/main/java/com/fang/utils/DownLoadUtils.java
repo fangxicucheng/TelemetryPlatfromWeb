@@ -16,10 +16,7 @@ public class DownLoadUtils {
                 File file = new File(path);
                 if (!file.exists()) {
                     file.createNewFile();
-
                 }
-
-
                 // 设置Headers
                 response.setHeader("Content-Type", "application/octet-stream;charset=UTF-8");
                 // 设置下载的文件的名称-该方式已解决中文乱码问题
