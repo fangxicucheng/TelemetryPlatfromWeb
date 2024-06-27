@@ -64,15 +64,29 @@ public class ParamExportService {
            ByteArrayOutputStream zipBaos = new ByteArrayOutputStream();
            // FileOutputStream zipBaos=new FileOutputStream(zipFile);
             saveFile(needExportInfo,exportResult,zipBaos);
-           body.add("file", new ByteArrayResource(zipBaos.toByteArray()));
+           body.add("file", new ByteArrayResource(zipBaos.toByteArray())/*{
+               @Override
+               public String getFilename() {
+                   return exportRequestInfo.getSatelliteName().replaceAll("_北斗","");
+               }
+           }*/);
         }
         else
         {
             body.add("text","未找到到对应的遥测文件！");
         }
+//        HttpHeaders zipHeaders = new HttpHeaders();
+//        zipHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+ exportRequestInfo.getSatelliteName().replaceAll("_北斗","")+".zip");
+//        zipHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        // 设置字符串的响应头
+//        HttpHeaders textHeaders = new HttpHeaders();
+//        textHeaders.setContentType(MediaType.TEXT_PLAIN);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.MULTIPART_MIXED);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        return new ResponseEntity<>(body, headers, HttpStatus.OK);
+        return  new ResponseEntity<>(body, headers, HttpStatus.OK);
     }
 
     public void saveFile( NeedExportInfo needExportInfo, ExportResult exportResult,OutputStream os) {
