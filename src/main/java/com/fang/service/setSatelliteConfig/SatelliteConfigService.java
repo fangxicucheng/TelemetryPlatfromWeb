@@ -249,7 +249,7 @@ public class SatelliteConfigService {
             zipStream.flush();
             zipStream.close();
             if (zipFile.exists()) {
-                DownLoadUtils.download(response, satelliteDb.getSatelliteName() + ".zip", zipFile.getPath());
+                DownLoadUtils.download(response, satelliteDb.getSatelliteName() + ".zip"/*"参数导出.zip"*/,/*"D:\\卫星遥测数据监控平台\\参数导出\\20240628\\参数导出.zip"*/ zipFile.getPath());
             }
             FileUtils.deleteDirectory(directoryFile);
         } catch (IOException e) {

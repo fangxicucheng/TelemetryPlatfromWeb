@@ -13,7 +13,7 @@ public class ProducerService {
     private int indexTopic1 = 0;
     private int indexTopic2 = 0;
     private int indexTopic3 = 0;
-    @Scheduled(fixedRate = 1000*60*60*24)
+   // @Scheduled(fixedRate = 1000*60*60*24)
     public void productMessage() {
 //        new Thread(()->{
 //
