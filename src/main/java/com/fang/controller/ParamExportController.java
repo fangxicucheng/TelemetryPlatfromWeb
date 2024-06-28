@@ -38,45 +38,61 @@ public class ParamExportController {
     @Value("${gorit.file.root.path}")
     private String baseDirectoryPath;
 
-    @GetMapping("/export/{frameFlag}")
-    public ResponseEntity<MultiValueMap<String, Object>> exportParam(@PathVariable int frameFlag, @RequestBody ExportRequestInfo exportRequestInfo)/* throws FileNotFoundException*/ {
+    /*    @PostMapping("/export/{frameFlag}")
+        public ResponseEntity<MultiValueMap<String, Object>> exportParam(@PathVariable int frameFlag, @RequestBody ExportRequestInfo exportRequestInfo)*//* throws FileNotFoundException*//* {
         System.out.println(frameFlag);
         System.out.println(exportRequestInfo);
       return  this.paramExportService.exportParam(frameFlag,exportRequestInfo);
-    }
-    @PostMapping ("/downLoad")
-    public void exportTest(@RequestBody Integer ss,HttpServletResponse res) throws IOException {
+    }*/
+    @PostMapping("/export/{frameFlag}")
+    public void exportParam(@PathVariable int frameFlag, @RequestBody ExportRequestInfo exportRequestInfo,HttpServletResponse res) throws IOException//* throws FileNotFoundException*//*
+     {
+            System.out.println(frameFlag);
+        System.out.println(exportRequestInfo);
+       this.paramExportService.exportParam(frameFlag,exportRequestInfo,res);
+}
+
+    @PostMapping("/downLoad")
+    public void exportTest(@RequestBody Integer ss, HttpServletResponse res) throws IOException {
         // Create Excel files
 
 
         File excelFile1 = createExcelFile("excel1.xlsx");
         File excelFile2 = createExcelFile("excel2.xlsx");
-
+        res.setCharacterEncoding("UTF-8");
+        res.setHeader("text", java.net.URLEncoder.encode("开始了"));
+        // 设置Headers
+        res.setHeader("Content-Type", "application/octet-stream;charset=UTF-8");
+        // 设置下载的文件的名称-该方式已解决中文乱码问题
+        res.setHeader("Content-Disposition",
+                "attachment;filename=" + java.net.URLEncoder.encode("参数导出.zip", "UTF-8"));
         // Create a zip file
-     //   ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(res.getOutputStream());
-        ZipOutputStream zipOutputStream =null;
+        //   ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(res.getOutputStream());
+        ZipOutputStream zipOutputStream = null;
         String directory = baseDirectoryPath + "/参数导出/" + sdf.format(new Date()) + "/";
         File directoryFile = new File(directory);
         if (!directoryFile.exists()) {
             directoryFile.mkdirs();
         }
-        String strZipPath = directory +  "参数导出.zip";
+        String strZipPath = directory + "参数导出.zip";
         File zipFile = new File(strZipPath);
         try {
-            zipOutputStream=new ZipOutputStream(new FileOutputStream(zipFile));
+            // zipOutputStream=new ZipOutputStream(new FileOutputStream(zipFile));
+            zipOutputStream = new ZipOutputStream(res.getOutputStream());
             addToZipFile(excelFile1, zipOutputStream);
             addToZipFile(excelFile2, zipOutputStream);
             zipOutputStream.flush();
             zipOutputStream.close();
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
-       // byte[] zipBytes = byteArrayOutputStream.toByteArray();
+        // byte[] zipBytes = byteArrayOutputStream.toByteArray();
 
         // Clean up temporary files
         excelFile1.delete();
         excelFile2.delete();
-        DownLoadUtils.download(res,"参数导出.zip",strZipPath);
+
+        //DownLoadUtils.download(res,"参数导出.zip",strZipPath);
 /*        FileInputStream is = null;
         BufferedInputStream bs = null;
         OutputStream os = null;
@@ -120,43 +136,44 @@ public class ParamExportController {
         headers.add("charset","UTF-8");
         headers.add("Custom-Header", "This is a custom string");
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);*/
-      //  headers.setContentDispositionFormData('attachment','files.zip',StandardCharsets.UTF_8);
+        //  headers.setContentDispositionFormData('attachment','files.zip',StandardCharsets.UTF_8);
 
         // Return zip file as response
-      //  return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
+        //  return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
     }
-/*    @PostMapping ("/downLoad")
-     public ResponseEntity<MultiValueMap<String, Object>>exportTest() throws IOException {
-        byte[] zipBytes = createZipFile();
 
-        // 将字节数组包装为 ByteArrayResource
-        ByteArrayResource zipResource = new ByteArrayResource(zipBytes);
+    /*    @PostMapping ("/downLoad")
+         public ResponseEntity<MultiValueMap<String, Object>>exportTest() throws IOException {
+            byte[] zipBytes = createZipFile();
 
-        // 创建字符串内容
-        String message = "This is a custom message from Spring Boot.";
+            // 将字节数组包装为 ByteArrayResource
+            ByteArrayResource zipResource = new ByteArrayResource(zipBytes);
 
-        // 创建 MultiValueMap 并添加 ZIP 文件和字符串
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("message", message);
-        body.add("file", zipResource);
+            // 创建字符串内容
+            String message = "This is a custom message from Spring Boot.";
+
+            // 创建 MultiValueMap 并添加 ZIP 文件和字符串
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("message", message);
+            body.add("file", zipResource);
 
 
-        // 返回包含 ZIP 文件和字符串的 MultiValueMap
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            // 返回包含 ZIP 文件和字符串的 MultiValueMap
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        return  new ResponseEntity<>(body, headers, HttpStatus.OK);
-    }*/
-private File createExcelFile(String fileName) throws IOException {
-    Workbook workbook = new XSSFWorkbook();
-    File file = new File(fileName);
-    try (FileOutputStream fileOut = new FileOutputStream(file)) {
-        workbook.createSheet("Sheet1");
-        workbook.write(fileOut);
+            return  new ResponseEntity<>(body, headers, HttpStatus.OK);
+        }*/
+    private File createExcelFile(String fileName) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        File file = new File(fileName);
+        try (FileOutputStream fileOut = new FileOutputStream(file)) {
+            workbook.createSheet("Sheet1");
+            workbook.write(fileOut);
+        }
+        workbook.close();
+        return file;
     }
-    workbook.close();
-    return file;
-}
 
     private void addToZipFile(File file, ZipOutputStream zipOutputStream) throws IOException {
         try (var fis = Files.newInputStream(file.toPath())) {

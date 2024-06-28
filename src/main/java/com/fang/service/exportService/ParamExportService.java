@@ -10,6 +10,7 @@ import com.fang.service.exportService.needExport.NeedExportInfo;
 import com.fang.service.exportService.needExport.NeedExportParaCodeInfo;
 import com.fang.service.saveService.ReceiveRecordService;
 import com.fang.service.telemetryService.ParseExportTelemetry;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -45,8 +46,55 @@ public class ParamExportService {
     public List<ReceiveRecord> getReceiveRecordList(ExportRequestInfo exportRequestInfo) {
         return receiveRecordService.getReceiveRecordList(exportRequestInfo.getSatelliteName().replaceAll("_北斗", ""), exportRequestInfo.getStationNameList(), exportRequestInfo.getStartTime(), exportRequestInfo.getEndTime());
     }
+    public void exportParam(int frameFlag, ExportRequestInfo exportRequestInfo, HttpServletResponse res) throws IOException /*throws FileNotFoundException*/ {
 
-    public ResponseEntity<MultiValueMap<String, Object>> exportParam(int frameFlag, ExportRequestInfo exportRequestInfo) /*throws FileNotFoundException*/ {
+        List<ReceiveRecord> receiveRecordList = getReceiveRecordList(exportRequestInfo);
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        if (receiveRecordList != null && receiveRecordList.size() > 0) {
+
+            res.setHeader("text", java.net.URLEncoder.encode("导出成功"));
+            res.setCharacterEncoding("UTF-8");
+
+            // 设置Headers
+            res.setHeader("Content-Type", "application/octet-stream;charset=UTF-8");
+            // 设置下载的文件的名称-该方式已解决中文乱码问题
+            res.setHeader("Content-Disposition",
+                    "attachment;filename=" + java.net.URLEncoder.encode(exportRequestInfo.getSatelliteName()+".zip", "UTF-8"));
+            NeedExportInfo needExportInfo = new NeedExportInfo(exportRequestInfo.getCatalogList());
+            ExportResult exportResult = new ExportResult();
+            ParseExportTelemetry.exportTelemetry(exportRequestInfo.getSatelliteName(), receiveRecordList, needExportInfo, exportResult, frameFlag);
+//            String directory = baseDirectoryPath + "/参数导出/" + sdf.format(new Date()) + "/";
+//            File directoryFile = new File(directory);
+//            if (!directoryFile.exists()) {
+//                directoryFile.mkdirs();
+//            }
+//            String strZipPath = directory +   "测试数据.zip";
+//            File zipFile = new File(strZipPath);
+            ByteArrayOutputStream zipBaos = new ByteArrayOutputStream();
+            // FileOutputStream zipBaos=new FileOutputStream(zipFile);
+            saveFile(needExportInfo,exportResult,res.getOutputStream());
+
+        }
+        else
+        {
+            res.setHeader("text", java.net.URLEncoder.encode("未找到到对应的遥测文件"));
+           // body.add("text","未找到到对应的遥测文件！");
+        }
+//        HttpHeaders zipHeaders = new HttpHeaders();
+//        zipHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+ exportRequestInfo.getSatelliteName().replaceAll("_北斗","")+".zip");
+//        zipHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        // 设置字符串的响应头
+//        HttpHeaders textHeaders = new HttpHeaders();
+//        textHeaders.setContentType(MediaType.TEXT_PLAIN);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.MULTIPART_MIXED);
+       // HttpHeaders headers = new HttpHeaders();
+       // headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+       // return  new ResponseEntity<>(body, headers, HttpStatus.OK);
+    }
+
+/*    public ResponseEntity<MultiValueMap<String, Object>> exportParam(int frameFlag, ExportRequestInfo exportRequestInfo) *//*throws FileNotFoundException*//* {
         List<ReceiveRecord> receiveRecordList = getReceiveRecordList(exportRequestInfo);
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         if (receiveRecordList != null && receiveRecordList.size() > 0) {
@@ -64,12 +112,12 @@ public class ParamExportService {
            ByteArrayOutputStream zipBaos = new ByteArrayOutputStream();
            // FileOutputStream zipBaos=new FileOutputStream(zipFile);
             saveFile(needExportInfo,exportResult,zipBaos);
-           body.add("file", new ByteArrayResource(zipBaos.toByteArray())/*{
+           body.add("file", new ByteArrayResource(zipBaos.toByteArray())*//*{
                @Override
                public String getFilename() {
                    return exportRequestInfo.getSatelliteName().replaceAll("_北斗","");
                }
-           }*/);
+           }*//*);
         }
         else
         {
@@ -87,7 +135,7 @@ public class ParamExportService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         return  new ResponseEntity<>(body, headers, HttpStatus.OK);
-    }
+    }*/
 
     public void saveFile( NeedExportInfo needExportInfo, ExportResult exportResult,OutputStream os) {
         try ( ZipOutputStream zipStream = new ZipOutputStream(os)){

@@ -53,6 +53,8 @@ public class BaseParaParser implements ParaParser {
         } else {
             ParseMCUtils.parseMCFrameInfo(frameInfo, receiveBytes, this.satelliteConfigClass);
         }
+
+        //System.out.println(frameInfo.getFrameConfigClass().getFrameName());
         if(frameInfo.getFrameConfigClass()==null||frameInfo.getFrameConfigClass().getFrameName()==null){
             System.out.println("帧名称为空");
         }
