@@ -8,10 +8,17 @@ import com.fang.service.exportService.model.ExportRequestInfo;
 import com.fang.service.exportService.needExport.NeedExportFrameInfo;
 import com.fang.service.exportService.needExport.NeedExportInfo;
 import com.fang.service.exportService.needExport.NeedExportParaCodeInfo;
+import com.fang.service.saveService.ReceiveRecordRequestInfo;
 import com.fang.service.saveService.ReceiveRecordService;
 import com.fang.service.telemetryService.ParseExportTelemetry;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -19,6 +26,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,11 +34,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -39,27 +48,192 @@ import java.util.zip.ZipOutputStream;
 public class ParamExportService {
     @Value("${gorit.file.root.path}")
     private String baseDirectoryPath;
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
     @Autowired
     private ReceiveRecordService receiveRecordService;
 
     public List<ReceiveRecord> getReceiveRecordList(ExportRequestInfo exportRequestInfo) {
         return receiveRecordService.getReceiveRecordList(exportRequestInfo.getSatelliteName().replaceAll("_北斗", ""), exportRequestInfo.getStationNameList(), exportRequestInfo.getStartTime(), exportRequestInfo.getEndTime());
     }
+
+    public Page<ReceiveRecord> getReceiveRecordPage(ExportRequestInfo exportRequestInfo, int pageSize, int pageNumber) {
+        ReceiveRecordRequestInfo requestInfo = new ReceiveRecordRequestInfo();
+        List<String> satelliteNameList = new ArrayList<>();
+        satelliteNameList.add(exportRequestInfo.getSatelliteName());
+        requestInfo.setStationNameList(satelliteNameList);
+        requestInfo.setStationNameList(exportRequestInfo.getStationNameList());
+        requestInfo.setStartTime(exportRequestInfo.getStartTime());
+        requestInfo.setEndTime(exportRequestInfo.getEndTime());
+        requestInfo.setPageSize(pageSize);
+        requestInfo.setPageNum(pageNumber);
+        return receiveRecordService.getTelemetryReplayList(requestInfo);
+    }
+
+    public void exportParamStream(int frameFlag, ExportRequestInfo exportRequestInfo, HttpServletResponse res) throws Exception {
+        boolean firstTime = false;
+        int pageSize = 10;
+        int pageNum = 0;
+        String directory = baseDirectoryPath.replaceAll("\\\\", "/") + "参数导出/" + sdf.format(new Date()) + "/" + exportRequestInfo.getSatelliteName() + UUID.randomUUID();
+        File directoryFile = new File(directory);
+        if (!directoryFile.exists()) {
+            directoryFile.mkdirs();
+        }
+        NeedExportInfo needExportInfo = new NeedExportInfo(exportRequestInfo.getCatalogList());
+        int totalPageSize = 0;
+        do {
+            Page<ReceiveRecord> receiveRecordPage = getReceiveRecordPage(exportRequestInfo, pageSize, pageNum);
+            if (receiveRecordPage.getTotalPages() == 0) {
+                res.setHeader("text", java.net.URLEncoder.encode("未找到到对应的遥测文件"));
+                return;
+            }
+
+            ExportResult exportResult = exportTelemetry(frameFlag, exportRequestInfo, needExportInfo, receiveRecordPage.getContent());
+            if (exportResult.getExportResult() != null) {
+
+                saveExcelFile(exportResult, directory, needExportInfo);
+            }
+
+            totalPageSize = receiveRecordPage.getTotalPages();
+            pageNum++;//下一页
+
+        } while (pageNum + 1 < totalPageSize);
+        String zipFilePath = directory + exportRequestInfo.getSatelliteName() + ".zip";
+        writeToZip(zipFilePath, directory);
+
+        downLoadZipFile(res, zipFilePath, exportRequestInfo.getSatelliteName());
+        System.out.println("参数导出完成");
+    }
+
+    public void saveExcelFile(ExportResult exportResult, String directory, NeedExportInfo needExportInfo) throws IOException {
+        for (String frameName : exportResult.getExportResult().keySet()) {
+            String fileName = directory + frameName + ".xlsx";
+            ExportFrameTotalResult exportFrameTotalResult = exportResult.getExportResult().get(frameName);
+            File file = new File(fileName);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+
+            SXSSFWorkbook workbook = null;
+            if (file.length() == 0) {
+                workbook = new SXSSFWorkbook(2000);
+            } else {
+                FileInputStream fs = new FileInputStream(file.getPath());
+                workbook = new SXSSFWorkbook(new XSSFWorkbook(fs), 2000);
+            }
+
+            SXSSFSheet sheet = null;
+            SXSSFRow row = null;
+            NeedExportFrameInfo needExportFrame = needExportInfo.getNeedExportFrame(frameName);
+            if (workbook.getNumberOfSheets() == 0) {
+                sheet = workbook.createSheet(frameName);
+
+                row = sheet.createRow(0);
+                int hasWriteLines = 0;
+
+                for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
+                    NeedExportParaCodeInfo needExportParaCodeInfo = needExportFrame.getNeedExportParaCodeInfoList().get(i);
+                    SXSSFCell codeCell = row.createCell(2 * i);
+                    codeCell.setCellValue(needExportParaCodeInfo.getParaCode());
+                    SXSSFCell nameCell = row.createCell(2 * i + 1);
+                    nameCell.setCellValue(needExportParaCodeInfo.getParaName());
+                    hasWriteLines++;
+                }
+            } else {
+                sheet = workbook.getSheetAt(0);
+            }
+
+            int rowNum = sheet.getLastRowNum() + 1;
+            for (ExportFrameSingleFrameResult exportFrameSingleFrameResult : exportFrameTotalResult.getReusltList()) {
+                row = sheet.createRow(rowNum);
+                for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
+                    NeedExportParaCodeInfo needExportParaCodeInfo = needExportFrame.getNeedExportParaCodeInfoList().get(i);
+                    SingleParaCodeResult singleParaCodeResult = exportFrameSingleFrameResult.getSingleParaCodeResult(needExportParaCodeInfo.getParaCode());
+                    SXSSFCell hexCell = row.createCell(2 * i);
+                    hexCell.setCellValue(singleParaCodeResult.getHexValueStr() + "");
+                    SXSSFCell valueCell = row.createCell(2 * i + 1);
+                    valueCell.setCellValue(singleParaCodeResult.getParaValueStr() + "");
+                }
+                rowNum++;
+            }
+            FileOutputStream outputStream = new FileOutputStream(fileName);
+            workbook.write(outputStream);
+            workbook.close();
+            outputStream.close();
+
+        }
+    }
+
+    public void writeToZip(String zipFilePath, String directoryPath) throws IOException {
+
+        FileOutputStream fs = new FileOutputStream(zipFilePath);
+        ZipOutputStream zipStream = new ZipOutputStream(fs);
+        File directory = new File(directoryPath);
+        List<File> fileList = Arrays.stream(directory.listFiles()).filter(t -> t.getName().contains(".xlsx")).collect(Collectors.toList());
+        if (fileList != null && fileList.size() > 0) {
+            for (File file : fileList) {
+                ZipEntry zipEntry = new ZipEntry(file.getName());
+                zipStream.putNextEntry(zipEntry);
+                FileInputStream in = new FileInputStream(file);
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = in.read(buffer)) > 0) {
+                    zipStream.write(buffer, 0, length);
+                    zipStream.flush();
+                }
+                in.close();
+                zipStream.closeEntry();
+            }
+        }
+        zipStream.close();
+        fs.close();
+       // zipStream.close();
+    }
+
+    private void downLoadZipFile(HttpServletResponse res, String zipPath, String satelliteName) throws Exception {
+        res.setHeader("text", java.net.URLEncoder.encode("导出成功"));
+        res.setCharacterEncoding("UTF-8");
+        // 设置Headers
+        res.setHeader("Content-Type", "application/octet-stream;charset=UTF-8");
+        // 设置下载的文件的名称-该方式已解决中文乱码问题
+        res.setHeader("Content-Disposition",
+                "attachment;filename=" + java.net.URLEncoder.encode(satelliteName + ".zip", "UTF-8"));
+
+        FileInputStream in = new FileInputStream(new File(zipPath));
+        byte[] buffer = new byte[1024 * 1024];
+        int len = -1;
+        ServletOutputStream os = res.getOutputStream();
+        while ((len = in.read(buffer)) != -1) {
+            os.write(buffer, 0, len);
+        }
+        in.close();
+        os.close();
+
+    }
+
+    /*刪除文件夾*/
+    private void deleteDirectory(String directory) throws IOException {
+        FileUtils.deleteDirectory(new File(directory));
+    }
+
+
+    public ExportResult exportTelemetry(int frameFlag, ExportRequestInfo exportRequestInfo, NeedExportInfo needExportInfo, List<ReceiveRecord> receiveRecordList) {
+        ExportResult exportResult = new ExportResult();
+        ParseExportTelemetry.exportTelemetry(exportRequestInfo.getSatelliteName(), receiveRecordList, needExportInfo, exportResult, frameFlag);
+        return exportResult;
+    }
+
     public void exportParam(int frameFlag, ExportRequestInfo exportRequestInfo, HttpServletResponse res) throws IOException /*throws FileNotFoundException*/ {
 
         List<ReceiveRecord> receiveRecordList = getReceiveRecordList(exportRequestInfo);
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         if (receiveRecordList != null && receiveRecordList.size() > 0) {
-
             res.setHeader("text", java.net.URLEncoder.encode("导出成功"));
             res.setCharacterEncoding("UTF-8");
-
             // 设置Headers
             res.setHeader("Content-Type", "application/octet-stream;charset=UTF-8");
             // 设置下载的文件的名称-该方式已解决中文乱码问题
             res.setHeader("Content-Disposition",
-                    "attachment;filename=" + java.net.URLEncoder.encode(exportRequestInfo.getSatelliteName()+".zip", "UTF-8"));
+                    "attachment;filename=" + java.net.URLEncoder.encode(exportRequestInfo.getSatelliteName() + ".zip", "UTF-8"));
             NeedExportInfo needExportInfo = new NeedExportInfo(exportRequestInfo.getCatalogList());
             ExportResult exportResult = new ExportResult();
             ParseExportTelemetry.exportTelemetry(exportRequestInfo.getSatelliteName(), receiveRecordList, needExportInfo, exportResult, frameFlag);
@@ -72,13 +246,11 @@ public class ParamExportService {
 //            File zipFile = new File(strZipPath);
             ByteArrayOutputStream zipBaos = new ByteArrayOutputStream();
             // FileOutputStream zipBaos=new FileOutputStream(zipFile);
-            saveFile(needExportInfo,exportResult,res.getOutputStream());
+            saveFile(needExportInfo, exportResult, res.getOutputStream());
 
-        }
-        else
-        {
+        } else {
             res.setHeader("text", java.net.URLEncoder.encode("未找到到对应的遥测文件"));
-           // body.add("text","未找到到对应的遥测文件！");
+            // body.add("text","未找到到对应的遥测文件！");
         }
 //        HttpHeaders zipHeaders = new HttpHeaders();
 //        zipHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+ exportRequestInfo.getSatelliteName().replaceAll("_北斗","")+".zip");
@@ -89,12 +261,12 @@ public class ParamExportService {
 //        textHeaders.setContentType(MediaType.TEXT_PLAIN);
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(MediaType.MULTIPART_MIXED);
-       // HttpHeaders headers = new HttpHeaders();
-       // headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-       // return  new ResponseEntity<>(body, headers, HttpStatus.OK);
+        // HttpHeaders headers = new HttpHeaders();
+        // headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        // return  new ResponseEntity<>(body, headers, HttpStatus.OK);
     }
 
-/*    public ResponseEntity<MultiValueMap<String, Object>> exportParam(int frameFlag, ExportRequestInfo exportRequestInfo) *//*throws FileNotFoundException*//* {
+    /*    public ResponseEntity<MultiValueMap<String, Object>> exportParam(int frameFlag, ExportRequestInfo exportRequestInfo) *//*throws FileNotFoundException*//* {
         List<ReceiveRecord> receiveRecordList = getReceiveRecordList(exportRequestInfo);
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         if (receiveRecordList != null && receiveRecordList.size() > 0) {
@@ -137,15 +309,14 @@ public class ParamExportService {
         return  new ResponseEntity<>(body, headers, HttpStatus.OK);
     }*/
 
-    public void saveFile( NeedExportInfo needExportInfo, ExportResult exportResult,OutputStream os) {
-        try ( ZipOutputStream zipStream = new ZipOutputStream(os)){
+    public void saveFile(NeedExportInfo needExportInfo, ExportResult exportResult, OutputStream os) {
+        try (ZipOutputStream zipStream = new ZipOutputStream(os)) {
             Map<String, ExportFrameTotalResult> frameTotalResultMap = exportResult.getExportResult();
-            for (String frameName : frameTotalResultMap.keySet())
-            {
+            for (String frameName : needExportInfo.getNeedExportFrameMap().keySet()) {
                 NeedExportFrameInfo needExportFrame = needExportInfo.getNeedExportFrame(frameName);
                 String fileName = frameName + ".xlsx";
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                writeExcel(needExportFrame,frameTotalResultMap.get(frameName),baos);
+                writeExcel(needExportFrame, frameTotalResultMap.get(frameName), baos);
                 ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
                 ZipEntry zipEntry = new ZipEntry(fileName);
                 zipStream.putNextEntry(zipEntry);
@@ -161,6 +332,7 @@ public class ParamExportService {
             log.error(e.getMessage());
         }
     }
+
     public void writeExcel(NeedExportFrameInfo needFrameInfo, ExportFrameTotalResult frameTotalResult, OutputStream os) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook();
 //        CellStyle headerStyle = workbook.createCellStyle();
@@ -182,25 +354,27 @@ public class ParamExportService {
         for (int i = 0; i < needExportParaCodeInfoList.size(); i++) {
             XSSFCell codeCell = row.createCell(2 * i);
             XSSFCell nameCell = row.createCell(2 * i + 1);
-          //  codeCell.setCellStyle(headerStyle);
-          //  nameCell.setCellStyle(headerStyle);
+            //  codeCell.setCellStyle(headerStyle);
+            //  nameCell.setCellStyle(headerStyle);
             NeedExportParaCodeInfo needExportParaCodeInfo = needExportParaCodeInfoList.get(i);
-            codeCell.setCellValue(needExportParaCodeInfo.getParaCode()+"");
-            nameCell.setCellValue(needExportParaCodeInfo.getParaName()+"");
+            codeCell.setCellValue(needExportParaCodeInfo.getParaCode() + "");
+            nameCell.setCellValue(needExportParaCodeInfo.getParaName() + "");
         }
-        for (int i = 0; i < frameTotalResult.getReusltList().size(); i++) {
-            ExportFrameSingleFrameResult singleFrameResult = frameTotalResult.getReusltList().get(i);
-            row = sheet.createRow(i + 1);
-            for (int j = 0; j < needExportParaCodeInfoList.size(); j++) {
-                String paraCode = needExportParaCodeInfoList.get(j).getParaCode();
-                SingleParaCodeResult paraResult = singleFrameResult.getSingleParaCodeResult(paraCode);
-                if(paraResult!=null){
-                    XSSFCell hexValueCell = row.createCell(j * 2);
-                //    hexValueCell.setCellStyle(contentStyle);
-                    hexValueCell.setCellValue(paraResult.getHexValueStr()+"");
-                    XSSFCell paraValueCell = row.createCell(j * 2 + 1);
-                  //  paraValueCell.setCellStyle(contentStyle);
-                    paraValueCell.setCellValue(paraResult.getParaValueStr()+"");
+        if (frameTotalResult != null) {
+            for (int i = 0; i < frameTotalResult.getReusltList().size(); i++) {
+                ExportFrameSingleFrameResult singleFrameResult = frameTotalResult.getReusltList().get(i);
+                row = sheet.createRow(i + 1);
+                for (int j = 0; j < needExportParaCodeInfoList.size(); j++) {
+                    String paraCode = needExportParaCodeInfoList.get(j).getParaCode();
+                    SingleParaCodeResult paraResult = singleFrameResult.getSingleParaCodeResult(paraCode);
+                    if (paraResult != null) {
+                        XSSFCell hexValueCell = row.createCell(j * 2);
+                        //    hexValueCell.setCellStyle(contentStyle);
+                        hexValueCell.setCellValue(paraResult.getHexValueStr() + "");
+                        XSSFCell paraValueCell = row.createCell(j * 2 + 1);
+                        //  paraValueCell.setCellStyle(contentStyle);
+                        paraValueCell.setCellValue(paraResult.getParaValueStr() + "");
+                    }
                 }
             }
         }

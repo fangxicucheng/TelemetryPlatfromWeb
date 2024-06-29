@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -45,12 +46,20 @@ public class ParamExportController {
       return  this.paramExportService.exportParam(frameFlag,exportRequestInfo);
     }*/
     @PostMapping("/export/{frameFlag}")
-    public void exportParam(@PathVariable int frameFlag, @RequestBody ExportRequestInfo exportRequestInfo,HttpServletResponse res) throws IOException//* throws FileNotFoundException*//*
-     {
-            System.out.println(frameFlag);
+    public void exportParam(@PathVariable int frameFlag, @RequestBody ExportRequestInfo exportRequestInfo, HttpServletResponse res) throws IOException//* throws FileNotFoundException*//*
+    {
+        System.out.println(frameFlag);
         System.out.println(exportRequestInfo);
-       this.paramExportService.exportParam(frameFlag,exportRequestInfo,res);
-}
+        this.paramExportService.exportParam(frameFlag, exportRequestInfo, res);
+        System.out.println("参数导出已结束");
+    }
+
+    @PostMapping("/exportStream/{frameFlag}")
+    public void exportParamStream(@PathVariable int frameFlag, @RequestBody ExportRequestInfo exportRequestInfo, HttpServletResponse res) throws Exception {
+
+        this.paramExportService.exportParamStream(frameFlag, exportRequestInfo, res);
+
+    }
 
     @PostMapping("/downLoad")
     public void exportTest(@RequestBody Integer ss, HttpServletResponse res) throws IOException {
