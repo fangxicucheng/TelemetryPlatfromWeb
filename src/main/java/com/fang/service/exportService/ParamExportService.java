@@ -15,6 +15,7 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
@@ -73,7 +74,7 @@ public class ParamExportService {
         boolean firstTime = false;
         int pageSize = 10;
         int pageNum = 0;
-        String directory = baseDirectoryPath.replaceAll("\\\\", "/") + "参数导出/" + sdf.format(new Date()) + "/" + exportRequestInfo.getSatelliteName() + UUID.randomUUID();
+        String directory = baseDirectoryPath.replaceAll("\\\\", "/") + "参数导出/" + sdf.format(new Date()) + "/" + exportRequestInfo.getSatelliteName() + UUID.randomUUID()+"/";
         File directoryFile = new File(directory);
         if (!directoryFile.exists()) {
             directoryFile.mkdirs();
@@ -114,22 +115,26 @@ public class ParamExportService {
             }
 
 
+            XSSFWorkbook xb=null;
+
             SXSSFWorkbook workbook = null;
             if (file.length() == 0) {
                 workbook = new SXSSFWorkbook(2000);
             } else {
                 FileInputStream fs = new FileInputStream(file.getPath());
-                workbook = new SXSSFWorkbook(new XSSFWorkbook(fs), 2000);
+                xb = new XSSFWorkbook(fs);
+                workbook = new SXSSFWorkbook(xb,2000);
             }
 
             SXSSFSheet sheet = null;
             SXSSFRow row = null;
             NeedExportFrameInfo needExportFrame = needExportInfo.getNeedExportFrame(frameName);
+            int rowNum =0;
             if (workbook.getNumberOfSheets() == 0) {
                 sheet = workbook.createSheet(frameName);
 
                 row = sheet.createRow(0);
-                int hasWriteLines = 0;
+
 
                 for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
                     NeedExportParaCodeInfo needExportParaCodeInfo = needExportFrame.getNeedExportParaCodeInfoList().get(i);
@@ -137,13 +142,21 @@ public class ParamExportService {
                     codeCell.setCellValue(needExportParaCodeInfo.getParaCode());
                     SXSSFCell nameCell = row.createCell(2 * i + 1);
                     nameCell.setCellValue(needExportParaCodeInfo.getParaName());
-                    hasWriteLines++;
+
                 }
+                rowNum++;
             } else {
                 sheet = workbook.getSheetAt(0);
+                XSSFSheet xSheet = xb.getSheetAt(0);
+                Iterator<Row> iterator = xSheet.iterator();
+                while (iterator.hasNext()) {
+                    rowNum=iterator.next().getRowNum()+1;
+                }
+
             }
 
-            int rowNum = sheet.getLastRowNum() + 1;
+
+
             for (ExportFrameSingleFrameResult exportFrameSingleFrameResult : exportFrameTotalResult.getReusltList()) {
                 row = sheet.createRow(rowNum);
                 for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
