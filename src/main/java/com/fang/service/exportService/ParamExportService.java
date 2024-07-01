@@ -1,5 +1,11 @@
 package com.fang.service.exportService;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.fang.database.postgresql.entity.ReceiveRecord;
 import com.fang.service.exportService.exportResult.ExportFrameSingleFrameResult;
 import com.fang.service.exportService.exportResult.ExportFrameTotalResult;
@@ -15,7 +21,12 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
@@ -26,16 +37,10 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -74,7 +79,7 @@ public class ParamExportService {
         boolean firstTime = false;
         int pageSize = 10;
         int pageNum = 0;
-        String directory = baseDirectoryPath.replaceAll("\\\\", "/") + "参数导出/" + sdf.format(new Date()) + "/" + exportRequestInfo.getSatelliteName() + UUID.randomUUID()+"/";
+        String directory = baseDirectoryPath.replaceAll("\\\\", "/") + "参数导出/" + sdf.format(new Date()) + "/" + exportRequestInfo.getSatelliteName() + UUID.randomUUID() + "/";
         File directoryFile = new File(directory);
         if (!directoryFile.exists()) {
             directoryFile.mkdirs();
@@ -87,13 +92,10 @@ public class ParamExportService {
                 res.setHeader("text", java.net.URLEncoder.encode("未找到到对应的遥测文件"));
                 return;
             }
-
             ExportResult exportResult = exportTelemetry(frameFlag, exportRequestInfo, needExportInfo, receiveRecordPage.getContent());
             if (exportResult.getExportResult() != null) {
-
                 saveExcelFile(exportResult, directory, needExportInfo);
             }
-
             totalPageSize = receiveRecordPage.getTotalPages();
             pageNum++;//下一页
 
@@ -105,36 +107,139 @@ public class ParamExportService {
         System.out.println("参数导出完成");
     }
 
-    public void saveExcelFile(ExportResult exportResult, String directory, NeedExportInfo needExportInfo) throws IOException {
+    List<List<Object>> getWriteDataList(boolean newFile, NeedExportFrameInfo needExportFrame, List<ExportFrameSingleFrameResult> reusltList) {
+        List<List<Object>> writeDataList = new ArrayList<>();
+        if (newFile) {
+            List<Object> frameResult = new ArrayList<>();
+            for (NeedExportParaCodeInfo needExportParaCodeInfo : needExportFrame.getNeedExportParaCodeInfoList()) {
+
+                frameResult.add(needExportParaCodeInfo.getParaCode());
+                frameResult.add(needExportParaCodeInfo.getParaName());
+            }
+            writeDataList.add(frameResult);
+
+        }
+        for (ExportFrameSingleFrameResult exportFrameSingleFrameResult : reusltList) {
+            List<Object> frameResult = new ArrayList<>();
+            for (NeedExportParaCodeInfo needExportParaCodeInfo : needExportFrame.getNeedExportParaCodeInfoList()) {
+                SingleParaCodeResult singleParaCodeResult = exportFrameSingleFrameResult.getSingleParaCodeResult(needExportParaCodeInfo.getParaCode());
+                if (singleParaCodeResult == null) {
+                    frameResult.add("");
+                    frameResult.add("");
+                } else {
+                    frameResult.add(singleParaCodeResult.getHexValueStr());
+                    frameResult.add(singleParaCodeResult.getParaValueStr());
+                }
+            }
+            writeDataList.add(frameResult);
+
+        }
+        return writeDataList;
+    }
+
+    /*    public void saveExcelFile(ExportResult exportResult, String directory, NeedExportInfo needExportInfo) throws IOException, InvalidFormatException {
+            for (String frameName : exportResult.getExportResult().keySet()) {
+                String fileName = directory + frameName + ".xlsx";
+                ExportFrameTotalResult exportFrameTotalResult = exportResult.getExportResult().get(frameName);
+                File file = new File(fileName);
+
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+                NeedExportFrameInfo needExportFrame = needExportInfo.getNeedExportFrame(frameName);
+
+                if (file.length() == 0) {
+                    SXSSFWorkbook workbook = new SXSSFWorkbook(2000);
+
+                    SXSSFSheet sheet = workbook.createSheet(frameName);
+                    SXSSFRow row = sheet.createRow(0);
+
+                    for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
+                        NeedExportParaCodeInfo needExportParaCodeInfo = needExportFrame.getNeedExportParaCodeInfoList().get(i);
+                        SXSSFCell codeCell = row.createCell(2 * i);
+                        codeCell.setCellValue(needExportParaCodeInfo.getParaCode());
+                        SXSSFCell nameCell = row.createCell(2 * i + 1);
+                        nameCell.setCellValue(needExportParaCodeInfo.getParaName());
+
+
+                    }
+                    FileOutputStream outputStream = new FileOutputStream(fileName);
+                    workbook.write(outputStream);
+                    workbook.close();
+                    outputStream.close();
+
+                } else {
+                    try (FileInputStream inputStream = new FileInputStream(file.getPath()))
+                    {
+                        XSSFWorkbook wb =(XSSFWorkbook) WorkbookFactory.create(inputStream);
+
+                        SXSSFWorkbook workbook = new SXSSFWorkbook( wb,2000);
+                        int rowNum=0;
+                        SXSSFSheet sheet = workbook.getSheetAt(0);
+                        XSSFSheet xSheet = wb.getSheetAt(0);
+                        Iterator<Row> iterator = xSheet.iterator();
+                        while (iterator.hasNext()) {
+                            rowNum = iterator.next().getRowNum() + 1;
+                        }
+                        SXSSFRow row=null;
+                        for (ExportFrameSingleFrameResult exportFrameSingleFrameResult : exportFrameTotalResult.getReusltList()) {
+                            row = sheet.createRow(rowNum);
+                            for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
+                                NeedExportParaCodeInfo needExportParaCodeInfo = needExportFrame.getNeedExportParaCodeInfoList().get(i);
+                                SingleParaCodeResult singleParaCodeResult = exportFrameSingleFrameResult.getSingleParaCodeResult(needExportParaCodeInfo.getParaCode());
+                                SXSSFCell hexCell = row.createCell(2 * i);
+                                hexCell.setCellValue(singleParaCodeResult.getHexValueStr() + "");
+                                SXSSFCell valueCell = row.createCell(2 * i + 1);
+                                valueCell.setCellValue(singleParaCodeResult.getParaValueStr() + "");
+                            }
+                            rowNum++;
+                        }
+                        FileOutputStream outputStream = new FileOutputStream(fileName);
+                        workbook.write(outputStream);
+                        workbook.close();
+                        outputStream.close();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+    //                OPCPackage pkg = OPCPackage.open(file, PackageAccess.READ_WRITE);
+    //                xb = new XSSFWorkbook(pkg);
+
+                }
+
+            }
+        }*/
+    public void saveExcelFile(ExportResult exportResult, String directory, NeedExportInfo needExportInfo) throws IOException, InvalidFormatException {
         for (String frameName : exportResult.getExportResult().keySet()) {
             String fileName = directory + frameName + ".xlsx";
             ExportFrameTotalResult exportFrameTotalResult = exportResult.getExportResult().get(frameName);
             File file = new File(fileName);
+            boolean isNewFile = false;
             if (!file.exists()) {
                 file.createNewFile();
+                isNewFile = true;
             }
-
-
-            XSSFWorkbook xb=null;
-
-            SXSSFWorkbook workbook = null;
-            if (file.length() == 0) {
-                workbook = new SXSSFWorkbook(2000);
-            } else {
-                FileInputStream fs = new FileInputStream(file.getPath());
-                xb = new XSSFWorkbook(fs);
-                workbook = new SXSSFWorkbook(xb,2000);
-            }
-
-            SXSSFSheet sheet = null;
-            SXSSFRow row = null;
             NeedExportFrameInfo needExportFrame = needExportInfo.getNeedExportFrame(frameName);
-            int rowNum =0;
-            if (workbook.getNumberOfSheets() == 0) {
-                sheet = workbook.createSheet(frameName);
 
-                row = sheet.createRow(0);
+            List<List<Object>> writeDataList = getWriteDataList(isNewFile, needExportFrame, exportFrameTotalResult.getReusltList());
+            if (isNewFile) {
+                EasyExcel.write(file.getPath()).registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).sheet(frameName).doWrite(writeDataList);
+            } else {
+                ExcelWriter writer = EasyExcel.write(fileName).build();
+                WriteSheet writerSheet = EasyExcel.writerSheet(frameName).build();
+                writer.write(writeDataList,writerSheet);
+                writer.finish();
 
+            }
+
+
+/*            if (file.length() == 0) {
+                SXSSFWorkbook workbook = new SXSSFWorkbook(2000);
+
+                SXSSFSheet sheet = workbook.createSheet(frameName);
+                SXSSFRow row = sheet.createRow(0);
 
                 for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
                     NeedExportParaCodeInfo needExportParaCodeInfo = needExportFrame.getNeedExportParaCodeInfoList().get(i);
@@ -143,37 +248,51 @@ public class ParamExportService {
                     SXSSFCell nameCell = row.createCell(2 * i + 1);
                     nameCell.setCellValue(needExportParaCodeInfo.getParaName());
 
+
                 }
-                rowNum++;
+                FileOutputStream outputStream = new FileOutputStream(fileName);
+                workbook.write(outputStream);
+                workbook.close();
+                outputStream.close();
+
             } else {
-                sheet = workbook.getSheetAt(0);
-                XSSFSheet xSheet = xb.getSheetAt(0);
-                Iterator<Row> iterator = xSheet.iterator();
-                while (iterator.hasNext()) {
-                    rowNum=iterator.next().getRowNum()+1;
+                try (FileInputStream inputStream = new FileInputStream(file.getPath())) {
+                    XSSFWorkbook wb = (XSSFWorkbook) WorkbookFactory.create(inputStream);
+
+                    SXSSFWorkbook workbook = new SXSSFWorkbook(wb, 2000);
+                    int rowNum = 0;
+                    SXSSFSheet sheet = workbook.getSheetAt(0);
+                    XSSFSheet xSheet = wb.getSheetAt(0);
+                    Iterator<Row> iterator = xSheet.iterator();
+                    while (iterator.hasNext()) {
+                        rowNum = iterator.next().getRowNum() + 1;
+                    }
+                    SXSSFRow row = null;
+                    for (ExportFrameSingleFrameResult exportFrameSingleFrameResult : exportFrameTotalResult.getReusltList()) {
+                        row = sheet.createRow(rowNum);
+                        for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
+                            NeedExportParaCodeInfo needExportParaCodeInfo = needExportFrame.getNeedExportParaCodeInfoList().get(i);
+                            SingleParaCodeResult singleParaCodeResult = exportFrameSingleFrameResult.getSingleParaCodeResult(needExportParaCodeInfo.getParaCode());
+                            SXSSFCell hexCell = row.createCell(2 * i);
+                            hexCell.setCellValue(singleParaCodeResult.getHexValueStr() + "");
+                            SXSSFCell valueCell = row.createCell(2 * i + 1);
+                            valueCell.setCellValue(singleParaCodeResult.getParaValueStr() + "");
+                        }
+                        rowNum++;
+                    }
+                    FileOutputStream outputStream = new FileOutputStream(fileName);
+                    workbook.write(outputStream);
+                    workbook.close();
+                    outputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-            }
 
+//                OPCPackage pkg = OPCPackage.open(file, PackageAccess.READ_WRITE);
+//                xb = new XSSFWorkbook(pkg);
 
-
-            for (ExportFrameSingleFrameResult exportFrameSingleFrameResult : exportFrameTotalResult.getReusltList()) {
-                row = sheet.createRow(rowNum);
-                for (int i = 0; i < needExportFrame.getNeedExportParaCodeInfoList().size(); i++) {
-                    NeedExportParaCodeInfo needExportParaCodeInfo = needExportFrame.getNeedExportParaCodeInfoList().get(i);
-                    SingleParaCodeResult singleParaCodeResult = exportFrameSingleFrameResult.getSingleParaCodeResult(needExportParaCodeInfo.getParaCode());
-                    SXSSFCell hexCell = row.createCell(2 * i);
-                    hexCell.setCellValue(singleParaCodeResult.getHexValueStr() + "");
-                    SXSSFCell valueCell = row.createCell(2 * i + 1);
-                    valueCell.setCellValue(singleParaCodeResult.getParaValueStr() + "");
-                }
-                rowNum++;
-            }
-            FileOutputStream outputStream = new FileOutputStream(fileName);
-            workbook.write(outputStream);
-            workbook.close();
-            outputStream.close();
-
+            }*/
         }
     }
 
@@ -200,7 +319,7 @@ public class ParamExportService {
         }
         zipStream.close();
         fs.close();
-       // zipStream.close();
+        // zipStream.close();
     }
 
     private void downLoadZipFile(HttpServletResponse res, String zipPath, String satelliteName) throws Exception {
