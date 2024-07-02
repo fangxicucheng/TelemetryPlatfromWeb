@@ -1,11 +1,4 @@
 package com.fang.service.exportService;
-
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.EasyExcelFactory;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
-import com.alibaba.excel.write.metadata.WriteSheet;
-import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.fang.database.postgresql.entity.ReceiveRecord;
 import com.fang.service.exportService.exportResult.ExportFrameSingleFrameResult;
 import com.fang.service.exportService.exportResult.ExportFrameTotalResult;
@@ -22,15 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.openxml4j.opc.PackageAccess;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.xssf.streaming.SXSSFCell;
-import org.apache.poi.xssf.streaming.SXSSFRow;
-import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -66,7 +50,7 @@ public class ParamExportService {
         ReceiveRecordRequestInfo requestInfo = new ReceiveRecordRequestInfo();
         List<String> satelliteNameList = new ArrayList<>();
         satelliteNameList.add(exportRequestInfo.getSatelliteName());
-        requestInfo.setStationNameList(satelliteNameList);
+        requestInfo.setSatelliteNameList(satelliteNameList);
         requestInfo.setStationNameList(exportRequestInfo.getStationNameList());
         requestInfo.setStartTime(exportRequestInfo.getStartTime());
         requestInfo.setEndTime(exportRequestInfo.getEndTime());
@@ -84,6 +68,7 @@ public class ParamExportService {
         if (!directoryFile.exists()) {
             directoryFile.mkdirs();
         }
+        Map<String,ExcelWriterUtils>excelWriterMap=new HashMap<>();
         NeedExportInfo needExportInfo = new NeedExportInfo(exportRequestInfo.getCatalogList());
         int totalPageSize = 0;
         do {
@@ -94,17 +79,26 @@ public class ParamExportService {
             }
             ExportResult exportResult = exportTelemetry(frameFlag, exportRequestInfo, needExportInfo, receiveRecordPage.getContent());
             if (exportResult.getExportResult() != null) {
-                saveExcelFile(exportResult, directory, needExportInfo);
+                saveExcelFile(exportResult, directory, needExportInfo,excelWriterMap);
             }
             totalPageSize = receiveRecordPage.getTotalPages();
             pageNum++;//下一页
 
         } while (pageNum + 1 < totalPageSize);
+
+        if (excelWriterMap!=null) {
+
+            for (String frameName : excelWriterMap.keySet()) {
+
+                excelWriterMap.get(frameName).finish();
+            }
+        }
         String zipFilePath = directory + exportRequestInfo.getSatelliteName() + ".zip";
         writeToZip(zipFilePath, directory);
 
         downLoadZipFile(res, zipFilePath, exportRequestInfo.getSatelliteName());
         System.out.println("参数导出完成");
+        FileUtils.deleteDirectory(directoryFile);
     }
 
     List<List<Object>> getWriteDataList(boolean newFile, NeedExportFrameInfo needExportFrame, List<ExportFrameSingleFrameResult> reusltList) {
@@ -211,28 +205,38 @@ public class ParamExportService {
 
             }
         }*/
-    public void saveExcelFile(ExportResult exportResult, String directory, NeedExportInfo needExportInfo) throws IOException, InvalidFormatException {
+    public void saveExcelFile(ExportResult exportResult, String directory, NeedExportInfo needExportInfo,Map<String,ExcelWriterUtils>excelWriterMap) throws IOException, InvalidFormatException {
         for (String frameName : exportResult.getExportResult().keySet()) {
-            String fileName = directory + frameName + ".xlsx";
-            ExportFrameTotalResult exportFrameTotalResult = exportResult.getExportResult().get(frameName);
-            File file = new File(fileName);
             boolean isNewFile = false;
-            if (!file.exists()) {
-                file.createNewFile();
-                isNewFile = true;
+            if(!excelWriterMap.containsKey(frameName)){
+                String fileName = directory + frameName + ".xlsx";
+                //ExcelWriter writer = EasyExcel.write(fileName).build();
+                ExcelWriterUtils excelWriterUtils=new ExcelWriterUtils(fileName,frameName);
+                excelWriterMap.put(frameName,excelWriterUtils);
+                isNewFile=true;
             }
+
+            ExcelWriterUtils writer=excelWriterMap.get(frameName);
+            ExportFrameTotalResult exportFrameTotalResult = exportResult.getExportResult().get(frameName);
+           // File file = new File(fileName);
+
+//            if (!file.exists()) {
+//                file.createNewFile();
+//                isNewFile = true;
+//            }
             NeedExportFrameInfo needExportFrame = needExportInfo.getNeedExportFrame(frameName);
 
             List<List<Object>> writeDataList = getWriteDataList(isNewFile, needExportFrame, exportFrameTotalResult.getReusltList());
-            if (isNewFile) {
-                EasyExcel.write(file.getPath()).registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).sheet(frameName).doWrite(writeDataList);
-            } else {
-                ExcelWriter writer = EasyExcel.write(fileName).build();
-                WriteSheet writerSheet = EasyExcel.writerSheet(frameName).build();
-                writer.write(writeDataList,writerSheet);
-                writer.finish();
-
-            }
+            writer.write(writeDataList);
+//            if (isNewFile) {
+//                EasyExcel.write(file.getPath()).registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).sheet(frameName).doWrite(writeDataList);
+//            } else {
+//                ExcelWriter writer = EasyExcel.write(fileName).build();
+//                WriteSheet writerSheet = EasyExcel.writerSheet(frameName).build();
+//                writer.write(writeDataList,writerSheet);
+//                writer.finish();
+//
+//            }
 
 
 /*            if (file.length() == 0) {
